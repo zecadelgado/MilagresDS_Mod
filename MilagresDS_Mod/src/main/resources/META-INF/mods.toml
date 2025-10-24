@@ -1,0 +1,24 @@
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
+
+[[mods]]
+modId = "milagresds_mod"
+version = "${mod_version}"
+displayName = "MilagresDS Mod"
+authors = "${mod_authors}"
+description = """${mod_description}"""
+
+[[dependencies.milagresds_mod]]
+modId = "forge"
+mandatory = true
+versionRange = "${forge_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.milagresds_mod]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
