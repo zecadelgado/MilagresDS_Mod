@@ -14,7 +14,7 @@ def loader_version_range     = '[47,)'
 def mapping_channel          = 'official'
 def mapping_version          = '1.20.1'
 
-def mod_id          = 'milagresds_mod'         // modid sempre minúsculo
+def mod_id          = 'com.stefani.config.milagresds_mod'         // modid sempre minúsculo
 def mod_name        = 'MilagresDS Mod'
 def mod_license     = 'All Rights Reserved'
 def mod_version     = '1.0.0'
