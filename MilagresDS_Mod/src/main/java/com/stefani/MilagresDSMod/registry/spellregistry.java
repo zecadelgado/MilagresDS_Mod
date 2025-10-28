@@ -1,4 +1,5 @@
-package com.stefani.registry;
+package com.stefani.MilagresDSMod.registry;
 
-public class ModRegistries {
+public class spellregistry {
+    public static final String SPELLS = "SPELLS";
 }

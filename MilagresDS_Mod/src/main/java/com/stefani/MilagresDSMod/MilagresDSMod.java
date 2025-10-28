@@ -1,5 +1,5 @@
-package com.stefani.milagresds_mod;
-import com.stefani.milagresds_mod.registry.spellregistry;
+package com.stefani.MilagresDSMod;
+import com.stefani.MilagresDSMod.registry.spellregistry;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -10,6 +10,6 @@ public class MilagresDSMod {
     public MilagresDSMod() {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        spellregistry.SPELLS.register(eventBus);
+        eventBus.register(spellregistry.SPELLS);
     }
 }

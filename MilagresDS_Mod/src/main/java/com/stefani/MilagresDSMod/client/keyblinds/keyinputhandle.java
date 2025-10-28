@@ -1,5 +1,4 @@
-package com.stefani.client.keyblinds;
+package com.stefani.MilagresDSMod.client.keyblinds;
 
-public class handlekeyblinds {
-
+public class keyinputhandle {
 }
