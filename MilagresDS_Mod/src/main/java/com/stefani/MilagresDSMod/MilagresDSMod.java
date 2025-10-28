@@ -8,8 +8,8 @@ public class MilagresDSMod {
     public static final String MODID = "milagresdsmod";
 
     public MilagresDSMod() {
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        spellregistry.SPELLS.register(eventBus);
+        spellregistry.SPELLS.register(modEventBus);
     }
 }
