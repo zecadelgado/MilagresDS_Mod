@@ -3,24 +3,24 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'java-library'
 }
 
 /* ==== Configurações do projeto/mod ==== */
-def minecraft_version        = '1.20.1'
-def minecraft_version_range  = '[1.20,1.21)'
-def forge_version            = '47.3.0'
-def forge_version_range      = '[47,)'
-def loader_version_range     = '[47,)'
-def mapping_channel          = 'official'
-def mapping_version          = '1.20.1'
-
-def mod_id          = 'com.stefani.config.milagresds_mod'         // modid sempre minúsculo
-def mod_name        = 'MilagresDS Mod'
-def mod_license     = 'All Rights Reserved'
-def mod_version     = '1.0.0'
-def mod_group_id    = 'com.milagresds.mod'
-def mod_authors     = 'Stefani'
-def mod_description = 'Mod MilagresDS para Minecraft 1.20.1.'
+def minecraft_version        = project.property('minecraft_version')
+def minecraft_version_range  = project.property('minecraft_version_range')
+def forge_version            = project.property('forge_version')
+def forge_version_range      = project.property('forge_version_range')
+def loader_version_range     = project.property('loader_version_range')
+def mapping_channel          = project.property('mapping_channel')
+def mapping_version          = project.property('mapping_version')
+def mod_id                   = project.property('mod_id')
+def mod_name                 = project.property('mod_name')
+def mod_license              = project.property('mod_license')
+def mod_version              = project.property('mod_version')
+def mod_group_id             = project.property('mod_group_id')
+def mod_authors              = project.property('mod_authors')
+def mod_description          = project.property('mod_description')
 
 version = mod_version
 group = mod_group_id
@@ -73,6 +73,10 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    maven {
+        name = "Forge Maven"
+        url = uri("https://maven.minecraftforge.net/")
+    }
 }
 
 dependencies {
