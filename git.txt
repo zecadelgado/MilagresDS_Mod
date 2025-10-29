@@ -1,0 +1,1178 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/MagicStats.java b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/MagicStats.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..01265758f3652ff0d5145dde631d07851963bd7b
+--- /dev/null
++++ b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/MagicStats.java
+@@ -0,0 +1,109 @@
++package com.stefani.MilagresDSMod.client;
++
++import net.minecraft.resources.ResourceLocation;
++
++import javax.annotation.Nullable;
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.List;
++
++/**
++ * Tracks the client-side snapshot of memorised spells and available slots. The values are manipulated solely on the
++ * client UI and synchronised with the server through dedicated packets when the player confirms a change.
++ */
++public final class MagicStats {
++    private static final MagicStats INSTANCE = new MagicStats();
++
++    private int slotsMax = 4;
++    private final List<ResourceLocation> equippedSpells = new ArrayList<>();
++
++    private MagicStats() {
++        ensureCapacity();
++    }
++
++    public static MagicStats get() {
++        return INSTANCE;
++    }
++
++    public int getSlotsMax() {
++        return slotsMax;
++    }
++
++    public List<ResourceLocation> getEquippedSpells() {
++        return Collections.unmodifiableList(equippedSpells);
++    }
++
++    public void addSlot() {
++        slotsMax++;
++        ensureCapacity();
++    }
++
++    public void removeSlot() {
++        if (slotsMax <= 1) {
++            return;
++        }
++        slotsMax--;
++        trimToSlots();
++    }
++
++    public void setSlots(int slots) {
++        slotsMax = Math.max(1, slots);
++        ensureCapacity();
++        trimToSlots();
++    }
++
++    public void equipSpell(int slotIndex, @Nullable ResourceLocation id) {
++        ensureCapacity();
++        if (slotIndex < 0 || slotIndex >= slotsMax) {
++            return;
++        }
++        if (id != null) {
++            // Guarantee uniqueness so a spell occupies only one slot at a time.
++            for (int i = 0; i < equippedSpells.size(); i++) {
++                if (id.equals(equippedSpells.get(i))) {
++                    equippedSpells.set(i, null);
++                }
++            }
++        }
++        equippedSpells.set(slotIndex, id);
++    }
++
++    public void clearSlot(int slotIndex) {
++        if (slotIndex < 0 || slotIndex >= slotsMax) {
++            return;
++        }
++        equippedSpells.set(slotIndex, null);
++    }
++
++    @Nullable
++    public ResourceLocation getSpellInSlot(int slotIndex) {
++        if (slotIndex < 0 || slotIndex >= slotsMax) {
++            return null;
++        }
++        return equippedSpells.get(slotIndex);
++    }
++
++    public boolean isEquipped(@Nullable ResourceLocation spellId) {
++        return spellId != null && equippedSpells.contains(spellId);
++    }
++
++    public void syncFromServer(int slots, List<ResourceLocation> memorised) {
++        slotsMax = Math.max(1, slots);
++        equippedSpells.clear();
++        equippedSpells.addAll(memorised);
++        ensureCapacity();
++        trimToSlots();
++    }
++
++    private void ensureCapacity() {
++        while (equippedSpells.size() < slotsMax) {
++            equippedSpells.add(null);
++        }
++    }
++
++    private void trimToSlots() {
++        if (equippedSpells.size() > slotsMax) {
++            equippedSpells.subList(slotsMax, equippedSpells.size()).clear();
++        }
++    }
++}
+ 
+EOF
+)
+
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/Category.java b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/Category.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..b0f24e2468a4ae56117e7251156448e3370a3eb5
+--- /dev/null
++++ b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/Category.java
+@@ -0,0 +1,28 @@
++package com.stefani.MilagresDSMod.client.data;
++
++import net.minecraft.network.chat.Component;
++
++/**
++ * Spell categories used for grouping on the memorize screen.
++ */
++public enum Category {
++    OFFENSIVE("ui.memorize.category.offensive"),
++    DEFENSIVE("ui.memorize.category.defensive"),
++    SUPPORT("ui.memorize.category.support"),
++    UTILITY("ui.memorize.category.utility"),
++    RITUAL("ui.memorize.category.ritual");
++
++    private final String translationKey;
++
++    Category(String translationKey) {
++        this.translationKey = translationKey;
++    }
++
++    public Component getDisplayName() {
++        return Component.translatable(translationKey);
++    }
++
++    public String translationKey() {
++        return translationKey;
++    }
++}
+ 
+EOF
+)
+
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/Requirements.java b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/Requirements.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..c0f325d359d0b1d34cad9643d6392230e137e5a0
+--- /dev/null
++++ b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/Requirements.java
+@@ -0,0 +1,52 @@
++package com.stefani.MilagresDSMod.client.data;
++
++import net.minecraft.network.chat.Component;
++
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.List;
++import java.util.Objects;
++
++/**
++ * Immutable data structure describing attribute requirements to memorize a spell.
++ */
++public final class Requirements {
++    private final int requiredLevel;
++    private final int intelligence;
++    private final int faith;
++    private final int arcane;
++    private final List<Component> additionalNotes;
++
++    public Requirements(int requiredLevel, int intelligence, int faith, int arcane, List<Component> additionalNotes) {
++        this.requiredLevel = Math.max(0, requiredLevel);
++        this.intelligence = Math.max(0, intelligence);
++        this.faith = Math.max(0, faith);
++        this.arcane = Math.max(0, arcane);
++        Objects.requireNonNull(additionalNotes, "additionalNotes");
++        this.additionalNotes = Collections.unmodifiableList(new ArrayList<>(additionalNotes));
++    }
++
++    public static Requirements of(int requiredLevel, int intelligence, int faith, int arcane) {
++        return new Requirements(requiredLevel, intelligence, faith, arcane, List.of());
++    }
++
++    public int requiredLevel() {
++        return requiredLevel;
++    }
++
++    public int intelligence() {
++        return intelligence;
++    }
++
++    public int faith() {
++        return faith;
++    }
++
++    public int arcane() {
++        return arcane;
++    }
++
++    public List<Component> additionalNotes() {
++        return additionalNotes;
++    }
++}
+ 
+EOF
+)
+
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/Spell.java b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/Spell.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..f607d65d6897b358f2a6d57402f8a482e70531a5
+--- /dev/null
++++ b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/Spell.java
+@@ -0,0 +1,27 @@
++package com.stefani.MilagresDSMod.client.data;
++
++import net.minecraft.network.chat.Component;
++import net.minecraft.resources.ResourceLocation;
++
++import java.util.Objects;
++
++/**
++ * Immutable client-side representation of a spell definition that is safe to cache on the UI layer.
++ */
++public record Spell(ResourceLocation id,
++                    Component name,
++                    Category category,
++                    int manaCost,
++                    Requirements requirements,
++                    Component description,
++                    ResourceLocation icon) {
++
++    public Spell {
++        Objects.requireNonNull(id, "id");
++        Objects.requireNonNull(name, "name");
++        Objects.requireNonNull(category, "category");
++        Objects.requireNonNull(requirements, "requirements");
++        Objects.requireNonNull(description, "description");
++        Objects.requireNonNull(icon, "icon");
++    }
++}
+ 
+EOF
+)
+
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/SpellRegistryClient.java b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/SpellRegistryClient.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..2e1f1bbca8b07ce3ff071343209b356185744648
+--- /dev/null
++++ b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/data/SpellRegistryClient.java
+@@ -0,0 +1,114 @@
++package com.stefani.MilagresDSMod.client.data;
++
++import com.stefani.MilagresDSMod.MilagresDSMod;
++import net.minecraft.network.chat.Component;
++import net.minecraft.resources.ResourceLocation;
++
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.LinkedHashMap;
++import java.util.List;
++import java.util.Map;
++import java.util.Optional;
++
++/**
++ * Static client-side registry with showcase spells used exclusively for UI previews and local testing.
++ */
++public final class SpellRegistryClient {
++    private static final ResourceLocation FALLBACK_ICON = ResourceLocation.fromNamespaceAndPath(
++            MilagresDSMod.MODID, "textures/spells/fallback.png");
++
++    private static final List<Spell> SPELLS;
++    private static final Map<ResourceLocation, Spell> SPELLS_BY_ID;
++
++    static {
++        List<Spell> spells = new ArrayList<>();
++        spells.add(build("lightning_spear", Category.OFFENSIVE, 24,
++                new Requirements(12, 8, 16, 0, List.of(Component.translatable("ui.memorize.requirement.slots", 1))),
++                Component.translatable("spell.milagresdsmod.lightning_spear.desc"),
++                icon("lightning_spear")));
++        spells.add(build("arcane_barrage", Category.OFFENSIVE, 32,
++                new Requirements(18, 20, 6, 12, List.of(Component.translatable("ui.memorize.requirement.slots", 2))),
++                Component.translatable("spell.milagresdsmod.arcane_barrage.desc"),
++                icon("arcane_barrage")));
++        spells.add(build("ember_comet", Category.OFFENSIVE, 40,
++                new Requirements(24, 15, 10, 0, List.of(Component.translatable("ui.memorize.requirement.slots", 2))),
++                Component.translatable("spell.milagresdsmod.ember_comet.desc"),
++                icon("ember_comet")));
++        spells.add(build("crystalline_shield", Category.DEFENSIVE, 18,
++                new Requirements(10, 12, 6, 0, List.of(Component.translatable("ui.memorize.requirement.slots", 1))),
++                Component.translatable("spell.milagresdsmod.crystalline_shield.desc"),
++                icon("crystalline_shield")));
++        spells.add(build("healing_burst", Category.SUPPORT, 26,
++                new Requirements(14, 0, 18, 0, List.of(Component.translatable("ui.memorize.requirement.slots", 2))),
++                Component.translatable("spell.milagresdsmod.healing_burst.desc"),
++                icon("healing_burst")));
++        spells.add(build("sanctuary_barrier", Category.SUPPORT, 30,
++                new Requirements(20, 10, 22, 0, List.of(Component.translatable("ui.memorize.requirement.slots", 2))),
++                Component.translatable("spell.milagresdsmod.sanctuary_barrier.desc"),
++                icon("sanctuary_barrier")));
++        spells.add(build("wind_step", Category.UTILITY, 12,
++                new Requirements(8, 8, 0, 0, List.of(Component.translatable("ui.memorize.requirement.slots", 1))),
++                Component.translatable("spell.milagresdsmod.wind_step.desc"),
++                icon("wind_step")));
++        spells.add(build("gravity_well", Category.RITUAL, 44,
++                new Requirements(28, 24, 12, 14, List.of(Component.translatable("ui.memorize.requirement.slots", 3))),
++                Component.translatable("spell.milagresdsmod.gravity_well.desc"),
++                icon("gravity_well")));
++        spells.add(build("soul_chain", Category.RITUAL, 36,
++                new Requirements(26, 18, 18, 8, List.of(Component.translatable("ui.memorize.requirement.slots", 3))),
++                Component.translatable("spell.milagresdsmod.soul_chain.desc"),
++                icon("soul_chain")));
++        spells.add(build("toxic_mist", Category.OFFENSIVE, 22,
++                new Requirements(12, 14, 4, 6, List.of(Component.translatable("ui.memorize.requirement.slots", 1))),
++                Component.translatable("spell.milagresdsmod.toxic_mist.desc"),
++                icon("toxic_mist")));
++        spells.add(build("earthen_bulwark", Category.DEFENSIVE, 28,
++                new Requirements(22, 0, 16, 0, List.of(Component.translatable("ui.memorize.requirement.slots", 2))),
++                Component.translatable("spell.milagresdsmod.earthen_bulwark.desc"),
++                icon("earthen_bulwark")));
++        spells.add(build("lunar_ray", Category.OFFENSIVE, 34,
++                new Requirements(25, 20, 10, 12, List.of(Component.translatable("ui.memorize.requirement.slots", 2))),
++                Component.translatable("spell.milagresdsmod.lunar_ray.desc"),
++                icon("lunar_ray")));
++
++        List<Spell> immutable = List.copyOf(spells);
++        Map<ResourceLocation, Spell> map = new LinkedHashMap<>();
++        for (Spell spell : immutable) {
++            map.put(spell.id(), spell);
++        }
++        SPELLS = immutable;
++        SPELLS_BY_ID = Collections.unmodifiableMap(map);
++    }
++
++    private SpellRegistryClient() {
++    }
++
++    private static Spell build(String name, Category category, int manaCost, Requirements requirements,
++                               Component description, ResourceLocation icon) {
++        ResourceLocation id = new ResourceLocation(MilagresDSMod.MODID, name);
++        return new Spell(id,
++                Component.translatable("spell.milagresdsmod." + name),
++                category,
++                manaCost,
++                requirements,
++                description,
++                icon);
++    }
++
++    private static ResourceLocation icon(String name) {
++        return ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/spells/" + name + ".png");
++    }
++
++    public static List<Spell> getAll() {
++        return SPELLS;
++    }
++
++    public static Optional<Spell> get(ResourceLocation id) {
++        return Optional.ofNullable(SPELLS_BY_ID.get(id));
++    }
++
++    public static ResourceLocation fallbackIcon() {
++        return FALLBACK_ICON;
++    }
++}
+ 
+EOF
+)
+
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/gui/SpellGridWidget.java b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/gui/SpellGridWidget.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..dc69aa67b1a7cc3d4b45a47276467dffb028e5f1
+--- /dev/null
++++ b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/gui/SpellGridWidget.java
+@@ -0,0 +1,215 @@
++package com.stefani.MilagresDSMod.client.gui;
++
++import com.stefani.MilagresDSMod.client.data.Spell;
++import com.stefani.MilagresDSMod.client.data.SpellRegistryClient;
++import net.minecraft.client.Minecraft;
++import net.minecraft.client.gui.components.AbstractWidget;
++import net.minecraft.client.gui.narration.NarratedElementType;
++import net.minecraft.client.gui.narration.NarrationElementOutput;
++import net.minecraft.client.gui.GuiGraphics;
++import net.minecraft.network.chat.Component;
++import net.minecraft.resources.ResourceLocation;
++import net.minecraft.util.Mth;
++import org.lwjgl.glfw.GLFW;
++
++import javax.annotation.Nullable;
++
++import java.util.List;
++import java.util.Objects;
++import java.util.function.Consumer;
++
++public class SpellGridWidget extends AbstractWidget {
++    private static final int COLUMNS = 6;
++    private static final int ICON_SIZE = 48;
++    private static final int CELL_PADDING = 2;
++    private static final int CELL_SIZE = ICON_SIZE + CELL_PADDING * 2;
++
++    private final List<Spell> spells;
++    private final ResourceLocation frameTexture;
++    private final ResourceLocation selectedFrameTexture;
++    private Consumer<Spell> selectionListener = spell -> {};
++
++    private int selectedIndex = -1;
++    private int scrollRow = 0;
++
++    public SpellGridWidget(int x, int y, int width, int height, List<Spell> spells,
++                           ResourceLocation frameTexture, ResourceLocation selectedFrameTexture) {
++        super(x, y, width, height, Component.empty());
++        this.spells = List.copyOf(spells);
++        this.frameTexture = frameTexture;
++        this.selectedFrameTexture = selectedFrameTexture;
++    }
++
++    public void setSelectionListener(Consumer<Spell> listener) {
++        this.selectionListener = Objects.requireNonNullElse(listener, spell -> {});
++    }
++
++    public void setSelectedSpell(ResourceLocation spellId) {
++        if (spellId == null) {
++            setSelectedIndex(-1);
++            return;
++        }
++        for (int i = 0; i < spells.size(); i++) {
++            if (spellId.equals(spells.get(i).id())) {
++                setSelectedIndex(i);
++                return;
++            }
++        }
++    }
++
++    @Nullable
++    public Spell getSelectedSpell() {
++        if (selectedIndex < 0 || selectedIndex >= spells.size()) {
++            return null;
++        }
++        return spells.get(selectedIndex);
++    }
++
++    @Nullable
++    public Spell getSpellAt(double mouseX, double mouseY) {
++        int index = indexAt(mouseX, mouseY);
++        if (index < 0) {
++            return null;
++        }
++        return spells.get(index);
++    }
++
++    @Override
++    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
++        int visibleRows = Math.max(1, this.height / CELL_SIZE);
++        int maxScroll = Math.max(0, getRowCount() - visibleRows);
++        scrollRow = Mth.clamp(scrollRow, 0, maxScroll);
++
++        guiGraphics.enableScissor(getX(), getY(), getX() + width, getY() + height);
++        for (int row = 0; row < visibleRows; row++) {
++            int gridRow = scrollRow + row;
++            for (int column = 0; column < COLUMNS; column++) {
++                int index = gridRow * COLUMNS + column;
++                if (index >= spells.size()) {
++                    continue;
++                }
++                int cellX = getX() + column * CELL_SIZE;
++                int cellY = getY() + row * CELL_SIZE;
++                ResourceLocation frame = index == selectedIndex ? selectedFrameTexture : frameTexture;
++                guiGraphics.blit(frame, cellX, cellY, 0, 0, CELL_SIZE, CELL_SIZE, CELL_SIZE, CELL_SIZE);
++
++                Spell spell = spells.get(index);
++                ResourceLocation icon = resolveIcon(spell.icon());
++                int iconX = cellX + CELL_PADDING;
++                int iconY = cellY + CELL_PADDING;
++                guiGraphics.blit(icon, iconX, iconY, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
++            }
++        }
++        guiGraphics.disableScissor();
++    }
++
++    @Override
++    public boolean mouseClicked(double mouseX, double mouseY, int button) {
++        int index = indexAt(mouseX, mouseY);
++        if (index < 0) {
++            return false;
++        }
++        this.playDownSound(Minecraft.getInstance().getSoundManager());
++        setSelectedIndex(index);
++        return true;
++    }
++
++    @Override
++    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
++        if (!isMouseOver(mouseX, mouseY)) {
++            return false;
++        }
++        int visibleRows = Math.max(1, this.height / CELL_SIZE);
++        int maxScroll = Math.max(0, getRowCount() - visibleRows);
++        scrollRow = Mth.clamp(scrollRow - (int) Math.signum(delta), 0, maxScroll);
++        return true;
++    }
++
++    @Override
++    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
++        if (!this.isFocused()) {
++            return false;
++        }
++        int rowCount = getRowCount();
++        switch (keyCode) {
++            case GLFW.GLFW_KEY_LEFT -> moveSelection(-1);
++            case GLFW.GLFW_KEY_RIGHT -> moveSelection(1);
++            case GLFW.GLFW_KEY_UP -> moveSelection(-COLUMNS);
++            case GLFW.GLFW_KEY_DOWN -> moveSelection(COLUMNS);
++            default -> {
++                return false;
++            }
++        }
++        int visibleRows = Math.max(1, this.height / CELL_SIZE);
++        int currentRow = selectedIndex >= 0 ? selectedIndex / COLUMNS : 0;
++        if (currentRow < scrollRow) {
++            scrollRow = currentRow;
++        } else if (currentRow >= scrollRow + visibleRows) {
++            scrollRow = currentRow - visibleRows + 1;
++        }
++        scrollRow = Mth.clamp(scrollRow, 0, Math.max(0, rowCount - visibleRows));
++        return true;
++    }
++
++    private void moveSelection(int delta) {
++        if (spells.isEmpty()) {
++            return;
++        }
++        int targetIndex = selectedIndex < 0 ? 0 : selectedIndex + delta;
++        targetIndex = Mth.clamp(targetIndex, 0, spells.size() - 1);
++        setSelectedIndex(targetIndex);
++    }
++
++    private int getRowCount() {
++        return Mth.ceil((double) spells.size() / COLUMNS);
++    }
++
++    private int indexAt(double mouseX, double mouseY) {
++        if (!isMouseOver(mouseX, mouseY)) {
++            return -1;
++        }
++        double relativeX = mouseX - getX();
++        double relativeY = mouseY - getY();
++        if (relativeX < 0 || relativeY < 0) {
++            return -1;
++        }
++        int column = (int) (relativeX / CELL_SIZE);
++        int rowInView = (int) (relativeY / CELL_SIZE);
++        if (column < 0 || column >= COLUMNS || rowInView < 0) {
++            return -1;
++        }
++        int index = (scrollRow + rowInView) * COLUMNS + column;
++        if (index < 0 || index >= spells.size()) {
++            return -1;
++        }
++        return index;
++    }
++
++    private void setSelectedIndex(int index) {
++        if (index < -1 || index >= spells.size()) {
++            return;
++        }
++        this.selectedIndex = index;
++        Spell selected = getSelectedSpell();
++        selectionListener.accept(selected);
++    }
++
++    private ResourceLocation resolveIcon(@Nullable ResourceLocation icon) {
++        if (icon == null) {
++            return SpellRegistryClient.fallbackIcon();
++        }
++        Minecraft minecraft = Minecraft.getInstance();
++        if (minecraft == null) {
++            return SpellRegistryClient.fallbackIcon();
++        }
++        return minecraft.getResourceManager().getResource(icon).isPresent() ? icon : SpellRegistryClient.fallbackIcon();
++    }
++
++    @Override
++    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
++        Spell selected = getSelectedSpell();
++        if (selected != null) {
++            narrationElementOutput.add(NarratedElementType.TITLE, selected.name());
++        }
++    }
++}
+ 
+EOF
+)
+
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/gui/SpellMemorizeScreen.java b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/gui/SpellMemorizeScreen.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..a9b97a9927cd1fbdb1392213f6f6c7207c57d06f
+--- /dev/null
++++ b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/gui/SpellMemorizeScreen.java
+@@ -0,0 +1,330 @@
++package com.stefani.MilagresDSMod.client.gui;
++
++import com.stefani.MilagresDSMod.MilagresDSMod;
++import com.stefani.MilagresDSMod.capability.playermanaprovider;
++import com.stefani.MilagresDSMod.client.MagicStats;
++import com.stefani.MilagresDSMod.client.data.Requirements;
++import com.stefani.MilagresDSMod.client.data.Spell;
++import com.stefani.MilagresDSMod.client.data.SpellRegistryClient;
++import com.stefani.MilagresDSMod.network.modpackets;
++import net.minecraft.ChatFormatting;
++import net.minecraft.client.Minecraft;
++import net.minecraft.client.gui.GuiGraphics;
++import net.minecraft.client.gui.components.Button;
++import net.minecraft.client.gui.screens.Screen;
++import net.minecraft.network.chat.Component;
++import net.minecraft.resources.ResourceLocation;
++import net.minecraft.world.entity.player.Player;
++
++import javax.annotation.Nullable;
++import java.util.ArrayList;
++import java.util.List;
++
++/**
++ * Spell memorisation screen that allows players to assign spells to local slots without spending mana.
++ */
++public class SpellMemorizeScreen extends Screen {
++    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(
++            MilagresDSMod.MODID, "textures/gui/spell_menu_bg.png");
++    private static final ResourceLocation FRAME = ResourceLocation.fromNamespaceAndPath(
++            MilagresDSMod.MODID, "textures/gui/icon_frame.png");
++    private static final ResourceLocation FRAME_SELECTED = ResourceLocation.fromNamespaceAndPath(
++            MilagresDSMod.MODID, "textures/gui/icon_frame_selected.png");
++
++    private static final int BACKGROUND_WIDTH = 520;
++    private static final int BACKGROUND_HEIGHT = 360;
++    private static final int SLOT_SIZE = 52;
++    private static final int SLOT_SPACING = 8;
++
++    private SpellGridWidget gridWidget;
++    private Button equipButton;
++    private Button removeButton;
++    private Button backButton;
++
++    private final MagicStats magicStats = MagicStats.get();
++    private Spell selectedSpell;
++    private int selectedSlotIndex;
++
++    private int leftPos;
++    private int topPos;
++
++    public SpellMemorizeScreen() {
++        super(Component.translatable("ui.memorize.title"));
++        this.selectedSlotIndex = 0;
++    }
++
++    @Override
++    protected void init() {
++        super.init();
++        this.leftPos = (this.width - BACKGROUND_WIDTH) / 2;
++        this.topPos = (this.height - BACKGROUND_HEIGHT) / 2;
++
++        int gridLeft = leftPos + 24;
++        int slotsTop = topPos + 32;
++        int gridTop = slotsTop + SLOT_SIZE + 16;
++        int gridWidth = SLOT_SIZE * 6;
++        int gridHeight = SLOT_SIZE * 4 + 8;
++
++        this.gridWidget = new SpellGridWidget(gridLeft, gridTop, gridWidth, gridHeight,
++                SpellRegistryClient.getAll(), FRAME, FRAME_SELECTED);
++        this.gridWidget.setSelectionListener(this::onSpellSelected);
++        addRenderableWidget(gridWidget);
++        setInitialSelection();
++
++        int detailLeft = gridLeft + gridWidth + 24;
++        int detailWidth = BACKGROUND_WIDTH - (detailLeft - leftPos) - 32;
++        int buttonsTop = topPos + BACKGROUND_HEIGHT - 60;
++
++        this.equipButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.equip"), button -> {
++            equipSelectedSpell();
++        }).bounds(detailLeft, buttonsTop, detailWidth, 20).build());
++
++        this.removeButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.remove"), button -> {
++            removeSelectedSpell();
++        }).bounds(detailLeft, buttonsTop + 24, detailWidth, 20).build());
++
++        this.backButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.back"), button -> onClose())
++                .bounds(detailLeft, buttonsTop + 48, detailWidth, 20).build());
++
++        updateButtonState();
++        setInitialFocus(gridWidget);
++    }
++
++    private void setInitialSelection() {
++        for (int slot = 0; slot < magicStats.getSlotsMax(); slot++) {
++            ResourceLocation spellId = magicStats.getSpellInSlot(slot);
++            if (spellId != null) {
++                this.gridWidget.setSelectedSpell(spellId);
++                return;
++            }
++        }
++    }
++
++    private void onSpellSelected(@Nullable Spell spell) {
++        this.selectedSpell = spell;
++        updateButtonState();
++    }
++
++    @Override
++    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
++        renderBackground(guiGraphics);
++        guiGraphics.blit(BACKGROUND, leftPos, topPos, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT,
++                BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
++        guiGraphics.drawString(this.font, this.title, leftPos + 24, topPos + 16, 0xF3E5AB, false);
++
++        renderEquippedSlots(guiGraphics, mouseX, mouseY);
++
++        super.render(guiGraphics, mouseX, mouseY, partialTick);
++
++        int detailLeft = gridWidget.getX() + gridWidget.getWidth() + 24;
++        int detailTop = gridWidget.getY();
++        int detailWidth = BACKGROUND_WIDTH - (detailLeft - leftPos) - 32;
++        renderSpellDetails(guiGraphics, detailLeft, detailTop, detailWidth);
++
++        renderSpellTooltip(guiGraphics, mouseX, mouseY);
++
++        renderHints(guiGraphics);
++    }
++
++    private void renderEquippedSlots(GuiGraphics guiGraphics, int mouseX, int mouseY) {
++        int slotsLeft = leftPos + 24;
++        int slotsTop = topPos + 32;
++        for (int i = 0; i < magicStats.getSlotsMax(); i++) {
++            int slotX = slotsLeft + i * (SLOT_SIZE + SLOT_SPACING);
++            ResourceLocation frame = i == selectedSlotIndex ? FRAME_SELECTED : FRAME;
++            guiGraphics.blit(frame, slotX, slotsTop, 0, 0, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE);
++
++            ResourceLocation spellId = magicStats.getSpellInSlot(i);
++            Spell spell = spellId != null ? SpellRegistryClient.get(spellId).orElse(null) : null;
++            ResourceLocation icon = resolveIcon(spell != null ? spell.icon() : null);
++            guiGraphics.blit(icon, slotX + 2, slotsTop + 2, 0, 0, 48, 48, 48, 48);
++
++            int labelColor = i == selectedSlotIndex ? 0xF5D76E : 0xC6B46A;
++            guiGraphics.drawString(this.font, String.valueOf(i + 1), slotX + 4, slotsTop + SLOT_SIZE - 10, labelColor, false);
++        }
++    }
++
++    private void renderSpellTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
++        if (this.gridWidget == null) {
++            return;
++        }
++        Spell hoveredSpell = this.gridWidget.getSpellAt(mouseX, mouseY);
++        if (hoveredSpell != null) {
++            guiGraphics.renderTooltip(this.font, hoveredSpell.name(), mouseX, mouseY);
++        }
++    }
++
++    private void renderSpellDetails(GuiGraphics guiGraphics, int left, int top, int width) {
++        int y = top;
++        if (selectedSpell == null) {
++            guiGraphics.drawString(this.font, Component.translatable("ui.memorize.empty_selection"), left, y, 0xAAAAAA, false);
++            return;
++        }
++        guiGraphics.drawString(this.font, selectedSpell.name(), left, y, 0xF7E7CE, false);
++        y += 12;
++        guiGraphics.drawString(this.font, selectedSpell.category().getDisplayName().withStyle(ChatFormatting.GOLD), left, y, 0xC6B46A, false);
++        y += 12;
++
++        for (Component line : this.font.split(selectedSpell.description(), width)) {
++            guiGraphics.drawString(this.font, line, left, y, 0xDDDDDD, false);
++            y += 10;
++        }
++        y += 4;
++
++        int playerMana = getPlayerMana();
++        int manaCost = selectedSpell.manaCost();
++        ChatFormatting manaColor = playerMana >= manaCost ? ChatFormatting.GREEN : ChatFormatting.RED;
++        Component manaLine = Component.translatable("ui.memorize.cost", manaCost, playerMana).withStyle(manaColor);
++        guiGraphics.drawString(this.font, manaLine, left, y, 0xFFFFFF, false);
++        y += 12;
++
++        renderRequirementBlock(guiGraphics, left, y, width, selectedSpell.requirements());
++    }
++
++    private void renderRequirementBlock(GuiGraphics guiGraphics, int left, int y, int width, Requirements requirements) {
++        guiGraphics.drawString(this.font, Component.translatable("ui.memorize.requirements.title"), left, y, 0xF7E7CE, false);
++        y += 10;
++
++        Player player = Minecraft.getInstance().player;
++        int level = player != null ? player.experienceLevel : 0;
++        int intelligence = getPlaceholderAttribute(player, "intelligence");
++        int faith = getPlaceholderAttribute(player, "faith");
++        int arcane = getPlaceholderAttribute(player, "arcane");
++
++        List<Component> lines = new ArrayList<>();
++        lines.add(formatRequirement("ui.memorize.requirement.level", requirements.requiredLevel(), level));
++        lines.add(formatRequirement("ui.memorize.requirement.intelligence", requirements.intelligence(), intelligence));
++        lines.add(formatRequirement("ui.memorize.requirement.faith", requirements.faith(), faith));
++        lines.add(formatRequirement("ui.memorize.requirement.arcane", requirements.arcane(), arcane));
++        for (Component note : requirements.additionalNotes()) {
++            lines.add(note.copy().withStyle(ChatFormatting.GRAY));
++        }
++
++        for (Component line : lines) {
++            for (Component split : this.font.split(line, width)) {
++                guiGraphics.drawString(this.font, split, left, y, 0xFFFFFF, false);
++                y += 10;
++            }
++        }
++    }
++
++    private Component formatRequirement(String translationKey, int required, int current) {
++        ChatFormatting color = current >= required ? ChatFormatting.GREEN : ChatFormatting.RED;
++        return Component.translatable(translationKey, required, current).withStyle(color);
++    }
++
++    private int getPlaceholderAttribute(@Nullable Player player, String key) {
++        // Attribute specialisations have not been implemented yet. Using zero keeps the UI functional while the
++        // backend evolves, and the text colour highlights unmet requirements for clarity.
++        return 0;
++    }
++
++    private int getPlayerMana() {
++        Player player = Minecraft.getInstance().player;
++        if (player == null) {
++            return 0;
++        }
++        return player.getCapability(playermanaprovider.PLAYER_MANA).map(mana -> mana.getMana()).orElse(0);
++    }
++
++    private void renderHints(GuiGraphics guiGraphics) {
++        int hintY = topPos + BACKGROUND_HEIGHT - 16;
++        Component scrollHint = Component.translatable("ui.memorize.hint.scroll");
++        Component navigationHint = Component.translatable("ui.memorize.hint.navigate");
++        Component confirmHint = Component.translatable("ui.memorize.hint.confirm", Minecraft.getInstance().options.keyUse.getTranslatedKeyMessage());
++
++        int center = leftPos + BACKGROUND_WIDTH / 2;
++        guiGraphics.drawCenteredString(this.font, scrollHint, center, hintY - 20, 0xCCCCCC);
++        guiGraphics.drawCenteredString(this.font, navigationHint, center, hintY - 10, 0xCCCCCC);
++        guiGraphics.drawCenteredString(this.font, confirmHint, center, hintY, 0xCCCCCC);
++    }
++
++    private void equipSelectedSpell() {
++        if (selectedSpell == null) {
++            return;
++        }
++        // Atualiza primeiro o snapshot local para que a grade responda imediatamente ao jogador.
++        magicStats.equipSpell(selectedSlotIndex, selectedSpell.id());
++        sendPrimarySlotToServer();
++        updateButtonState();
++    }
++
++    private void removeSelectedSpell() {
++        // Ao remover usamos o mesmo fluxo do equipar: estado local primeiro, sincronização depois.
++        magicStats.clearSlot(selectedSlotIndex);
++        sendPrimarySlotToServer();
++        updateButtonState();
++    }
++
++    private void sendPrimarySlotToServer() {
++        ResourceLocation primary = magicStats.getSpellInSlot(0);
++        // Only synchronise the primary slot for now so the server keeps the active spell used during casting.
++        modpackets.sendSpellSelection(primary);
++    }
++
++    private void updateButtonState() {
++        boolean hasSelection = selectedSpell != null;
++        boolean isEquipped = hasSelection && magicStats.isEquipped(selectedSpell.id());
++        this.equipButton.active = hasSelection && !isEquipped;
++        ResourceLocation slotSpell = magicStats.getSpellInSlot(selectedSlotIndex);
++        this.removeButton.active = slotSpell != null;
++    }
++
++    @Override
++    public boolean mouseClicked(double mouseX, double mouseY, int button) {
++        if (handleSlotClick(mouseX, mouseY)) {
++            return true;
++        }
++        return super.mouseClicked(mouseX, mouseY, button);
++    }
++
++    private boolean handleSlotClick(double mouseX, double mouseY) {
++        int slotsLeft = leftPos + 24;
++        int slotsTop = topPos + 32;
++        for (int i = 0; i < magicStats.getSlotsMax(); i++) {
++            int slotX = slotsLeft + i * (SLOT_SIZE + SLOT_SPACING);
++            if (mouseX >= slotX && mouseX < slotX + SLOT_SIZE && mouseY >= slotsTop && mouseY < slotsTop + SLOT_SIZE) {
++                selectedSlotIndex = i;
++                gridWidget.setSelectedSpell(magicStats.getSpellInSlot(i));
++                updateButtonState();
++                return true;
++            }
++        }
++        return false;
++    }
++
++    private ResourceLocation resolveIcon(@Nullable ResourceLocation icon) {
++        Minecraft minecraft = Minecraft.getInstance();
++        if (icon == null || minecraft == null) {
++            return SpellRegistryClient.fallbackIcon();
++        }
++        return minecraft.getResourceManager().getResource(icon).isPresent() ? icon : SpellRegistryClient.fallbackIcon();
++    }
++
++    @Override
++    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
++        if (this.gridWidget.keyPressed(keyCode, scanCode, modifiers)) {
++            return true;
++        }
++        return super.keyPressed(keyCode, scanCode, modifiers);
++    }
++
++    @Override
++    public void onClose() {
++        this.minecraft.setScreen(null);
++    }
++
++    @Override
++    public void tick() {
++        super.tick();
++        if (gridWidget == null) {
++            return;
++        }
++        int slots = Math.max(1, magicStats.getSlotsMax());
++        if (selectedSlotIndex >= slots) {
++            selectedSlotIndex = slots - 1;
++            gridWidget.setSelectedSpell(magicStats.getSpellInSlot(selectedSlotIndex));
++            updateButtonState();
++        }
++    }
++}
+ 
+EOF
+)
+
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/keyblinds/keyinputhandle.java b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/keyblinds/keyinputhandle.java
+index 7bb57f2bddffffb6f3c91df8954db83b3abfb9dc..b334047f6256d74f699a9e288f42213c61b55b31 100644
+--- a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/keyblinds/keyinputhandle.java
++++ b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/keyblinds/keyinputhandle.java
+@@ -1,32 +1,32 @@
+ package com.stefani.MilagresDSMod.client.keyblinds;
+ 
+ import com.stefani.MilagresDSMod.MilagresDSMod;
+-import com.stefani.MilagresDSMod.client.gui.spellselection;
++import com.stefani.MilagresDSMod.client.gui.SpellMemorizeScreen;
+ import com.stefani.MilagresDSMod.network.modpackets;
+ import com.stefani.MilagresDSMod.network.packets.castspellpackets;
+ import net.minecraft.client.Minecraft;
+ import net.minecraftforge.api.distmarker.Dist;
+ import net.minecraftforge.client.event.InputEvent;
+ import net.minecraftforge.eventbus.api.SubscribeEvent;
+ import net.minecraftforge.fml.common.Mod;
+ 
+ @Mod.EventBusSubscriber(modid = MilagresDSMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+ public class keyinputhandle {
+     @SubscribeEvent
+     public static void onKeyInput(InputEvent.Key event) {
+         Minecraft mc = Minecraft.getInstance();
+         if (mc.player == null) {
+             return;
+         }
+ 
+-        // Abrir menu de magias
++        // Abrir menu de memorização de magias (somente cliente)
+         if (modkeybindings.OPEN_SPELL_MENU.consumeClick()) {
+-            mc.setScreen(new spellselection());
++            mc.setScreen(new SpellMemorizeScreen());
+         }
+ 
+         // Lançar magia
+         if (modkeybindings.CAST_SPELL.consumeClick()) {
+             modpackets.sendToServer(new castspellpackets());
+         }
+     }
+ }
+ 
+EOF
+)
+
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/keyblinds/modkeybindings.java b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/keyblinds/modkeybindings.java
+index d8bec2f0e713e8e44f8cce7288b18de501350064..da1bfb7e76094cdb9a5e608270af8b52fe9415de 100644
+--- a/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/keyblinds/modkeybindings.java
++++ b/MilagresDS_Mod/src/main/java/com/stefani/MilagresDSMod/client/keyblinds/modkeybindings.java
+@@ -1,14 +1,14 @@
+ package com.stefani.MilagresDSMod.client.keyblinds;
+ 
+ import com.mojang.blaze3d.platform.InputConstants;
+ import net.minecraft.client.KeyMapping;
+ import net.minecraftforge.client.settings.KeyConflictContext;
+ import net.minecraftforge.client.settings.KeyModifier;
+ 
+ public class modkeybindings {
+     public static final String KEY_CATEGORY = "key.category.milagresdsmod";
+ 
+-    public static final KeyMapping OPEN_SPELL_MENU = new KeyMapping("key.milagresdsmod.open_spell_menu", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, InputConstants.KEY_M, KEY_CATEGORY);
++    public static final KeyMapping OPEN_SPELL_MENU = new KeyMapping("key.milagresdsmod.open_spell_menu", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, InputConstants.KEY_G, KEY_CATEGORY);
+ 
+     public static final KeyMapping CAST_SPELL = new KeyMapping("key.MilagresDSMod.cast_spell", KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, InputConstants.KEY_R, KEY_CATEGORY);
+ }
+ 
+EOF
+)
+
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/resources/assets/milagresdsmod/lang/en_us.json b/MilagresDS_Mod/src/main/resources/assets/milagresdsmod/lang/en_us.json
+index f1643a7f6994a8a137faa0cd346c4ae7d81599f1..784ebd318df1ff5ab97f54892ebaf14934b711be 100644
+--- a/MilagresDS_Mod/src/main/resources/assets/milagresdsmod/lang/en_us.json
++++ b/MilagresDS_Mod/src/main/resources/assets/milagresdsmod/lang/en_us.json
+@@ -1,15 +1,67 @@
+ {
++  "key.category.milagresdsmod": "MilagresDS",
++  "key.milagresdsmod.open_spell_menu": "Memorize Spells",
++  "key.MilagresDSMod.cast_spell": "Cast Equipped Spell",
++
+   "spell.milagresdsmod.lightningspear": "Lightning Spear",
+   "spell.milagresdsmod.lightningspear.desc": "Launches a crackling spear of draconic lightning.",
+   "spell.milagresdsmod.lightningspear.effect": "High-speed electrical projectile that shocks targets.",
+   "spell.milagresdsmod.fireball": "Fireball",
+   "spell.milagresdsmod.fireball.desc": "Summons an explosive orb of concentrated flame.",
+   "spell.milagresdsmod.fireball.effect": "Explodes on impact, scorching enemies in an area.",
+   "spell.milagresdsmod.healingburst": "Healing Burst",
+   "spell.milagresdsmod.healingburst.desc": "Bathes the caster in restorative energy.",
+   "spell.milagresdsmod.healingburst.effect": "Instant heal followed by a short regeneration buff.",
++
++  "spell.milagresdsmod.lightning_spear": "Lightning Spear",
++  "spell.milagresdsmod.lightning_spear.desc": "Projects a spear of pure lightning that pierces through foes.",
++  "spell.milagresdsmod.arcane_barrage": "Arcane Barrage",
++  "spell.milagresdsmod.arcane_barrage.desc": "Unleashes a volley of tracking bolts infused with raw arcana.",
++  "spell.milagresdsmod.ember_comet": "Ember Comet",
++  "spell.milagresdsmod.ember_comet.desc": "Calls down a blazing comet that ignites the battlefield on impact.",
++  "spell.milagresdsmod.crystalline_shield": "Crystalline Shield",
++  "spell.milagresdsmod.crystalline_shield.desc": "Forms a translucent barrier that absorbs frontal damage.",
++  "spell.milagresdsmod.healing_burst": "Healing Burst",
++  "spell.milagresdsmod.healing_burst.desc": "Channels a soothing wave that restores allies nearby.",
++  "spell.milagresdsmod.sanctuary_barrier": "Sanctuary Barrier",
++  "spell.milagresdsmod.sanctuary_barrier.desc": "Erects a luminous dome that weakens hostile projectiles.",
++  "spell.milagresdsmod.wind_step": "Wind Step",
++  "spell.milagresdsmod.wind_step.desc": "Accelerates the caster with tailwinds, enhancing dodges.",
++  "spell.milagresdsmod.gravity_well": "Gravity Well",
++  "spell.milagresdsmod.gravity_well.desc": "Compresses the air into a singularity that pulls enemies inward.",
++  "spell.milagresdsmod.soul_chain": "Soul Chain",
++  "spell.milagresdsmod.soul_chain.desc": "Tethers targets with spectral chains that sap vitality.",
++  "spell.milagresdsmod.toxic_mist": "Toxic Mist",
++  "spell.milagresdsmod.toxic_mist.desc": "Spreads a poisonous fog that clings to anything it touches.",
++  "spell.milagresdsmod.earthen_bulwark": "Earthen Bulwark",
++  "spell.milagresdsmod.earthen_bulwark.desc": "Raises slabs of stone to shield allies and stagger attackers.",
++  "spell.milagresdsmod.lunar_ray": "Lunar Ray",
++  "spell.milagresdsmod.lunar_ray.desc": "Fires a focused beam of moonlight that sears spectral foes.",
++
+   "tooltip.milagresdsmod.spell.mana": "Mana Cost: %s",
+   "tooltip.milagresdsmod.spell.cooldown": "Cooldown: %s ticks",
+   "tooltip.milagresdsmod.spell.damage": "Base Damage: %s",
+-  "tooltip.milagresdsmod.spell.heal": "Healing: %s"
++  "tooltip.milagresdsmod.spell.heal": "Healing: %s",
++
++  "ui.memorize.title": "Spell Memorization",
++  "ui.memorize.button.equip": "Equip",
++  "ui.memorize.button.remove": "Remove",
++  "ui.memorize.button.back": "Back",
++  "ui.memorize.empty_selection": "Select a spell from the grid to view its details.",
++  "ui.memorize.cost": "Mana Cost: %s (You: %s)",
++  "ui.memorize.requirements.title": "Requirements",
++  "ui.memorize.requirement.level": "Level %s (You: %s)",
++  "ui.memorize.requirement.intelligence": "Intelligence %s (You: %s)",
++  "ui.memorize.requirement.faith": "Faith %s (You: %s)",
++  "ui.memorize.requirement.arcane": "Arcane %s (You: %s)",
++  "ui.memorize.requirement.slots": "Uses %s memory slot(s)",
++  "ui.memorize.hint.scroll": "Scroll: Mouse Wheel",
++  "ui.memorize.hint.navigate": "Navigate: Arrow Keys",
++  "ui.memorize.hint.confirm": "Equip: %s",
++
++  "ui.memorize.category.offensive": "Offensive",
++  "ui.memorize.category.defensive": "Defensive",
++  "ui.memorize.category.support": "Support",
++  "ui.memorize.category.utility": "Utility",
++  "ui.memorize.category.ritual": "Ritual"
+ }
+ 
+EOF
+)
+
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/MilagresDS_Mod/src/main/resources/assets/milagresdsmod/lang/pt_br.json b/MilagresDS_Mod/src/main/resources/assets/milagresdsmod/lang/pt_br.json
+index f7d5b86268dfb4d0ec9efa83be3d4602f4114c0a..c9881e5e13212b860050e24efceb0aea72ade94a 100644
+--- a/MilagresDS_Mod/src/main/resources/assets/milagresdsmod/lang/pt_br.json
++++ b/MilagresDS_Mod/src/main/resources/assets/milagresdsmod/lang/pt_br.json
+@@ -1,15 +1,67 @@
+ {
++  "key.category.milagresdsmod": "MilagresDS",
++  "key.milagresdsmod.open_spell_menu": "Memorizar Feitiços",
++  "key.MilagresDSMod.cast_spell": "Lançar Feitiço Equipado",
++
+   "spell.milagresdsmod.lightningspear": "Lança de Trovão",
+   "spell.milagresdsmod.lightningspear.desc": "Arremessa uma lança crepitante de relâmpago dracônico.",
+   "spell.milagresdsmod.lightningspear.effect": "Projétil elétrico veloz que eletrocuta os alvos.",
+   "spell.milagresdsmod.fireball": "Bola de Fogo",
+   "spell.milagresdsmod.fireball.desc": "Invoca uma esfera explosiva de chama concentrada.",
+   "spell.milagresdsmod.fireball.effect": "Explode ao contato, incendiando inimigos em área.",
+   "spell.milagresdsmod.healingburst": "Rajada de Cura",
+   "spell.milagresdsmod.healingburst.desc": "Envolve o conjurador em energia restauradora.",
+   "spell.milagresdsmod.healingburst.effect": "Cura instantânea seguida de uma breve regeneração.",
++
++  "spell.milagresdsmod.lightning_spear": "Lança de Raio",
++  "spell.milagresdsmod.lightning_spear.desc": "Projeta uma lança pura de raio que atravessa os inimigos.",
++  "spell.milagresdsmod.arcane_barrage": "Rajada Arcana",
++  "spell.milagresdsmod.arcane_barrage.desc": "Dispara uma chuva de dardos que perseguem o alvo com energia arcana.",
++  "spell.milagresdsmod.ember_comet": "Cometa de Brasas",
++  "spell.milagresdsmod.ember_comet.desc": "Invoca um cometa incandescente que incendeia o campo ao impactar.",
++  "spell.milagresdsmod.crystalline_shield": "Escudo Cristalino",
++  "spell.milagresdsmod.crystalline_shield.desc": "Ergue uma barreira translúcida que absorve dano frontal.",
++  "spell.milagresdsmod.healing_burst": "Explosão Curativa",
++  "spell.milagresdsmod.healing_burst.desc": "Canaliza uma onda suave que restaura aliados próximos.",
++  "spell.milagresdsmod.sanctuary_barrier": "Barreira de Santuário",
++  "spell.milagresdsmod.sanctuary_barrier.desc": "Ergue uma cúpula radiante que enfraquece projéteis hostis.",
++  "spell.milagresdsmod.wind_step": "Passo do Vento",
++  "spell.milagresdsmod.wind_step.desc": "Acelera o conjurador com correntes de ar, favorecendo esquivas.",
++  "spell.milagresdsmod.gravity_well": "Poço Gravitacional",
++  "spell.milagresdsmod.gravity_well.desc": "Condensa o ar em uma singularidade que puxa inimigos ao centro.",
++  "spell.milagresdsmod.soul_chain": "Corrente de Almas",
++  "spell.milagresdsmod.soul_chain.desc": "Prende alvos com correntes espectrais que drenam vitalidade.",
++  "spell.milagresdsmod.toxic_mist": "Névoa Tóxica",
++  "spell.milagresdsmod.toxic_mist.desc": "Espalha uma névoa venenosa que adere a tudo que toca.",
++  "spell.milagresdsmod.earthen_bulwark": "Baluarte Terrestre",
++  "spell.milagresdsmod.earthen_bulwark.desc": "Ergue placas de pedra para proteger aliados e desequilibrar atacantes.",
++  "spell.milagresdsmod.lunar_ray": "Raio Lunar",
++  "spell.milagresdsmod.lunar_ray.desc": "Dispara um feixe de luar que fere criaturas espectrais.",
++
+   "tooltip.milagresdsmod.spell.mana": "Custo de Mana: %s",
+   "tooltip.milagresdsmod.spell.cooldown": "Recarga: %s ticks",
+   "tooltip.milagresdsmod.spell.damage": "Dano Base: %s",
+-  "tooltip.milagresdsmod.spell.heal": "Cura: %s"
++  "tooltip.milagresdsmod.spell.heal": "Cura: %s",
++
++  "ui.memorize.title": "Memorização de Feitiços",
++  "ui.memorize.button.equip": "Equipar",
++  "ui.memorize.button.remove": "Remover",
++  "ui.memorize.button.back": "Voltar",
++  "ui.memorize.empty_selection": "Selecione um feitiço na grade para ver os detalhes.",
++  "ui.memorize.cost": "Custo de Mana: %s (Você: %s)",
++  "ui.memorize.requirements.title": "Requisitos",
++  "ui.memorize.requirement.level": "Nível %s (Você: %s)",
++  "ui.memorize.requirement.intelligence": "Inteligência %s (Você: %s)",
++  "ui.memorize.requirement.faith": "Fé %s (Você: %s)",
++  "ui.memorize.requirement.arcane": "Arcano %s (Você: %s)",
++  "ui.memorize.requirement.slots": "Usa %s espaço(s) de memória",
++  "ui.memorize.hint.scroll": "Rolar: Rodinha do Mouse",
++  "ui.memorize.hint.navigate": "Mover: Setas",
++  "ui.memorize.hint.confirm": "Equipar: %s",
++
++  "ui.memorize.category.offensive": "Ofensivo",
++  "ui.memorize.category.defensive": "Defensivo",
++  "ui.memorize.category.support": "Suporte",
++  "ui.memorize.category.utility": "Utilidade",
++  "ui.memorize.category.ritual": "Ritual"
+ }
+ 
+EOF
+)
+
