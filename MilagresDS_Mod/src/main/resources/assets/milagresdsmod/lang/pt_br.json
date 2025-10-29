@@ -1,0 +1,15 @@
+{
+  "spell.milagresdsmod.lightningspear": "Lança de Trovão",
+  "spell.milagresdsmod.lightningspear.desc": "Arremessa uma lança crepitante de relâmpago dracônico.",
+  "spell.milagresdsmod.lightningspear.effect": "Projétil elétrico veloz que eletrocuta os alvos.",
+  "spell.milagresdsmod.fireball": "Bola de Fogo",
+  "spell.milagresdsmod.fireball.desc": "Invoca uma esfera explosiva de chama concentrada.",
+  "spell.milagresdsmod.fireball.effect": "Explode ao contato, incendiando inimigos em área.",
+  "spell.milagresdsmod.healingburst": "Rajada de Cura",
+  "spell.milagresdsmod.healingburst.desc": "Envolve o conjurador em energia restauradora.",
+  "spell.milagresdsmod.healingburst.effect": "Cura instantânea seguida de uma breve regeneração.",
+  "tooltip.milagresdsmod.spell.mana": "Custo de Mana: %s",
+  "tooltip.milagresdsmod.spell.cooldown": "Recarga: %s ticks",
+  "tooltip.milagresdsmod.spell.damage": "Dano Base: %s",
+  "tooltip.milagresdsmod.spell.heal": "Cura: %s"
+}
