@@ -1,6 +1,8 @@
 package com.stefani.MilagresDSMod.network.packets;
+
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
 import com.stefani.MilagresDSMod.capability.playerspellsprovider;
+import com.stefani.MilagresDSMod.magic.spell;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
@@ -37,6 +39,7 @@ public class castspellpackets {
                 }
             });
         });
+        context.setPacketHandled(true);
         return true;
     }
 }
