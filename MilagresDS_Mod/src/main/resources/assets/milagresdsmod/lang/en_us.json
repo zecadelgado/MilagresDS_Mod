@@ -1,7 +1,7 @@
 {
-  "key.category.milagresdsmod": "MilagresDS",
-  "key.milagresdsmod.open_spell_menu": "Memorize Spells",
-  "key.MilagresDSMod.cast_spell": "Cast Equipped Spell",
+  "key.category.milagresdsmod": "Milagres — Magias",
+  "key.milagresdsmod.open_spell_menu": "Abrir menu de magias",
+  "key.milagresdsmod.cast_spell": "Lançar feitiço equipado",
 
   "spell.milagresdsmod.lightningspear": "Lightning Spear",
   "spell.milagresdsmod.lightningspear.desc": "Launches a crackling spear of draconic lightning.",

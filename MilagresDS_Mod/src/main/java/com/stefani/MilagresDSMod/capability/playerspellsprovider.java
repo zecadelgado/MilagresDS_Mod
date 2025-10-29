@@ -1,7 +1,9 @@
 package com.stefani.MilagresDSMod.capability;
 
+import com.stefani.MilagresDSMod.MilagresDSMod;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
@@ -12,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class playerspellsprovider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
+    public static final ResourceLocation ID = new ResourceLocation(MilagresDSMod.MODID, "player_spells");
     public static final Capability<playerspells> PLAYER_SPELLS = CapabilityManager.get(new CapabilityToken<>() {});
 
     private playerspells spells = null;

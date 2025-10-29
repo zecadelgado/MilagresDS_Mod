@@ -16,6 +16,8 @@ public final class MagicStats {
 
     private int slotsMax = 4;
     private final List<ResourceLocation> equippedSpells = new ArrayList<>();
+    private int clientManaCurrent;
+    private int clientManaMax;
 
     private MagicStats() {
         ensureCapacity();
@@ -23,6 +25,20 @@ public final class MagicStats {
 
     public static MagicStats get() {
         return INSTANCE;
+    }
+
+    public static void setClientMana(int current, int max) {
+        MagicStats instance = get();
+        instance.clientManaCurrent = Math.max(0, current);
+        instance.clientManaMax = Math.max(0, max);
+    }
+
+    public static int getClientMana() {
+        return get().clientManaCurrent;
+    }
+
+    public static int getClientManaMax() {
+        return get().clientManaMax;
     }
 
     public int getSlotsMax() {

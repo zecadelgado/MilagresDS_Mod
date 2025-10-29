@@ -1,4 +1,4 @@
-package com.stefani.MilagresDSMod.client.keyblinds;
+package com.stefani.MilagresDSMod.client.keybindings;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
 import com.stefani.MilagresDSMod.client.gui.SpellMemorizeScreen;
@@ -20,12 +20,12 @@ public class keyinputhandle {
         }
 
         // Abrir menu de memorização de magias (somente cliente)
-        if (modkeybindings.OPEN_SPELL_MENU.consumeClick()) {
+        if (ModKeyBindings.OPEN_SPELL_MENU.consumeClick()) {
             mc.setScreen(new SpellMemorizeScreen());
         }
 
         // Lançar magia
-        if (modkeybindings.CAST_SPELL.consumeClick()) {
+        if (ModKeyBindings.CAST_SPELL.consumeClick()) {
             modpackets.sendToServer(new castspellpackets());
         }
     }

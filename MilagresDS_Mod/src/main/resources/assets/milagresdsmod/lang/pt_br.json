@@ -1,7 +1,7 @@
 {
-  "key.category.milagresdsmod": "MilagresDS",
-  "key.milagresdsmod.open_spell_menu": "Memorizar Feitiços",
-  "key.MilagresDSMod.cast_spell": "Lançar Feitiço Equipado",
+  "key.category.milagresdsmod": "Milagres — Magias",
+  "key.milagresdsmod.open_spell_menu": "Abrir menu de magias",
+  "key.milagresdsmod.cast_spell": "Lançar feitiço equipado",
 
   "spell.milagresdsmod.lightningspear": "Lança de Trovão",
   "spell.milagresdsmod.lightningspear.desc": "Arremessa uma lança crepitante de relâmpago dracônico.",

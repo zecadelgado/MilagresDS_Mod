@@ -1,7 +1,9 @@
 package com.stefani.MilagresDSMod.capability;
 
+import com.stefani.MilagresDSMod.MilagresDSMod;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
@@ -12,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class playermanaprovider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
+    public static final ResourceLocation ID = new ResourceLocation(MilagresDSMod.MODID, "player_mana");
     public static final Capability<playermana> PLAYER_MANA = CapabilityManager.get(new CapabilityToken<>(){});
 
     private playermana mana = null;
@@ -37,12 +40,14 @@ public class playermanaprovider implements ICapabilityProvider, INBTSerializable
         CompoundTag nbt = new CompoundTag();
         createPlayerMana();
         nbt.putInt("mana", mana.getMana());
+        nbt.putInt("maxMana", mana.getMaxMana());
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         createPlayerMana();
+        mana.setMaxMana(nbt.contains("maxMana") ? nbt.getInt("maxMana") : mana.getMaxMana());
         mana.setMana(nbt.getInt("mana"));
     }
 }
