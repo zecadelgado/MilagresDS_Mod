@@ -1,7 +1,7 @@
 package com.stefani.MilagresDSMod.client.keyblinds;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
-import com.stefani.MilagresDSMod.client.gui.spellselection;
+import com.stefani.MilagresDSMod.client.gui.SpellMemorizeScreen;
 import com.stefani.MilagresDSMod.network.modpackets;
 import com.stefani.MilagresDSMod.network.packets.castspellpackets;
 import net.minecraft.client.Minecraft;
@@ -21,7 +21,7 @@ public class keyinputhandle {
 
         // Abrir menu de magias
         if (modkeybindings.OPEN_SPELL_MENU.consumeClick()) {
-            mc.setScreen(new spellselection());
+            mc.setScreen(new SpellMemorizeScreen());
         }
 
         // Lançar magia
