@@ -1,6 +1,7 @@
 package com.stefani.MilagresDSMod;
 
-import com.stefani.MilagresDSMod.client.keyblinds.modkeybindings;
+import com.stefani.MilagresDSMod.client.modkeybindings;
+import com.stefani.MilagresDSMod.network.modpackets;
 import com.stefani.MilagresDSMod.registry.spellregistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -17,6 +18,7 @@ public class MilagresDSMod {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         spellregistry.SPELLS.register(modEventBus);
+        modpackets.register();
     }
 
     @Mod.EventBusSubscriber(modid = MilagresDSMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
