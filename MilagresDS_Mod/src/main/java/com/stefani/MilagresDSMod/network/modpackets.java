@@ -6,7 +6,7 @@ import com.stefani.MilagresDSMod.network.packets.selectspellpackets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.SimpleChannel;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 import javax.annotation.Nullable;
 

@@ -1,346 +1,365 @@
 package com.stefani.MilagresDSMod.client.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.stefani.MilagresDSMod.capability.playerspellsprovider;
+import com.stefani.MilagresDSMod.MilagresDSMod;
+import com.stefani.MilagresDSMod.client.MagicStats;
 import com.stefani.MilagresDSMod.client.ManaAdapter;
-import com.stefani.MilagresDSMod.magic.spell;
+import com.stefani.MilagresDSMod.client.data.Requirements;
+import com.stefani.MilagresDSMod.client.data.Spell;
+import com.stefani.MilagresDSMod.client.data.SpellRegistryClient;
 import com.stefani.MilagresDSMod.network.modpackets;
-import com.stefani.MilagresDSMod.registry.spellregistry;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.player.Player;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
 
+/**
+ * Spell memorisation screen that allows players to assign spells to local slots without spending mana.
+ */
 public class SpellMemorizeScreen extends Screen {
-    private static final Component TITLE = Component.translatable("screen.milagresdsmod.spell_memorize.title");
-    private static final Component EQUIP_LABEL = Component.translatable("screen.milagresdsmod.spell_memorize.equip");
-    private static final Component REMOVE_LABEL = Component.translatable("screen.milagresdsmod.spell_memorize.remove");
-    private static final Component NO_SPELLS = Component.translatable("screen.milagresdsmod.spell_memorize.none");
-    private static final Component SELECT_PROMPT = Component.translatable("screen.milagresdsmod.spell_memorize.select");
-    private static final Component MEMORIZED_LABEL = Component.translatable("screen.milagresdsmod.spell_memorize.memorized");
-    private static final int GRID_COLUMNS = 4;
-    private static final int ENTRY_SIZE = 26;
-    private static final int ENTRY_SPACING = 6;
-    private static final int ICON_SIZE = 16;
-    private static final int DETAILS_WIDTH = 180;
-    private static final int DETAILS_HEIGHT = 170;
-    private static final int BUTTON_HEIGHT = 20;
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(
+            MilagresDSMod.MODID, "textures/gui/spell_menu_bg.png");
+    private static final ResourceLocation FRAME = ResourceLocation.fromNamespaceAndPath(
+            MilagresDSMod.MODID, "textures/gui/icon_frame.png");
+    private static final ResourceLocation FRAME_SELECTED = ResourceLocation.fromNamespaceAndPath(
+            MilagresDSMod.MODID, "textures/gui/icon_frame_selected.png");
 
-    private final ManaAdapter manaAdapter = new ManaAdapter();
-    private final List<SpellEntry> spellEntries = new ArrayList<>();
+    private static final int BACKGROUND_WIDTH = 520;
+    private static final int BACKGROUND_HEIGHT = 360;
+    private static final int SLOT_SIZE = 52;
+    private static final int SLOT_SPACING = 8;
 
-    private ResourceLocation selectedSpellId;
-    private ResourceLocation equippedSpellId;
-
+    private SpellGridWidget gridWidget;
     private Button equipButton;
     private Button removeButton;
+    private Button backButton;
 
-    private int listLeft;
-    private int listTop;
-    private int listColumns;
+    private final MagicStats magicStats = MagicStats.get();
+    private Spell selectedSpell;
+    private int selectedSlotIndex;
+
+    private int leftPos;
+    private int topPos;
 
     public SpellMemorizeScreen() {
-        super(TITLE);
+        super(Component.translatable("ui.memorize.title"));
+        this.selectedSlotIndex = 0;
     }
 
     @Override
     protected void init() {
         super.init();
-        spellEntries.clear();
+        this.leftPos = (this.width - BACKGROUND_WIDTH) / 2;
+        this.topPos = (this.height - BACKGROUND_HEIGHT) / 2;
 
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null) {
-            player.getCapability(playerspellsprovider.PLAYER_SPELLS)
-                    .ifPresent(spells -> equippedSpellId = spells.getEquippedSpellId());
-        } else {
-            equippedSpellId = null;
-        }
+        int gridLeft = leftPos + 24;
+        int slotsTop = topPos + 32;
+        int gridTop = slotsTop + SLOT_SIZE + 16;
+        int gridWidth = SLOT_SIZE * 6;
+        int gridHeight = SLOT_SIZE * 4 + 8;
 
-        for (spell spell : spellregistry.REGISTRY.get().getValues()) {
-            ResourceLocation id = spellregistry.REGISTRY.get().getKey(spell);
-            if (id != null) {
-                spellEntries.add(new SpellEntry(spell, id));
-            }
-        }
+        this.gridWidget = new SpellGridWidget(gridLeft, gridTop, gridWidth, gridHeight,
+                SpellRegistryClient.getAll(), FRAME, FRAME_SELECTED);
+        this.gridWidget.setSelectionListener(this::onSpellSelected);
+        addRenderableWidget(gridWidget);
+        setInitialSelection();
 
-        if (selectedSpellId != null && spellEntries.stream().noneMatch(entry -> Objects.equals(entry.id(), selectedSpellId))) {
-            selectedSpellId = null;
-        }
+        int detailLeft = gridLeft + gridWidth + 24;
+        int detailWidth = BACKGROUND_WIDTH - (detailLeft - leftPos) - 32;
+        int buttonsTop = topPos + BACKGROUND_HEIGHT - 60;
 
-        if (selectedSpellId == null) {
-            selectedSpellId = equippedSpellId != null ? equippedSpellId : (!spellEntries.isEmpty() ? spellEntries.get(0).id() : null);
-        }
+        this.equipButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.equip"), button -> {
+            equipSelectedSpell();
+        }).bounds(detailLeft, buttonsTop, detailWidth, 20).build());
 
-        calculateGridLayout();
+        this.removeButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.remove"), button -> {
+            removeSelectedSpell();
+        }).bounds(detailLeft, buttonsTop + 24, detailWidth, 20).build());
 
-        int panelLeft = this.width / 2 + 20;
-        int panelTop = this.height / 2 - DETAILS_HEIGHT / 2;
-        int buttonWidth = DETAILS_WIDTH - 20;
+        this.backButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.back"), button -> onClose())
+                .bounds(detailLeft, buttonsTop + 48, detailWidth, 20).build());
 
-        equipButton = addRenderableWidget(Button.builder(EQUIP_LABEL, button -> equipSelectedSpell())
-                .pos(panelLeft + 10, panelTop + DETAILS_HEIGHT - (BUTTON_HEIGHT + 4) * 2)
-                .size(buttonWidth, BUTTON_HEIGHT)
-                .build());
-
-        removeButton = addRenderableWidget(Button.builder(REMOVE_LABEL, button -> removeEquippedSpell())
-                .pos(panelLeft + 10, panelTop + DETAILS_HEIGHT - (BUTTON_HEIGHT + 4))
-                .size(buttonWidth, BUTTON_HEIGHT)
-                .build());
-
-        updateButtonStates();
+        updateButtonState();
+        setInitialFocus(gridWidget);
     }
 
-    private void calculateGridLayout() {
-        listColumns = Math.min(GRID_COLUMNS, Math.max(1, spellEntries.size()));
-        int rows = listColumns == 0 ? 0 : (int) Math.ceil(spellEntries.size() / (double) listColumns);
-        int gridWidth = listColumns * ENTRY_SIZE + Math.max(0, listColumns - 1) * ENTRY_SPACING;
-        int gridHeight = rows * ENTRY_SIZE + Math.max(0, rows - 1) * ENTRY_SPACING;
+    private void setInitialSelection() {
+        for (int slot = 0; slot < magicStats.getSlotsMax(); slot++) {
+            ResourceLocation spellId = magicStats.getSpellInSlot(slot);
+            if (spellId != null) {
+                this.gridWidget.setSelectedSpell(spellId);
+                return;
+            }
+        }
+    }
 
-        listLeft = this.width / 2 - DETAILS_WIDTH / 2 - gridWidth - 20;
-        listTop = this.height / 2 - gridHeight / 2;
+    private void onSpellSelected(@Nullable Spell spell) {
+        this.selectedSpell = spell;
+        updateButtonState();
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(guiGraphics);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 18, 0xFFFFFF);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(guiGraphics);
+        guiGraphics.blit(BACKGROUND, leftPos, topPos, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT,
+                BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
+        guiGraphics.drawString(this.font, this.title, leftPos + 24, topPos + 16, 0xF3E5AB, false);
 
-        updateButtonStates();
+        renderEquippedSlots(guiGraphics, mouseX, mouseY);
 
-        SpellEntry hoveredEntry = renderSpellGrid(guiGraphics, mouseX, mouseY);
-        renderDetailsPanel(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+        int detailLeft = gridWidget.getX() + gridWidget.getWidth() + 24;
+        int detailTop = gridWidget.getY();
+        int detailWidth = BACKGROUND_WIDTH - (detailLeft - leftPos) - 32;
+        renderSpellDetails(guiGraphics, detailLeft, detailTop, detailWidth);
 
-        if (hoveredEntry != null) {
-            guiGraphics.renderTooltip(this.font, hoveredEntry.buildTooltip(), mouseX, mouseY);
+        renderSpellTooltip(guiGraphics, mouseX, mouseY);
+
+        renderHints(guiGraphics);
+    }
+
+    private void renderEquippedSlots(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        int slotsLeft = leftPos + 24;
+        int slotsTop = topPos + 32;
+
+        // Renderizar título dos slots
+        Component slotsTitle = Component.translatable("ui.memorize.slots",
+            magicStats.getEquippedSpells().stream().filter(s -> s != null).count(),
+            magicStats.getSlotsMax());
+        guiGraphics.drawString(this.font, slotsTitle, slotsLeft, slotsTop - 12, 0xF7E7CE, false);
+
+        for (int i = 0; i < magicStats.getSlotsMax(); i++) {
+            int slotX = slotsLeft + i * (SLOT_SIZE + SLOT_SPACING);
+            ResourceLocation frame = i == selectedSlotIndex ? FRAME_SELECTED : FRAME;
+            guiGraphics.blit(frame, slotX, slotsTop, 0, 0, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE);
+
+            ResourceLocation spellId = magicStats.getSpellInSlot(i);
+            Spell spell = spellId != null ? SpellRegistryClient.get(spellId).orElse(null) : null;
+            ResourceLocation icon = resolveIcon(spell != null ? spell.icon() : null);
+            guiGraphics.blit(icon, slotX + 2, slotsTop + 2, 0, 0, 48, 48, 48, 48);
+
+            int labelColor = i == selectedSlotIndex ? 0xF5D76E : 0xC6B46A;
+            guiGraphics.drawString(this.font, String.valueOf(i + 1), slotX + 4, slotsTop + SLOT_SIZE - 10, labelColor, false);
         }
     }
 
-    private SpellEntry renderSpellGrid(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        if (spellEntries.isEmpty()) {
-            guiGraphics.drawCenteredString(this.font, NO_SPELLS, this.width / 2 - DETAILS_WIDTH / 2 - 20, this.height / 2, 0xAAAAAA);
-            return null;
-        }
-
-        SpellEntry hoveredEntry = null;
-        for (int index = 0; index < spellEntries.size(); index++) {
-            SpellEntry entry = spellEntries.get(index);
-            int column = listColumns == 0 ? 0 : index % listColumns;
-            int row = listColumns == 0 ? 0 : index / listColumns;
-            int x = listLeft + column * (ENTRY_SIZE + ENTRY_SPACING);
-            int y = listTop + row * (ENTRY_SIZE + ENTRY_SPACING);
-
-            boolean isHovered = mouseX >= x && mouseX <= x + ENTRY_SIZE && mouseY >= y && mouseY <= y + ENTRY_SIZE;
-            boolean isSelected = Objects.equals(entry.id(), selectedSpellId);
-
-            if (isSelected || isHovered) {
-                int color = isSelected ? 0x80FFFFFF : 0x80999999;
-                guiGraphics.fill(x - 2, y - 2, x + ENTRY_SIZE + 2, y + ENTRY_SIZE + 2, color);
-            }
-
-            RenderSystem.setShaderTexture(0, entry.spell().getIcon());
-            int iconX = x + (ENTRY_SIZE - ICON_SIZE) / 2;
-            int iconY = y + (ENTRY_SIZE - ICON_SIZE) / 2;
-            guiGraphics.blit(entry.spell().getIcon(), iconX, iconY, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
-
-            if (isHovered) {
-                hoveredEntry = entry;
-            }
-        }
-        return hoveredEntry;
-    }
-
-    private void renderDetailsPanel(GuiGraphics guiGraphics) {
-        int panelLeft = this.width / 2 + 20;
-        int panelTop = this.height / 2 - DETAILS_HEIGHT / 2;
-        guiGraphics.fill(panelLeft - 4, panelTop - 4, panelLeft + DETAILS_WIDTH + 4, panelTop + DETAILS_HEIGHT + 4, 0xA0101010);
-
-        LocalPlayer player = Minecraft.getInstance().player;
-        int currentMana = manaAdapter.getCurrent(player);
-        int maxMana = manaAdapter.getMax(player);
-
-        int textX = panelLeft + 8;
-        int y = panelTop + 8;
-
-        guiGraphics.drawString(this.font, Component.translatable("screen.milagresdsmod.spell_memorize.mana", currentMana, maxMana), textX, y, 0xFFFFFF);
-        y += 12;
-
-        SpellEntry selected = getSelectedEntry();
-        if (selected == null) {
-            guiGraphics.drawString(this.font, SELECT_PROMPT, textX, y + 8, 0xCCCCCC);
+    private void renderSpellTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        if (this.gridWidget == null) {
             return;
         }
-
-        spell spell = selected.spell();
-        guiGraphics.drawString(this.font, spell.getDisplayName(), textX, y, 0xFFFFFF);
-        y += 12;
-
-        int manaCost = spell.getManaCost();
-        int manaColor = currentMana >= manaCost ? 0x55FF55 : 0xFF5555;
-        guiGraphics.drawString(this.font, Component.translatable("screen.milagresdsmod.spell_memorize.mana_cost", manaCost), textX, y, manaColor);
-        y += 12;
-
-        guiGraphics.drawString(this.font, Component.translatable("tooltip.milagresdsmod.spell.cooldown", spell.getCooldownTicks()), textX, y, 0xFFFFFF);
-        y += 12;
-
-        if (Objects.equals(equippedSpellId, selected.id())) {
-            guiGraphics.drawString(this.font, MEMORIZED_LABEL, textX, y, 0x55FF55);
-            y += 12;
+        Spell hoveredSpell = this.gridWidget.getSpellAt(mouseX, mouseY);
+        if (hoveredSpell != null) {
+            guiGraphics.renderTooltip(this.font, hoveredSpell.name(), mouseX, mouseY);
         }
-
-        Optional<Component> effectSummary = spell.getEffectSummary();
-        if (effectSummary.isPresent()) {
-            y = drawWrapped(guiGraphics, effectSummary.get(), textX, y + 4, DETAILS_WIDTH - 16, 0xFFFFFF);
-        }
-
-        Optional<Component> description = spell.getDescription();
-        if (description.isPresent()) {
-            y = drawWrapped(guiGraphics, description.get(), textX, y + 2, DETAILS_WIDTH - 16, 0xCCCCCC);
-        }
-
-        spell.getBaseDamage().ifPresent(damage -> {
-            Component damageText = Component.translatable("tooltip.milagresdsmod.spell.damage", String.format(Locale.ROOT, "%.1f", damage));
-            guiGraphics.drawString(this.font, damageText, textX, y + 4, 0xFFAA55);
-        });
-
-        spell.getHealingAmount().ifPresent(healing -> {
-            Component healingText = Component.translatable("tooltip.milagresdsmod.spell.heal", String.format(Locale.ROOT, "%.1f", healing));
-            guiGraphics.drawString(this.font, healingText, textX, y + 16, 0x55FFAA);
-        });
     }
 
-    private int drawWrapped(GuiGraphics guiGraphics, Component text, int x, int startY, int maxWidth, int color) {
-        List<FormattedCharSequence> lines = this.font.split(text, maxWidth);
-        int y = startY;
-        for (FormattedCharSequence line : lines) {
-            guiGraphics.drawString(this.font, line, x, y, color, false);
-            y += 9;
+    private void renderSpellDetails(GuiGraphics guiGraphics, int left, int top, int width) {
+        int y = top;
+        if (selectedSpell == null) {
+            guiGraphics.drawString(this.font, Component.translatable("ui.memorize.empty_selection"), left, y, 0xAAAAAA, false);
+            return;
         }
-        return y;
+        guiGraphics.drawString(this.font, selectedSpell.name(), left, y, 0xF7E7CE, false);
+        y += 12;
+        guiGraphics.drawString(this.font, selectedSpell.category().getDisplayName(), left, y, 0xFFD700, false);
+        y += 12;
+
+        for (FormattedCharSequence line : this.font.split(selectedSpell.description(), width)) {
+            guiGraphics.drawString(this.font, line, left, y, 0xDDDDDD, false);
+            y += 10;
+        }
+        y += 4;
+
+        int playerMana = getPlayerMana();
+        int playerMaxMana = getPlayerMaxMana();
+        int manaCost = selectedSpell.manaCost();
+        int manaColor = playerMana >= manaCost ? 0x55FF55 : 0xFF5555;
+        Component manaLine = Component.translatable("ui.memorize.cost", manaCost);
+        guiGraphics.drawString(this.font, Component.translatable("ui.memorize.mana_label"), left, y, 0xF7E7CE, false);
+        y += 10;
+        guiGraphics.drawString(this.font, manaLine, left + 8, y, manaColor, false);
+        Component currentMana = Component.translatable("ui.memorize.current_mana", playerMana, playerMaxMana);
+        guiGraphics.drawString(this.font, currentMana, left + 8, y + 10, 0xDDDDDD, false);
+        y += 22;
+
+        renderRequirementBlock(guiGraphics, left, y, width, selectedSpell.requirements());
+    }
+
+    private void renderRequirementBlock(GuiGraphics guiGraphics, int left, int y, int width, Requirements requirements) {
+        guiGraphics.drawString(this.font, Component.translatable("ui.memorize.requirements.title"), left, y, 0xF7E7CE, false);
+        y += 10;
+
+        Player player = Minecraft.getInstance().player;
+        int level = player != null ? player.experienceLevel : 0;
+        int intelligence = getPlaceholderAttribute(player, "intelligence");
+        int faith = getPlaceholderAttribute(player, "faith");
+        int arcane = getPlaceholderAttribute(player, "arcane");
+
+        List<Component> lines = new ArrayList<>();
+        lines.add(formatRequirement("ui.memorize.requirement.level", requirements.requiredLevel(), level));
+        lines.add(formatRequirement("ui.memorize.requirement.intelligence", requirements.intelligence(), intelligence));
+        lines.add(formatRequirement("ui.memorize.requirement.faith", requirements.faith(), faith));
+        lines.add(formatRequirement("ui.memorize.requirement.arcane", requirements.arcane(), arcane));
+        for (Component note : requirements.additionalNotes()) {
+            lines.add(note.copy().withStyle(ChatFormatting.GRAY));
+        }
+
+        for (Component line : lines) {
+            for (FormattedCharSequence split : this.font.split(line, width)) {
+                guiGraphics.drawString(this.font, split, left, y, 0xFFFFFF, false);
+                y += 10;
+            }
+        }
+    }
+
+    private Component formatRequirement(String translationKey, int required, int current) {
+        ChatFormatting color = current >= required ? ChatFormatting.GREEN : ChatFormatting.RED;
+        return Component.translatable(translationKey, required, current).withStyle(color);
+    }
+
+    private int getPlaceholderAttribute(@Nullable Player player, String key) {
+        // Attribute specialisations have not been implemented yet. Using zero keeps the UI functional while the
+        // backend evolves, and the text colour highlights unmet requirements for clarity.
+        return 0;
+    }
+
+    private int getPlayerMana() {
+        Player player = Minecraft.getInstance().player;
+        return ManaAdapter.getCurrent(player);
+    }
+
+    private int getPlayerMaxMana() {
+        Player player = Minecraft.getInstance().player;
+        return ManaAdapter.getMax(player);
+    }
+
+    private void renderHints(GuiGraphics guiGraphics) {
+        int hintY = topPos + BACKGROUND_HEIGHT - 16;
+        Component scrollHint = Component.translatable("ui.memorize.hint.scroll");
+        Component navigationHint = Component.translatable("ui.memorize.hint.navigate");
+        Component confirmHint = Component.translatable("ui.memorize.hint.confirm", Minecraft.getInstance().options.keyUse.getTranslatedKeyMessage());
+
+        int center = leftPos + BACKGROUND_WIDTH / 2;
+        guiGraphics.drawCenteredString(this.font, scrollHint, center, hintY - 20, 0xCCCCCC);
+        guiGraphics.drawCenteredString(this.font, navigationHint, center, hintY - 10, 0xCCCCCC);
+        guiGraphics.drawCenteredString(this.font, confirmHint, center, hintY, 0xCCCCCC);
+    }
+
+    private void equipSelectedSpell() {
+        if (selectedSpell == null) {
+            return;
+        }
+        // Atualiza primeiro o snapshot local para que a grade responda imediatamente ao jogador.
+        magicStats.equipSpell(selectedSlotIndex, selectedSpell.id());
+        sendPrimarySlotToServer();
+        updateButtonState();
+    }
+
+    private void removeSelectedSpell() {
+        // Ao remover usamos o mesmo fluxo do equipar: estado local primeiro, sincronização depois.
+        magicStats.clearSlot(selectedSlotIndex);
+        sendPrimarySlotToServer();
+        updateButtonState();
+    }
+
+    private void sendPrimarySlotToServer() {
+        ResourceLocation primary = magicStats.getSpellInSlot(0);
+        // Only synchronise the primary slot for now so the server keeps the active spell used during casting.
+        modpackets.sendSpellSelection(primary);
+    }
+
+    private void updateButtonState() {
+        boolean hasSelection = selectedSpell != null;
+        boolean isEquipped = hasSelection && magicStats.isEquipped(selectedSpell.id());
+        boolean meetsRequirements = hasSelection && checkRequirements(selectedSpell);
+        this.equipButton.active = hasSelection && !isEquipped && meetsRequirements;
+        ResourceLocation slotSpell = magicStats.getSpellInSlot(selectedSlotIndex);
+        this.removeButton.active = slotSpell != null;
+    }
+
+    private boolean checkRequirements(Spell spell) {
+        Player player = Minecraft.getInstance().player;
+        if (player == null) {
+            return false;
+        }
+        Requirements req = spell.requirements();
+        int level = player.experienceLevel;
+        int intelligence = getPlaceholderAttribute(player, "intelligence");
+        int faith = getPlaceholderAttribute(player, "faith");
+        int arcane = getPlaceholderAttribute(player, "arcane");
+
+        return level >= req.requiredLevel()
+            && intelligence >= req.intelligence()
+            && faith >= req.faith()
+            && arcane >= req.arcane();
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
-            SpellEntry entry = getEntryAt(mouseX, mouseY);
-            if (entry != null) {
-                setSelectedSpell(entry.id());
-                return true;
-            }
+        if (handleSlotClick(mouseX, mouseY)) {
+            return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private SpellEntry getEntryAt(double mouseX, double mouseY) {
-        for (int index = 0; index < spellEntries.size(); index++) {
-            int column = listColumns == 0 ? 0 : index % listColumns;
-            int row = listColumns == 0 ? 0 : index / listColumns;
-            int x = listLeft + column * (ENTRY_SIZE + ENTRY_SPACING);
-            int y = listTop + row * (ENTRY_SIZE + ENTRY_SPACING);
-            if (mouseX >= x && mouseX <= x + ENTRY_SIZE && mouseY >= y && mouseY <= y + ENTRY_SIZE) {
-                return spellEntries.get(index);
+    private boolean handleSlotClick(double mouseX, double mouseY) {
+        int slotsLeft = leftPos + 24;
+        int slotsTop = topPos + 32;
+        for (int i = 0; i < magicStats.getSlotsMax(); i++) {
+            int slotX = slotsLeft + i * (SLOT_SIZE + SLOT_SPACING);
+            if (mouseX >= slotX && mouseX < slotX + SLOT_SIZE && mouseY >= slotsTop && mouseY < slotsTop + SLOT_SIZE) {
+                selectedSlotIndex = i;
+                gridWidget.setSelectedSpell(magicStats.getSpellInSlot(i));
+                updateButtonState();
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
-    private void setSelectedSpell(ResourceLocation id) {
-        this.selectedSpellId = id;
-        updateButtonStates();
+    private ResourceLocation resolveIcon(@Nullable ResourceLocation icon) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (icon == null || minecraft == null) {
+            return SpellRegistryClient.fallbackIcon();
+        }
+        return minecraft.getResourceManager().getResource(icon).isPresent() ? icon : SpellRegistryClient.fallbackIcon();
     }
 
-    private SpellEntry getSelectedEntry() {
-        if (selectedSpellId == null) {
-            return null;
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (this.gridWidget.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
         }
-        for (SpellEntry entry : spellEntries) {
-            if (Objects.equals(entry.id(), selectedSpellId)) {
-                return entry;
-            }
-        }
-        return null;
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    private void equipSelectedSpell() {
-        SpellEntry selected = getSelectedEntry();
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (selected == null || player == null) {
-            return;
-        }
-
-        int manaCost = selected.spell().getManaCost();
-        if (!manaAdapter.has(player, manaCost)) {
-            return;
-        }
-
-        player.getCapability(playerspellsprovider.PLAYER_SPELLS)
-                .ifPresent(spells -> spells.setEquippedSpell(selected.spell()));
-        equippedSpellId = selected.id();
-        modpackets.sendSpellSelection(selected.id());
-        updateButtonStates();
-    }
-
-    private void removeEquippedSpell() {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null || equippedSpellId == null) {
-            return;
-        }
-
-        player.getCapability(playerspellsprovider.PLAYER_SPELLS)
-                .ifPresent(spells -> spells.setEquippedSpell(null));
-        equippedSpellId = null;
-        modpackets.sendSpellSelection(null);
-        updateButtonStates();
-    }
-
-    private void updateButtonStates() {
-        SpellEntry selected = getSelectedEntry();
-        LocalPlayer player = Minecraft.getInstance().player;
-        boolean hasSelection = selected != null;
-        boolean isEquipped = hasSelection && Objects.equals(selected.id(), equippedSpellId);
-        boolean hasMana = hasSelection && player != null && manaAdapter.has(player, selected.spell().getManaCost());
-
-        if (equipButton != null) {
-            equipButton.active = hasSelection && !isEquipped && hasMana;
-        }
-        if (removeButton != null) {
-            removeButton.active = equippedSpellId != null;
+    @Override
+    public void onClose() {
+        if (this.minecraft != null) {
+            this.minecraft.setScreen(null);
         }
     }
 
     @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
-
-    private record SpellEntry(spell spell, ResourceLocation id) {
-        private List<Component> buildTooltip() {
-            List<Component> tooltip = new ArrayList<>();
-            tooltip.add(spell.getDisplayName());
-            tooltip.add(Component.translatable("tooltip.milagresdsmod.spell.mana", spell.getManaCost()));
-            tooltip.add(Component.translatable("tooltip.milagresdsmod.spell.cooldown", spell.getCooldownTicks()));
-            spell.getEffectSummary().ifPresent(tooltip::add);
-            spell.getDescription().ifPresent(tooltip::add);
-            spell.getBaseDamage().ifPresent(damage -> tooltip.add(Component.translatable(
-                    "tooltip.milagresdsmod.spell.damage",
-                    String.format(Locale.ROOT, "%.1f", damage)
-            )));
-            spell.getHealingAmount().ifPresent(healing -> tooltip.add(Component.translatable(
-                    "tooltip.milagresdsmod.spell.heal",
-                    String.format(Locale.ROOT, "%.1f", healing)
-            )));
-            return tooltip;
+    public void tick() {
+        super.tick();
+        if (gridWidget == null) {
+            return;
+        }
+        int slots = Math.max(1, magicStats.getSlotsMax());
+        if (selectedSlotIndex >= slots) {
+            selectedSlotIndex = slots - 1;
+            gridWidget.setSelectedSpell(magicStats.getSpellInSlot(selectedSlotIndex));
+            updateButtonState();
         }
     }
 }

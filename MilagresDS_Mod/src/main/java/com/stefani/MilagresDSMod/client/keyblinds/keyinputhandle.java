@@ -19,7 +19,7 @@ public class keyinputhandle {
             return;
         }
 
-        // Abrir menu de magias
+        // Abrir menu de memorização de magias (somente cliente)
         if (modkeybindings.OPEN_SPELL_MENU.consumeClick()) {
             mc.setScreen(new SpellMemorizeScreen());
         }
