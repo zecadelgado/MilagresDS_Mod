@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 public class modcapabilities {
     @SubscribeEvent
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
-        event.register(playermana.class);
-        event.register(playerspells.class);
+        event.register(com.stefani.MilagresDSMod.capability.playermana.class);
+        event.register(com.stefani.MilagresDSMod.capability.playerspells.class);
     }
 }

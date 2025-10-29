@@ -17,6 +17,11 @@ public class playermana {
         return maxMana;
     }
 
+    public void setMaxMana(int maxMana) {
+        this.maxMana = Math.max(1, maxMana);
+        this.mana = Math.min(this.mana, this.maxMana);
+    }
+
     public void setMana(int mana) {
         this.mana = Math.max(0, Math.min(mana, maxMana));
     }

@@ -3,6 +3,7 @@ package com.stefani.MilagresDSMod.network.packets;
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
 import com.stefani.MilagresDSMod.capability.playerspellsprovider;
 import com.stefani.MilagresDSMod.magic.spell;
+import com.stefani.MilagresDSMod.network.modpackets;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
@@ -36,6 +37,7 @@ public class castspellpackets {
                         mana.consumeMana(equippedSpell.getManaCost());
                         equippedSpell.cast(player, player.level());
                         spells.setCooldown(equippedSpell, player.level());
+                        modpackets.sendManaSync(player, mana);
                     }
                 });
             });
