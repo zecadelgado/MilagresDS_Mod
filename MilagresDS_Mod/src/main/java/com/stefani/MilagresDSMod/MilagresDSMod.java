@@ -1,6 +1,6 @@
 package com.stefani.MilagresDSMod;
 
-import com.stefani.MilagresDSMod.client.modkeybindings;
+import com.stefani.MilagresDSMod.client.keyblinds.modkeybindings;
 import com.stefani.MilagresDSMod.network.modpackets;
 import com.stefani.MilagresDSMod.registry.spellregistry;
 import net.minecraftforge.api.distmarker.Dist;
