@@ -1,12 +1,17 @@
 package com.stefani.MilagresDSMod.network;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
+import com.stefani.MilagresDSMod.capability.playermana;
+import com.stefani.MilagresDSMod.capability.playermanaprovider;
+import com.stefani.MilagresDSMod.network.SyncManaS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.castspellpackets;
 import com.stefani.MilagresDSMod.network.packets.selectspellpackets;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 
@@ -21,12 +26,18 @@ public class modpackets {
     );
 
     private static int packetId = 0;
+    private static boolean registered = false;
 
     private static int nextId() {
         return packetId++;
     }
 
     public static void register() {
+        if (registered) {
+            return;
+        }
+        registered = true;
+
         CHANNEL.messageBuilder(castspellpackets.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(castspellpackets::toBytes)
                 .decoder(castspellpackets::new)
@@ -37,6 +48,12 @@ public class modpackets {
                 .encoder(selectspellpackets::toBytes)
                 .decoder(selectspellpackets::new)
                 .consumerMainThread((packet, supplier) -> packet.handle(supplier))
+                .add();
+
+        CHANNEL.messageBuilder(SyncManaS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncManaS2CPacket::encode)
+                .decoder(SyncManaS2CPacket::decode)
+                .consumerMainThread(SyncManaS2CPacket::handle)
                 .add();
     }
 
@@ -50,5 +67,15 @@ public class modpackets {
 
     public static void sendSpellSelection(@Nullable ResourceLocation spellId) {
         CHANNEL.sendToServer(new selectspellpackets(spellId));
+    }
+
+    public static void sendManaSync(ServerPlayer player) {
+        player.getCapability(playermanaprovider.PLAYER_MANA).ifPresent(mana ->
+                sendManaSync(player, mana));
+    }
+
+    public static void sendManaSync(ServerPlayer player, playermana mana) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                new SyncManaS2CPacket(mana.getMana(), mana.getMaxMana()));
     }
 }
