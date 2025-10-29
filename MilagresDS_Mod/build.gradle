@@ -2,15 +2,7 @@ buildscript {
     repositories {
         maven {
             name = 'ForgeGradle'
-            url = uri('https://maven.minecraftforge.net/')
-        }
-        maven {
-            name = 'ForgeGradleHttpFallback'
-            url = uri('http://maven.minecraftforge.net/')
-            allowInsecureProtocol = true
-            content {
-                includeGroup 'net.minecraftforge.gradle'
-            }
+            url = 'https://maven.minecraftforge.net/'
         }
         mavenCentral()
     }
