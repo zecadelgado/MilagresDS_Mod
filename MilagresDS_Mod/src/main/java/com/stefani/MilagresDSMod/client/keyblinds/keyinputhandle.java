@@ -21,7 +21,7 @@ public class keyinputhandle {
 
             // Lançar magia
             if (modkeybindings.CAST_SPELL.consumeClick()) {
-                // Enviar pacote para o servidor
+                modpackets.sendToServer(new castspellpackets());
             }
         }
     }
