@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class spellselection extends Screen {
@@ -127,8 +128,18 @@ public class spellselection extends Screen {
         List<Component> buildTooltip() {
             List<Component> tooltip = new ArrayList<>();
             tooltip.add(spell.getDisplayName());
-            tooltip.add(Component.literal("Mana: " + spell.getManaCost()));
-            tooltip.add(Component.literal("Recarga: " + spell.getCooldownTicks() + " ticks"));
+            tooltip.add(Component.translatable("tooltip.milagresdsmod.spell.mana", spell.getManaCost()));
+            tooltip.add(Component.translatable("tooltip.milagresdsmod.spell.cooldown", spell.getCooldownTicks()));
+            spell.getEffectSummary().ifPresent(tooltip::add);
+            spell.getDescription().ifPresent(tooltip::add);
+            spell.getBaseDamage().ifPresent(damage -> tooltip.add(Component.translatable(
+                    "tooltip.milagresdsmod.spell.damage",
+                    String.format(Locale.ROOT, "%.1f", damage)
+            )));
+            spell.getHealingAmount().ifPresent(healing -> tooltip.add(Component.translatable(
+                    "tooltip.milagresdsmod.spell.heal",
+                    String.format(Locale.ROOT, "%.1f", healing)
+            )));
             return tooltip;
         }
     }
