@@ -11,5 +11,13 @@
   "tooltip.milagresdsmod.spell.mana": "Custo de Mana: %s",
   "tooltip.milagresdsmod.spell.cooldown": "Recarga: %s ticks",
   "tooltip.milagresdsmod.spell.damage": "Dano Base: %s",
-  "tooltip.milagresdsmod.spell.heal": "Cura: %s"
+  "tooltip.milagresdsmod.spell.heal": "Cura: %s",
+  "screen.milagresdsmod.spell_memorize.title": "Memorizar Magias",
+  "screen.milagresdsmod.spell_memorize.equip": "Equipar",
+  "screen.milagresdsmod.spell_memorize.remove": "Remover",
+  "screen.milagresdsmod.spell_memorize.none": "Nenhuma magia disponível",
+  "screen.milagresdsmod.spell_memorize.select": "Selecione uma magia à esquerda",
+  "screen.milagresdsmod.spell_memorize.memorized": "Memorizada",
+  "screen.milagresdsmod.spell_memorize.mana": "Mana: %s / %s",
+  "screen.milagresdsmod.spell_memorize.mana_cost": "Custo de Mana: %s"
 }
