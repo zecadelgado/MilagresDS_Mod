@@ -1,10 +1,32 @@
+buildscript {
+    repositories {
+        maven {
+            name = 'ForgeGradle'
+            url = uri('https://maven.minecraftforge.net/')
+        }
+        maven {
+            name = 'ForgeGradleHttpFallback'
+            url = uri('http://maven.minecraftforge.net/')
+            allowInsecureProtocol = true
+            content {
+                includeGroup 'net.minecraftforge.gradle'
+            }
+        }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.minecraftforge.gradle:ForgeGradle:${project.property('forge_gradle_version')}"
+    }
+}
+
 plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'java-library'
 }
+
+apply plugin: 'net.minecraftforge.gradle'
 
 /* ==== Configurações do projeto/mod ==== */
 def minecraft_version        = project.property('minecraft_version')
@@ -76,6 +98,14 @@ repositories {
     maven {
         name = "Forge Maven"
         url = uri("https://maven.minecraftforge.net/")
+    }
+    maven {
+        name = "Forge Maven Http Fallback"
+        url = uri("http://maven.minecraftforge.net/")
+        allowInsecureProtocol = true
+        content {
+            includeGroup "net.minecraftforge"
+        }
     }
 }
 
