@@ -20,6 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
 
 /**
  * Spell memorisation screen that allows players to assign spells to local slots without spending mana.
@@ -200,12 +201,12 @@ public class SpellMemorizeScreen extends Screen {
 
         Player player = Minecraft.getInstance().player;
         int level = player != null ? player.experienceLevel : 0;
-        int intelligence = getPlaceholderAttribute(player, "intelligence");
-        int faith = getPlaceholderAttribute(player, "faith");
-        int arcane = getPlaceholderAttribute(player, "arcane");
+        OptionalInt intelligence = getPlaceholderAttribute(player, "intelligence");
+        OptionalInt faith = getPlaceholderAttribute(player, "faith");
+        OptionalInt arcane = getPlaceholderAttribute(player, "arcane");
 
         List<Component> lines = new ArrayList<>();
-        lines.add(formatRequirement("ui.memorize.requirement.level", requirements.requiredLevel(), level));
+        lines.add(formatRequirement("ui.memorize.requirement.level", requirements.requiredLevel(), OptionalInt.of(level)));
         lines.add(formatRequirement("ui.memorize.requirement.intelligence", requirements.intelligence(), intelligence));
         lines.add(formatRequirement("ui.memorize.requirement.faith", requirements.faith(), faith));
         lines.add(formatRequirement("ui.memorize.requirement.arcane", requirements.arcane(), arcane));
@@ -221,15 +222,20 @@ public class SpellMemorizeScreen extends Screen {
         }
     }
 
-    private Component formatRequirement(String translationKey, int required, int current) {
-        ChatFormatting color = current >= required ? ChatFormatting.GREEN : ChatFormatting.RED;
-        return Component.translatable(translationKey, required, current).withStyle(color);
+    private Component formatRequirement(String translationKey, int required, OptionalInt current) {
+        if (current.isPresent()) {
+            int value = current.getAsInt();
+            ChatFormatting color = value >= required ? ChatFormatting.GREEN : ChatFormatting.RED;
+            return Component.translatable(translationKey, required, value).withStyle(color);
+        }
+        // Attribute system not implemented: display "?" and use a neutral colour.
+        return Component.translatable(translationKey, required, Component.literal("?")).withStyle(ChatFormatting.GRAY);
     }
 
-    private int getPlaceholderAttribute(@Nullable Player player, String key) {
-        // Attribute specialisations have not been implemented yet. Using zero keeps the UI functional while the
-        // backend evolves, and the text colour highlights unmet requirements for clarity.
-        return 0;
+    private OptionalInt getPlaceholderAttribute(@Nullable Player player, String key) {
+        // Attribute specialisations have not been implemented yet. Return an empty optional so requirement checks
+        // and the UI can gracefully fall back without blocking the player from equipping spells.
+        return OptionalInt.empty();
     }
 
     private int getPlayerMana() {
@@ -293,14 +299,26 @@ public class SpellMemorizeScreen extends Screen {
         }
         Requirements req = spell.requirements();
         int level = player.experienceLevel;
-        int intelligence = getPlaceholderAttribute(player, "intelligence");
-        int faith = getPlaceholderAttribute(player, "faith");
-        int arcane = getPlaceholderAttribute(player, "arcane");
+        if (level < req.requiredLevel()) {
+            return false;
+        }
 
-        return level >= req.requiredLevel()
-            && intelligence >= req.intelligence()
-            && faith >= req.faith()
-            && arcane >= req.arcane();
+        OptionalInt intelligence = getPlaceholderAttribute(player, "intelligence");
+        if (intelligence.isPresent() && intelligence.getAsInt() < req.intelligence()) {
+            return false;
+        }
+
+        OptionalInt faith = getPlaceholderAttribute(player, "faith");
+        if (faith.isPresent() && faith.getAsInt() < req.faith()) {
+            return false;
+        }
+
+        OptionalInt arcane = getPlaceholderAttribute(player, "arcane");
+        if (arcane.isPresent() && arcane.getAsInt() < req.arcane()) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
