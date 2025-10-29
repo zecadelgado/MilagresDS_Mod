@@ -91,6 +91,14 @@ repositories {
         name = "Forge Maven"
         url = uri("https://maven.minecraftforge.net/")
     }
+    maven {
+        name = "Forge Maven Http Fallback"
+        url = uri("http://maven.minecraftforge.net/")
+        allowInsecureProtocol = true
+        content {
+            includeGroup "net.minecraftforge"
+        }
+    }
 }
 
 dependencies {
