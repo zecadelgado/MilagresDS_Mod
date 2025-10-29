@@ -18,6 +18,11 @@ public class playerspells implements INBTSerializable<CompoundTag> {
         return spellregistry.REGISTRY.get().getValue(equippedSpellId);
     }
 
+    @Nullable
+    public ResourceLocation getEquippedSpellId() {
+        return equippedSpellId;
+    }
+
     public void setEquippedSpell(@Nullable spell spell) {
         if (spell == null) {
             this.equippedSpellId = null;
