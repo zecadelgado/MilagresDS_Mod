@@ -1,10 +1,24 @@
+buildscript {
+    repositories {
+        maven {
+            name = 'ForgeGradle'
+            url = 'https://maven.minecraftforge.net/'
+        }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.minecraftforge.gradle:ForgeGradle:${project.property('forge_gradle_version')}"
+    }
+}
+
 plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'java-library'
 }
+
+apply plugin: 'net.minecraftforge.gradle'
 
 /* ==== Configurações do projeto/mod ==== */
 def minecraft_version        = project.property('minecraft_version')
