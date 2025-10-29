@@ -10,6 +10,14 @@ public class MilagresDSMod {
     public MilagresDSMod() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        modEventBus.register(spellregistry.SPELLS);
+        spellregistry.SPELLS.register(modEventBus);
     }
-}
+    @Mod.EventBusSubscriber(modid = MilagresDSMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD,value = Dist.CLIENT)
+    public static class ClientModEvents{
+        @SubscribeEvent
+        public static void onKeyRegister(RegisterKeyMappingsEvent event) {
+            event.register(modkeybindings.OPEN_SPELL_MENU);
+            event.register(modkeybindings.CAST_SPELL);
+        }
+        }
+    }

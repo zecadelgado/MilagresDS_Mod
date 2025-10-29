@@ -3,20 +3,20 @@ loaderVersion = "${loader_version_range}"
 license = "${mod_license}"
 
 [[mods]]
-modId = "milagresds_mod"
+modId = "milagresdsmod"
 version = "${mod_version}"
 displayName = "MilagresDS Mod"
 authors = "${mod_authors}"
 description = """${mod_description}"""
 
-[[dependencies.milagresds_mod]]
+[[dependencies.milagresdsmod]]
 modId = "forge"
 mandatory = true
 versionRange = "${forge_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.milagresds_mod]]
+[[dependencies.milagresdsmod]]
 modId = "minecraft"
 mandatory = true
 versionRange = "${minecraft_version_range}"
