@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class playermanaprovider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
-    public static Capability<playermana> PLAYER_MANA = CapabilityManager.get(new CapabilityToken<>(){});
+    public static final Capability<playermana> PLAYER_MANA = CapabilityManager.get(new CapabilityToken<>(){});
 
     private playermana mana = null;
     private final LazyOptional<playermana> optional = LazyOptional.of(this::createPlayerMana);
