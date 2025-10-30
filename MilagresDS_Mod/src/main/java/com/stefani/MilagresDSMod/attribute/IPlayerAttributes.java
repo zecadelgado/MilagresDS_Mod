@@ -15,6 +15,18 @@ public interface IPlayerAttributes {
 
     void setPoints(int value);
 
+    int getStrength();
+
+    void setStrength(int value);
+
+    int getDexterity();
+
+    void setDexterity(int value);
+
+    int getConstitution();
+
+    void setConstitution(int value);
+
     int getIntelligence();
 
     void setIntelligence(int value);
@@ -32,6 +44,15 @@ public interface IPlayerAttributes {
     long xpToNextLevel();
 
     void addPoints(int delta);
+
+    default int getTotalAllocatedPoints() {
+        return Math.max(0, getStrength())
+                + Math.max(0, getDexterity())
+                + Math.max(0, getConstitution())
+                + Math.max(0, getIntelligence())
+                + Math.max(0, getFaith())
+                + Math.max(0, getArcane());
+    }
 
     void resetAllAttributes();
 

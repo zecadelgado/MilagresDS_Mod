@@ -15,5 +15,9 @@ public final class ModKeyBindings {
         new KeyMapping("key.milagresdsmod.cast_spell",
             KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, InputConstants.KEY_R, KEY_CATEGORY);
 
+    public static final KeyMapping OPEN_ATTRIBUTES =
+        new KeyMapping("key.milagresdsmod.open_attributes",
+            KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, InputConstants.KEY_K, KEY_CATEGORY);
+
     private ModKeyBindings() {}
 }

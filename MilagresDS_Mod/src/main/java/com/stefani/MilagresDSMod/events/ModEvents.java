@@ -6,6 +6,7 @@ import com.stefani.MilagresDSMod.capability.playermanaprovider;
 import com.stefani.MilagresDSMod.capability.playerspellsprovider;
 import com.stefani.MilagresDSMod.config.ModCommonConfig;
 import com.stefani.MilagresDSMod.network.modpackets;
+import com.stefani.MilagresDSMod.server.stats.ConstitutionApplier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -44,7 +45,10 @@ public class ModEvents {
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             modpackets.sendManaSync(serverPlayer);
-            modpackets.sendAttributesSync(serverPlayer);
+            event.getEntity().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).ifPresent(attributes -> {
+                ConstitutionApplier.apply(serverPlayer, attributes);
+                modpackets.sendAttributesSync(serverPlayer, attributes);
+            });
         }
     }
 
@@ -68,7 +72,12 @@ public class ModEvents {
 
         event.getOriginal().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).ifPresent(oldAttributes ->
                 event.getEntity().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES)
-                        .ifPresent(newAttributes -> newAttributes.deserializeNBT(oldAttributes.serializeNBT())));
+                        .ifPresent(newAttributes -> {
+                            newAttributes.deserializeNBT(oldAttributes.serializeNBT());
+                            if (event.getEntity() instanceof ServerPlayer newServerPlayer) {
+                                ConstitutionApplier.apply(newServerPlayer, newAttributes);
+                            }
+                        }));
 
         if (wasDeath) {
             event.getOriginal().invalidateCaps();
@@ -77,7 +86,10 @@ public class ModEvents {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             modpackets.sendManaSync(serverPlayer);
             event.getEntity().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES)
-                    .ifPresent(attributes -> modpackets.sendAttributesSync(serverPlayer, attributes));
+                    .ifPresent(attributes -> {
+                        ConstitutionApplier.apply(serverPlayer, attributes);
+                        modpackets.sendAttributesSync(serverPlayer, attributes);
+                    });
         }
     }
 
@@ -85,7 +97,10 @@ public class ModEvents {
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             modpackets.sendManaSync(serverPlayer);
-            modpackets.sendAttributesSync(serverPlayer);
+            event.getEntity().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).ifPresent(attributes -> {
+                ConstitutionApplier.apply(serverPlayer, attributes);
+                modpackets.sendAttributesSync(serverPlayer, attributes);
+            });
         }
     }
 }

@@ -37,6 +37,7 @@ public class MilagresDSMod {
         public static void onKeyRegister(RegisterKeyMappingsEvent event) {
             event.register(ModKeyBindings.OPEN_SPELL_MENU);
             event.register(ModKeyBindings.CAST_SPELL);
+            event.register(ModKeyBindings.OPEN_ATTRIBUTES);
         }
     }
 }

@@ -7,6 +7,7 @@ import com.stefani.MilagresDSMod.client.data.AttributesClientCache;
 import com.stefani.MilagresDSMod.client.data.Requirements;
 import com.stefani.MilagresDSMod.client.data.Spell;
 import com.stefani.MilagresDSMod.client.data.SpellRegistryClient;
+import com.stefani.MilagresDSMod.client.gui.AttributesScreen;
 import com.stefani.MilagresDSMod.network.modpackets;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -46,6 +47,7 @@ public class SpellMemorizeScreen extends Screen {
     private Button equipButton;
     private Button removeButton;
     private Button backButton;
+    private Button attributesButton;
 
     private final MagicStats magicStats = MagicStats.get();
     private Spell selectedSpell;
@@ -93,8 +95,13 @@ public class SpellMemorizeScreen extends Screen {
             removeSelectedSpell();
         }).bounds(detailLeft, buttonsTop + 24, detailWidth, 20).build());
 
+        int halfWidth = Math.max(60, (detailWidth - 4) / 2);
         this.backButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.back"), button -> onClose())
-                .bounds(detailLeft, buttonsTop + 48, detailWidth, 20).build());
+                .bounds(detailLeft, buttonsTop + 48, halfWidth, 20).build());
+
+        this.attributesButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.attributes"),
+                button -> openAttributesScreen()).bounds(detailLeft + halfWidth + 4, buttonsTop + 48,
+                detailWidth - halfWidth - 4, 20).build());
 
         updateButtonState();
         setInitialFocus(gridWidget);
@@ -203,10 +210,11 @@ public class SpellMemorizeScreen extends Screen {
         guiGraphics.drawString(this.font, currentMana, left + 8, y + 10, 0xDDDDDD, false);
         y += 22;
 
-        renderRequirementBlock(guiGraphics, left, y, width, selectedSpell.requirements());
+        int bottom = renderRequirementBlock(guiGraphics, left, y, width, selectedSpell.requirements());
+        renderAttributeSummary(guiGraphics, left, bottom + 8);
     }
 
-    private void renderRequirementBlock(GuiGraphics guiGraphics, int left, int y, int width, Requirements requirements) {
+    private int renderRequirementBlock(GuiGraphics guiGraphics, int left, int y, int width, Requirements requirements) {
         guiGraphics.drawString(this.font, Component.translatable("ui.memorize.requirements.title"), left, y, 0xF7E7CE, false);
         y += 10;
 
@@ -231,6 +239,21 @@ public class SpellMemorizeScreen extends Screen {
                 y += 10;
             }
         }
+        return y;
+    }
+
+    private void renderAttributeSummary(GuiGraphics guiGraphics, int left, int y) {
+        guiGraphics.drawString(this.font, Component.translatable("ui.attributes.hint"), left, y, 0xBBAA88, false);
+        y += 12;
+        Component summary = Component.literal(String.format(Locale.ROOT,
+                "STR %d | DEX %d | CON %d | INT %d | FAI %d | ARC %d",
+                AttributesClientCache.strength(),
+                AttributesClientCache.dexterity(),
+                AttributesClientCache.constitution(),
+                AttributesClientCache.intelligence(),
+                AttributesClientCache.faith(),
+                AttributesClientCache.arcane()));
+        guiGraphics.drawString(this.font, summary, left, y, 0xFFFFFF, false);
     }
 
     private Component formatRequirement(String translationKey, int required, OptionalInt current) {
@@ -375,6 +398,12 @@ public class SpellMemorizeScreen extends Screen {
             }
         }
         return false;
+    }
+
+    private void openAttributesScreen() {
+        if (this.minecraft != null) {
+            this.minecraft.setScreen(new AttributesScreen());
+        }
     }
 
     private ResourceLocation resolveIcon(@Nullable ResourceLocation icon) {

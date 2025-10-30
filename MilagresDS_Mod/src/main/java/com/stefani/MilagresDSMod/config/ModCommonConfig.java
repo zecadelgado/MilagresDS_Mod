@@ -45,7 +45,7 @@ public final class ModCommonConfig {
         STARTING_POINTS = builder.comment("Attribute points granted when the capability is first created.")
                 .defineInRange("startingPoints", 0, 0, Integer.MAX_VALUE);
         POINTS_PER_LEVEL = builder.comment("Attribute points awarded on each level-up.")
-                .defineInRange("pointsPerLevel", 2, 0, Integer.MAX_VALUE);
+                .defineInRange("pointsPerLevel", 1, 0, Integer.MAX_VALUE);
         builder.pop();
 
         SPEC = builder.build();
