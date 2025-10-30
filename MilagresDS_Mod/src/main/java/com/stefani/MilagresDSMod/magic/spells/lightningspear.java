@@ -20,7 +20,7 @@ public class lightningspear extends spell {
                         .manaCost(20)
                         .cooldown(100)
                         .category(SpellCategory.OFFENSIVE)
-                        .icon(ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/gui/spells/fireball.png"))
+                        .icon(ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/spells/lightningspear.png"))
                         .castSound(SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.0F, 0.8F)
                         .castParticles(() -> ParticleTypes.ELECTRIC_SPARK, 20, 0.2D, 0.2D, 0.2D, 0.01D)
                         .baseDamage(12.0F)

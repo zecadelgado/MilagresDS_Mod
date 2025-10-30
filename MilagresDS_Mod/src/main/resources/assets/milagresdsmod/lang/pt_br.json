@@ -18,6 +18,8 @@
   "tooltip.milagresdsmod.spell.damage": "Dano Base: %s",
   "tooltip.milagresdsmod.spell.heal": "Cura: %s",
 
+  "hud.milagresdsmod.mana": "Mana: %s/%s",
+
   "ui.memorize.title": "Memorização de Feitiços",
   "ui.memorize.button.equip": "Equipar",
   "ui.memorize.button.remove": "Remover",

@@ -21,7 +21,7 @@ public class healingburstspell extends spell {
                         .manaCost(30)
                         .cooldown(160)
                         .category(SpellCategory.SUPPORT)
-                        .icon(ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/gui/spells/fireball.png"))
+                        .icon(ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/spells/healingburst.png"))
                         .castSound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8F, 1.2F)
                         .castParticles(() -> ParticleTypes.HEART, 18, 0.35D, 0.5D, 0.35D, 0.02D)
                         .healingAmount(8.0F)
