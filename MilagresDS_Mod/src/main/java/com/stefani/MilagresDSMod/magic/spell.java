@@ -66,6 +66,14 @@ public abstract class spell {
         return this.properties;
     }
 
+    public SpellCategory getCategory() {
+        return this.properties.getCategory();
+    }
+
+    public SpellRequirements getRequirements() {
+        return this.properties.getRequirements();
+    }
+
     public Optional<Float> getBaseDamage() {
         return this.properties.getBaseDamage();
     }
