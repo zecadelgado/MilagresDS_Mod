@@ -31,11 +31,11 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
-        if (!event.isWasDeath()) {
-            return;
-        }
+        boolean wasDeath = event.isWasDeath();
 
-        event.getOriginal().reviveCaps();
+        if (wasDeath) {
+            event.getOriginal().reviveCaps();
+        }
 
         event.getEntity().getCapability(playermanaprovider.PLAYER_MANA).ifPresent(newMana ->
                 event.getOriginal().getCapability(playermanaprovider.PLAYER_MANA).ifPresent(oldMana ->
@@ -45,7 +45,9 @@ public class ModEvents {
                 event.getOriginal().getCapability(playerspellsprovider.PLAYER_SPELLS).ifPresent(oldSpells ->
                         newSpells.deserializeNBT(oldSpells.serializeNBT())));
 
-        event.getOriginal().invalidateCaps();
+        if (wasDeath) {
+            event.getOriginal().invalidateCaps();
+        }
 
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             modpackets.sendManaSync(serverPlayer);
