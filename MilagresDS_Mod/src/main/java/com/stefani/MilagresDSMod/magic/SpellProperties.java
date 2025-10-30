@@ -1,7 +1,6 @@
 package com.stefani.MilagresDSMod.magic;
 
-import com.stefani.MilagresDSMod.magic.SpellCategory;
-import com.stefani.MilagresDSMod.magic.SpellRequirements;
+import com.stefani.MilagresDSMod.config.ModCommonConfig;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -51,11 +50,13 @@ public final class SpellProperties {
     }
 
     public int getManaCost() {
-        return manaCost;
+        double multiplier = ModCommonConfig.COST_MULTIPLIER.get();
+        return Math.max(0, (int) Math.round(manaCost * multiplier));
     }
 
     public int getCooldownTicks() {
-        return cooldownTicks;
+        double multiplier = ModCommonConfig.COOLDOWN_MULTIPLIER.get();
+        return Math.max(0, (int) Math.round(cooldownTicks * multiplier));
     }
 
     public ResourceLocation getIcon() {
