@@ -11,5 +11,6 @@ public class modcapabilities {
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
         event.register(com.stefani.MilagresDSMod.capability.playermana.class);
         event.register(com.stefani.MilagresDSMod.capability.playerspells.class);
+        event.register(com.stefani.MilagresDSMod.attribute.IPlayerAttributes.class);
     }
 }

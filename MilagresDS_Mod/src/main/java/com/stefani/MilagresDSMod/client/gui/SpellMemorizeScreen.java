@@ -3,6 +3,7 @@ package com.stefani.MilagresDSMod.client.gui;
 import com.stefani.MilagresDSMod.MilagresDSMod;
 import com.stefani.MilagresDSMod.client.MagicStats;
 import com.stefani.MilagresDSMod.client.ManaAdapter;
+import com.stefani.MilagresDSMod.client.data.AttributesClientCache;
 import com.stefani.MilagresDSMod.client.data.Requirements;
 import com.stefani.MilagresDSMod.client.data.Spell;
 import com.stefani.MilagresDSMod.client.data.SpellRegistryClient;
@@ -23,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
+import java.util.Locale;
 
 /**
  * Spell memorisation screen that allows players to assign spells to local slots without spending mana.
@@ -209,7 +211,7 @@ public class SpellMemorizeScreen extends Screen {
         y += 10;
 
         Player player = Minecraft.getInstance().player;
-        int level = player != null ? player.experienceLevel : 0;
+        int level = AttributesClientCache.level();
         OptionalInt intelligence = getPlaceholderAttribute(player, "intelligence");
         OptionalInt faith = getPlaceholderAttribute(player, "faith");
         OptionalInt arcane = getPlaceholderAttribute(player, "arcane");
@@ -237,14 +239,24 @@ public class SpellMemorizeScreen extends Screen {
             ChatFormatting color = value >= required ? ChatFormatting.GREEN : ChatFormatting.RED;
             return Component.translatable(translationKey, required, value).withStyle(color);
         }
-        // Attribute system not implemented: display "?" and use a neutral colour.
-        return Component.translatable(translationKey, required, Component.literal("?")).withStyle(ChatFormatting.GRAY);
+        return Component.translatable(translationKey, required, Component.literal("?"))
+                .withStyle(ChatFormatting.GRAY);
     }
 
     private OptionalInt getPlaceholderAttribute(@Nullable Player player, String key) {
-        // Attribute specialisations have not been implemented yet. Return an empty optional so requirement checks
-        // and the UI can gracefully fall back without blocking the player from equipping spells.
-        return OptionalInt.empty();
+        if (key == null) {
+            return OptionalInt.empty();
+        }
+        switch (key.toLowerCase(Locale.ROOT)) {
+            case "intelligence":
+                return OptionalInt.of(AttributesClientCache.intelligence());
+            case "faith":
+                return OptionalInt.of(AttributesClientCache.faith());
+            case "arcane":
+                return OptionalInt.of(AttributesClientCache.arcane());
+            default:
+                return OptionalInt.empty();
+        }
     }
 
     private int getPlayerMana() {
@@ -319,7 +331,7 @@ public class SpellMemorizeScreen extends Screen {
             return false;
         }
         Requirements req = spell.requirements();
-        int level = player.experienceLevel;
+        int level = AttributesClientCache.level();
         if (level < req.requiredLevel()) {
             return false;
         }

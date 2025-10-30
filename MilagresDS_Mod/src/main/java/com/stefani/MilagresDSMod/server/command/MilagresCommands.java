@@ -9,6 +9,7 @@ import com.stefani.MilagresDSMod.network.modpackets;
 import com.stefani.MilagresDSMod.registry.spellregistry;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -24,22 +25,28 @@ public final class MilagresCommands {
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("milagres")
-                .requires(source -> source.hasPermission(2))
-                .then(Commands.literal("mana")
-                        .then(Commands.literal("set")
-                                .then(Commands.argument("value", IntegerArgumentType.integer(0))
-                                        .executes(ctx -> setMana(ctx.getSource(),
-                                                IntegerArgumentType.getInteger(ctx, "value"))))))
-                .then(Commands.literal("spell")
-                        .then(Commands.literal("unlock")
-                                .then(Commands.argument("spell", ResourceLocationArgument.id())
-                                        .executes(ctx -> changeUnlock(ctx.getSource(),
-                                                ResourceLocationArgument.getId(ctx, "spell"), true))))
-                        .then(Commands.literal("lock")
-                                .then(Commands.argument("spell", ResourceLocationArgument.id())
-                                        .executes(ctx -> changeUnlock(ctx.getSource(),
-                                                ResourceLocationArgument.getId(ctx, "spell"), false))))));
+        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("milagres")
+                .requires(source -> source.hasPermission(2));
+
+        root.then(Commands.literal("mana")
+                .then(Commands.literal("set")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(0))
+                                .executes(ctx -> setMana(ctx.getSource(),
+                                        IntegerArgumentType.getInteger(ctx, "value"))))));
+
+        root.then(Commands.literal("spell")
+                .then(Commands.literal("unlock")
+                        .then(Commands.argument("spell", ResourceLocationArgument.id())
+                                .executes(ctx -> changeUnlock(ctx.getSource(),
+                                        ResourceLocationArgument.getId(ctx, "spell"), true))))
+                .then(Commands.literal("lock")
+                        .then(Commands.argument("spell", ResourceLocationArgument.id())
+                                .executes(ctx -> changeUnlock(ctx.getSource(),
+                                        ResourceLocationArgument.getId(ctx, "spell"), false)))));
+
+        AttributesCommands.register(event.getDispatcher(), root);
+
+        event.getDispatcher().register(root);
     }
 
     private static int setMana(CommandSourceStack source, int value) throws CommandSyntaxException {

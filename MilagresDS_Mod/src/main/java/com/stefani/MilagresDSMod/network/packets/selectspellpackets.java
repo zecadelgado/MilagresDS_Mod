@@ -1,11 +1,13 @@
 package com.stefani.MilagresDSMod.network.packets;
 
+import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import com.stefani.MilagresDSMod.capability.playerspellsprovider;
 import com.stefani.MilagresDSMod.magic.spell;
 import com.stefani.MilagresDSMod.registry.spellregistry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.network.NetworkEvent;
 
 import javax.annotation.Nullable;
@@ -60,6 +62,20 @@ public class selectspellpackets {
                 }
                 spell selectedSpell = registry.getValue(spellId);
                 if (selectedSpell == null) {
+                    return;
+                }
+
+                var attributesOptional = player.getCapability(playerattributesprovider.PLAYER_ATTRIBUTES);
+                if (!attributesOptional.isPresent()) {
+                    return;
+                }
+                var attributes = attributesOptional.orElseThrow(() -> new IllegalStateException("Missing attributes"));
+                var requirements = selectedSpell.getRequirements();
+                if (attributes.getLevel() < requirements.requiredLevel()
+                        || attributes.getIntelligence() < requirements.intelligence()
+                        || attributes.getFaith() < requirements.faith()
+                        || attributes.getArcane() < requirements.arcane()) {
+                    player.displayClientMessage(Component.translatable("msg.milagresdsmod.requirements_not_met"), true);
                     return;
                 }
 

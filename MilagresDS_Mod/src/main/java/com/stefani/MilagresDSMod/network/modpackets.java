@@ -1,9 +1,12 @@
 package com.stefani.MilagresDSMod.network;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
+import com.stefani.MilagresDSMod.attribute.IPlayerAttributes;
+import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import com.stefani.MilagresDSMod.capability.playermana;
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
 import com.stefani.MilagresDSMod.network.packets.SyncManaS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SyncAttributesS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.castspellpackets;
 import com.stefani.MilagresDSMod.network.packets.selectspellpackets;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,6 +58,12 @@ public class modpackets {
                 .decoder(SyncManaS2CPacket::decode)
                 .consumerMainThread(SyncManaS2CPacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(SyncAttributesS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncAttributesS2CPacket::encode)
+                .decoder(SyncAttributesS2CPacket::decode)
+                .consumerMainThread(SyncAttributesS2CPacket::handle)
+                .add();
     }
 
     public static void sendToServer(castspellpackets packet) {
@@ -80,5 +89,20 @@ public class modpackets {
 
     public static void sendManaSync(ServerPlayer player, playermana mana) {
         sendManaSync(player, mana.getMana(), mana.getMaxMana());
+    }
+
+    public static void sendAttributesSync(ServerPlayer player) {
+        player.getCapability(playerattributesprovider.PLAYER_ATTRIBUTES)
+                .ifPresent(attributes -> sendAttributesSync(player, attributes));
+    }
+
+    public static void sendAttributesSync(ServerPlayer player, IPlayerAttributes attributes) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SyncAttributesS2CPacket(
+                attributes.getLevel(),
+                attributes.getXp(),
+                attributes.getPoints(),
+                attributes.getIntelligence(),
+                attributes.getFaith(),
+                attributes.getArcane()));
     }
 }
