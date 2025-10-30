@@ -10,6 +10,9 @@ public class PlayerAttributes implements IPlayerAttributes {
     private static final String KEY_INTELLIGENCE = "Intelligence";
     private static final String KEY_FAITH = "Faith";
     private static final String KEY_ARCANE = "Arcane";
+    private static final String KEY_STRENGTH = "Strength";
+    private static final String KEY_DEXTERITY = "Dexterity";
+    private static final String KEY_CONSTITUTION = "Constitution";
 
     private int level;
     private long xp;
@@ -17,6 +20,9 @@ public class PlayerAttributes implements IPlayerAttributes {
     private int intelligence;
     private int faith;
     private int arcane;
+    private int strength;
+    private int dexterity;
+    private int constitution;
 
     public PlayerAttributes() {
         this.level = Math.max(1, ModCommonConfig.STARTING_LEVEL.get());
@@ -25,6 +31,9 @@ public class PlayerAttributes implements IPlayerAttributes {
         this.intelligence = 0;
         this.faith = 0;
         this.arcane = 0;
+        this.strength = 0;
+        this.dexterity = 0;
+        this.constitution = 0;
     }
 
     @Override
@@ -55,6 +64,36 @@ public class PlayerAttributes implements IPlayerAttributes {
     @Override
     public void setPoints(int value) {
         this.points = Math.max(0, value);
+    }
+
+    @Override
+    public int getStrength() {
+        return strength;
+    }
+
+    @Override
+    public void setStrength(int value) {
+        this.strength = Math.max(0, value);
+    }
+
+    @Override
+    public int getDexterity() {
+        return dexterity;
+    }
+
+    @Override
+    public void setDexterity(int value) {
+        this.dexterity = Math.max(0, value);
+    }
+
+    @Override
+    public int getConstitution() {
+        return constitution;
+    }
+
+    @Override
+    public void setConstitution(int value) {
+        this.constitution = Math.max(0, value);
     }
 
     @Override
@@ -135,10 +174,13 @@ public class PlayerAttributes implements IPlayerAttributes {
 
     @Override
     public void resetAllAttributes() {
-        int refunded = this.intelligence + this.faith + this.arcane;
+        int refunded = this.intelligence + this.faith + this.arcane + this.strength + this.dexterity + this.constitution;
         this.intelligence = 0;
         this.faith = 0;
         this.arcane = 0;
+        this.strength = 0;
+        this.dexterity = 0;
+        this.constitution = 0;
         addPoints(refunded);
     }
 
@@ -151,6 +193,9 @@ public class PlayerAttributes implements IPlayerAttributes {
         tag.putInt(KEY_INTELLIGENCE, this.intelligence);
         tag.putInt(KEY_FAITH, this.faith);
         tag.putInt(KEY_ARCANE, this.arcane);
+        tag.putInt(KEY_STRENGTH, this.strength);
+        tag.putInt(KEY_DEXTERITY, this.dexterity);
+        tag.putInt(KEY_CONSTITUTION, this.constitution);
         return tag;
     }
 
@@ -162,5 +207,8 @@ public class PlayerAttributes implements IPlayerAttributes {
         this.intelligence = Math.max(0, tag.getInt(KEY_INTELLIGENCE));
         this.faith = Math.max(0, tag.getInt(KEY_FAITH));
         this.arcane = Math.max(0, tag.getInt(KEY_ARCANE));
+        this.strength = Math.max(0, tag.getInt(KEY_STRENGTH));
+        this.dexterity = Math.max(0, tag.getInt(KEY_DEXTERITY));
+        this.constitution = Math.max(0, tag.getInt(KEY_CONSTITUTION));
     }
 }

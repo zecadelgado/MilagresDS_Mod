@@ -5,8 +5,10 @@ import com.stefani.MilagresDSMod.attribute.IPlayerAttributes;
 import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import com.stefani.MilagresDSMod.capability.playermana;
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
-import com.stefani.MilagresDSMod.network.packets.SyncManaS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.AllocateAttributeC2SPacket;
+import com.stefani.MilagresDSMod.network.packets.ResetAttributesC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncAttributesS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SyncManaS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.castspellpackets;
 import com.stefani.MilagresDSMod.network.packets.selectspellpackets;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,6 +55,18 @@ public class modpackets {
                 .consumerMainThread((packet, supplier) -> packet.handle(supplier))
                 .add();
 
+        CHANNEL.messageBuilder(AllocateAttributeC2SPacket.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(AllocateAttributeC2SPacket::encode)
+                .decoder(AllocateAttributeC2SPacket::new)
+                .consumerMainThread((packet, supplier) -> packet.handle(supplier))
+                .add();
+
+        CHANNEL.messageBuilder(ResetAttributesC2SPacket.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ResetAttributesC2SPacket::encode)
+                .decoder(ResetAttributesC2SPacket::new)
+                .consumerMainThread((packet, supplier) -> packet.handle(supplier))
+                .add();
+
         CHANNEL.messageBuilder(SyncManaS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(SyncManaS2CPacket::encode)
                 .decoder(SyncManaS2CPacket::decode)
@@ -76,6 +90,14 @@ public class modpackets {
 
     public static void sendSpellSelection(@Nullable ResourceLocation spellId) {
         CHANNEL.sendToServer(new selectspellpackets(spellId));
+    }
+
+    public static void sendAllocateAttribute(String attributeKey, int points) {
+        CHANNEL.sendToServer(new AllocateAttributeC2SPacket(attributeKey, points));
+    }
+
+    public static void sendResetAttributes() {
+        CHANNEL.sendToServer(new ResetAttributesC2SPacket());
     }
 
     public static void sendManaSync(ServerPlayer player) {
@@ -103,6 +125,9 @@ public class modpackets {
                 attributes.getPoints(),
                 attributes.getIntelligence(),
                 attributes.getFaith(),
-                attributes.getArcane()));
+                attributes.getArcane(),
+                attributes.getStrength(),
+                attributes.getDexterity(),
+                attributes.getConstitution()));
     }
 }

@@ -13,14 +13,21 @@ public class SyncAttributesS2CPacket {
     private final int intelligence;
     private final int faith;
     private final int arcane;
+    private final int strength;
+    private final int dexterity;
+    private final int constitution;
 
-    public SyncAttributesS2CPacket(int level, long xp, int points, int intelligence, int faith, int arcane) {
+    public SyncAttributesS2CPacket(int level, long xp, int points, int intelligence, int faith, int arcane,
+                                   int strength, int dexterity, int constitution) {
         this.level = level;
         this.xp = xp;
         this.points = points;
         this.intelligence = intelligence;
         this.faith = faith;
         this.arcane = arcane;
+        this.strength = strength;
+        this.dexterity = dexterity;
+        this.constitution = constitution;
     }
 
     public static void encode(SyncAttributesS2CPacket packet, FriendlyByteBuf buffer) {
@@ -30,6 +37,9 @@ public class SyncAttributesS2CPacket {
         buffer.writeVarInt(packet.intelligence);
         buffer.writeVarInt(packet.faith);
         buffer.writeVarInt(packet.arcane);
+        buffer.writeVarInt(packet.strength);
+        buffer.writeVarInt(packet.dexterity);
+        buffer.writeVarInt(packet.constitution);
     }
 
     public static SyncAttributesS2CPacket decode(FriendlyByteBuf buffer) {
@@ -39,13 +49,17 @@ public class SyncAttributesS2CPacket {
         int intelligence = buffer.readVarInt();
         int faith = buffer.readVarInt();
         int arcane = buffer.readVarInt();
-        return new SyncAttributesS2CPacket(level, xp, points, intelligence, faith, arcane);
+        int strength = buffer.readVarInt();
+        int dexterity = buffer.readVarInt();
+        int constitution = buffer.readVarInt();
+        return new SyncAttributesS2CPacket(level, xp, points, intelligence, faith, arcane, strength, dexterity, constitution);
     }
 
     public static void handle(SyncAttributesS2CPacket packet, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> AttributesClientCache.update(packet.level, packet.xp, packet.points,
-                packet.intelligence, packet.faith, packet.arcane));
+                packet.intelligence, packet.faith, packet.arcane,
+                packet.strength, packet.dexterity, packet.constitution));
         context.setPacketHandled(true);
     }
 }

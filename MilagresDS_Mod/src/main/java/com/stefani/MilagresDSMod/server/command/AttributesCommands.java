@@ -9,6 +9,7 @@ import com.stefani.MilagresDSMod.attribute.IPlayerAttributes;
 import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import com.stefani.MilagresDSMod.config.ModCommonConfig;
 import com.stefani.MilagresDSMod.network.modpackets;
+import com.stefani.MilagresDSMod.server.stats.ConstitutionApplier;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
@@ -42,6 +43,15 @@ public final class AttributesCommands {
         appendAttributeModification(attrSet, false, false, (attributes, value) -> {
             attributes.setArcane(value.intValue());
         }, "arcane");
+        appendAttributeModification(attrSet, false, false, (attributes, value) -> {
+            attributes.setStrength(value.intValue());
+        }, "strength");
+        appendAttributeModification(attrSet, false, false, (attributes, value) -> {
+            attributes.setDexterity(value.intValue());
+        }, "dexterity");
+        appendAttributeModification(attrSet, false, false, (attributes, value) -> {
+            attributes.setConstitution(value.intValue());
+        }, "constitution");
 
         LiteralArgumentBuilder<CommandSourceStack> attrAdd = LiteralArgumentBuilder.literal("add");
         appendAttributeModification(attrAdd, true, true, (attributes, value) -> {
@@ -53,6 +63,15 @@ public final class AttributesCommands {
         appendAttributeModification(attrAdd, true, true, (attributes, value) -> {
             attributes.setArcane(Math.max(0, attributes.getArcane() + value.intValue()));
         }, "arcane");
+        appendAttributeModification(attrAdd, true, true, (attributes, value) -> {
+            attributes.setStrength(Math.max(0, attributes.getStrength() + value.intValue()));
+        }, "strength");
+        appendAttributeModification(attrAdd, true, true, (attributes, value) -> {
+            attributes.setDexterity(Math.max(0, attributes.getDexterity() + value.intValue()));
+        }, "dexterity");
+        appendAttributeModification(attrAdd, true, true, (attributes, value) -> {
+            attributes.setConstitution(Math.max(0, attributes.getConstitution() + value.intValue()));
+        }, "constitution");
 
         attrRoot.then(attrSet);
         attrRoot.then(attrAdd);
@@ -136,8 +155,9 @@ public final class AttributesCommands {
     private static int resetAttributes(CommandSourceStack source, ServerPlayer target) {
         return target.getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).map(attributes -> {
             attributes.resetAllAttributes();
+            ConstitutionApplier.apply(target, attributes);
             modpackets.sendAttributesSync(target, attributes);
-            source.sendSuccess(() -> Component.translatable("msg.milagresdsmod.attrs_reset"), false);
+            source.sendSuccess(() -> Component.translatable("msg.milagresdsmod.attrs_applied"), false);
             return 1;
         }).orElseGet(() -> {
             source.sendFailure(Component.literal("Player is missing attribute capability"));
@@ -149,8 +169,9 @@ public final class AttributesCommands {
         return target.getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).map(attributes -> {
             long xpToNext = attributes.xpToNextLevel();
             source.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
-                    "Level: %d | XP: %d | XP->Next: %d | Points: %d | INT: %d | FAITH: %d | ARCANE: %d",
+                    "Level: %d | XP: %d | XP->Next: %d | Points: %d | STR: %d | DEX: %d | CON: %d | INT: %d | FAITH: %d | ARCANE: %d",
                     attributes.getLevel(), attributes.getXp(), xpToNext, attributes.getPoints(),
+                    attributes.getStrength(), attributes.getDexterity(), attributes.getConstitution(),
                     attributes.getIntelligence(), attributes.getFaith(), attributes.getArcane())), false);
             return 1;
         }).orElseGet(() -> {
@@ -215,7 +236,11 @@ public final class AttributesCommands {
             attributes.setIntelligence(99);
             attributes.setFaith(99);
             attributes.setArcane(99);
+            attributes.setStrength(99);
+            attributes.setDexterity(99);
+            attributes.setConstitution(99);
             attributes.setPoints(0);
+            ConstitutionApplier.apply(target, attributes);
             modpackets.sendAttributesSync(target, attributes);
             modpackets.sendManaSync(target);
             source.sendSuccess(() -> Component.translatable("msg.milagresdsmod.preset_max_applied"), false);
@@ -231,6 +256,9 @@ public final class AttributesCommands {
                                               boolean addition) {
         return target.getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).map(attributes -> {
             applier.accept(attributes, value);
+            if ("constitution".equalsIgnoreCase(key)) {
+                ConstitutionApplier.apply(target, attributes);
+            }
             modpackets.sendAttributesSync(target, attributes);
             if (addition) {
                 source.sendSuccess(() -> Component.translatable("msg.milagresdsmod.attr_added",
