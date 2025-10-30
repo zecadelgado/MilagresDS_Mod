@@ -43,5 +43,13 @@
   "ui.memorize.category.defensive": "Defensivo",
   "ui.memorize.category.support": "Suporte",
   "ui.memorize.category.utility": "Utilidade",
-  "ui.memorize.category.ritual": "Ritual"
+  "ui.memorize.category.ritual": "Ritual",
+  "msg.milagresdsmod.requirements_not_met": "Requisitos não atendidos.",
+  "msg.milagresdsmod.attrs_reset": "Atributos redefinidos.",
+  "msg.milagresdsmod.attr_set": "%s definido para %s.",
+  "msg.milagresdsmod.attr_added": "%s aumentado em %s.",
+  "msg.milagresdsmod.level_set": "Nível definido para %s.",
+  "msg.milagresdsmod.xp_added": "XP adicionada: %s.",
+  "msg.milagresdsmod.points_set": "Pontos disponíveis: %s.",
+  "msg.milagresdsmod.preset_max_applied": "Preset de atributos máximos aplicado."
 }

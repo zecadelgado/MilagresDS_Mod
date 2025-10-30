@@ -1,8 +1,10 @@
 package com.stefani.MilagresDSMod.events;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
+import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
 import com.stefani.MilagresDSMod.capability.playerspellsprovider;
+import com.stefani.MilagresDSMod.config.ModCommonConfig;
 import com.stefani.MilagresDSMod.network.modpackets;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -17,8 +19,24 @@ public class ModEvents {
     @SubscribeEvent
     public static void onAttachCapabilitiesPlayer(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof Player) {
-            event.addCapability(playermanaprovider.ID, new playermanaprovider());
-            event.addCapability(playerspellsprovider.ID, new playerspellsprovider());
+            playermanaprovider manaProvider = new playermanaprovider();
+            playerspellsprovider spellsProvider = new playerspellsprovider();
+            playerattributesprovider attributesProvider = new playerattributesprovider();
+            event.addCapability(playermanaprovider.ID, manaProvider);
+            event.addCapability(playerspellsprovider.ID, spellsProvider);
+            event.addCapability(playerattributesprovider.ID, attributesProvider);
+
+            attributesProvider.getCapability(playerattributesprovider.PLAYER_ATTRIBUTES, null).ifPresent(attributes -> {
+                if (attributes.getLevel() <= 0) {
+                    attributes.setLevel(Math.max(1, ModCommonConfig.STARTING_LEVEL.get()));
+                }
+                if (attributes.getPoints() < 0) {
+                    attributes.setPoints(Math.max(0, ModCommonConfig.STARTING_POINTS.get()));
+                } else if (attributes.getPoints() == 0 && ModCommonConfig.STARTING_POINTS.get() > 0
+                        && attributes.getIntelligence() == 0 && attributes.getFaith() == 0 && attributes.getArcane() == 0) {
+                    attributes.setPoints(ModCommonConfig.STARTING_POINTS.get());
+                }
+            });
         }
     }
 
@@ -26,6 +44,7 @@ public class ModEvents {
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             modpackets.sendManaSync(serverPlayer);
+            modpackets.sendAttributesSync(serverPlayer);
         }
     }
 
@@ -47,12 +66,26 @@ public class ModEvents {
                 event.getEntity().getCapability(playerspellsprovider.PLAYER_SPELLS)
                         .ifPresent(newSpells -> newSpells.deserializeNBT(oldSpells.serializeNBT())));
 
+        event.getOriginal().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).ifPresent(oldAttributes ->
+                event.getEntity().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES)
+                        .ifPresent(newAttributes -> newAttributes.deserializeNBT(oldAttributes.serializeNBT())));
+
         if (wasDeath) {
             event.getOriginal().invalidateCaps();
         }
 
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             modpackets.sendManaSync(serverPlayer);
+            event.getEntity().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES)
+                    .ifPresent(attributes -> modpackets.sendAttributesSync(serverPlayer, attributes));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+            modpackets.sendManaSync(serverPlayer);
+            modpackets.sendAttributesSync(serverPlayer);
         }
     }
 }
