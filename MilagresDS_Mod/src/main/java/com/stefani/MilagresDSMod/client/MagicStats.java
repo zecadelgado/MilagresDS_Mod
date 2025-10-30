@@ -1,5 +1,6 @@
 package com.stefani.MilagresDSMod.client;
 
+import com.stefani.MilagresDSMod.client.data.SpellRegistryClient;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -74,6 +75,9 @@ public final class MagicStats {
             return;
         }
         if (id != null) {
+            if (SpellRegistryClient.get(id).isEmpty()) {
+                id = null;
+            }
             // Guarantee uniqueness so a spell occupies only one slot at a time.
             for (int i = 0; i < equippedSpells.size(); i++) {
                 if (id.equals(equippedSpells.get(i))) {
@@ -106,9 +110,14 @@ public final class MagicStats {
     public void syncFromServer(int slots, List<ResourceLocation> memorised) {
         slotsMax = Math.max(1, slots);
         equippedSpells.clear();
-        equippedSpells.addAll(memorised);
+        for (int i = 0; i < slotsMax; i++) {
+            ResourceLocation id = i < memorised.size() ? memorised.get(i) : null;
+            if (id != null && SpellRegistryClient.get(id).isEmpty()) {
+                id = null;
+            }
+            equippedSpells.add(id);
+        }
         ensureCapacity();
-        trimToSlots();
     }
 
     private void ensureCapacity() {
