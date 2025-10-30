@@ -31,21 +31,25 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
-        if (!event.isWasDeath()) {
-            return;
+        boolean wasDeath = event.isWasDeath();
+
+        if (wasDeath) {
+            event.getOriginal().reviveCaps();
         }
 
-        event.getOriginal().reviveCaps();
+        event.getOriginal().getCapability(playermanaprovider.PLAYER_MANA).ifPresent(oldMana ->
+                event.getEntity().getCapability(playermanaprovider.PLAYER_MANA).ifPresent(newMana -> {
+                    newMana.setMaxMana(oldMana.getMaxMana());
+                    newMana.setMana(oldMana.getMana());
+                }));
 
-        event.getEntity().getCapability(playermanaprovider.PLAYER_MANA).ifPresent(newMana ->
-                event.getOriginal().getCapability(playermanaprovider.PLAYER_MANA).ifPresent(oldMana ->
-                        newMana.deserializeNBT(oldMana.serializeNBT())));
+        event.getOriginal().getCapability(playerspellsprovider.PLAYER_SPELLS).ifPresent(oldSpells ->
+                event.getEntity().getCapability(playerspellsprovider.PLAYER_SPELLS)
+                        .ifPresent(newSpells -> newSpells.deserializeNBT(oldSpells.serializeNBT())));
 
-        event.getEntity().getCapability(playerspellsprovider.PLAYER_SPELLS).ifPresent(newSpells ->
-                event.getOriginal().getCapability(playerspellsprovider.PLAYER_SPELLS).ifPresent(oldSpells ->
-                        newSpells.deserializeNBT(oldSpells.serializeNBT())));
-
-        event.getOriginal().invalidateCaps();
+        if (wasDeath) {
+            event.getOriginal().invalidateCaps();
+        }
 
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             modpackets.sendManaSync(serverPlayer);

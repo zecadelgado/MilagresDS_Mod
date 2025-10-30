@@ -2,7 +2,6 @@ package com.stefani.MilagresDSMod.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
 
 public final class ModConfig {
     public static final ForgeConfigSpec COMMON_SPEC;
@@ -17,7 +16,7 @@ public final class ModConfig {
     private ModConfig() {}
 
     public static void register() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, COMMON_SPEC);
+        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, COMMON_SPEC);
     }
 
     public static final class Common {

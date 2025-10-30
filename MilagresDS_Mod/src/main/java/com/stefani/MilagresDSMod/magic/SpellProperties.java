@@ -1,15 +1,17 @@
 package com.stefani.MilagresDSMod.magic;
 
+import com.stefani.MilagresDSMod.config.ModCommonConfig;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -19,24 +21,28 @@ public final class SpellProperties {
     private final int cooldownTicks;
     private final ResourceLocation icon;
     private final double castRange;
+    private final SpellCategory category;
     private final SpellSound castSound;
     private final SpellParticles castParticles;
     private final Float baseDamage;
     private final Float healingAmount;
     private final Component description;
     private final Component effectSummary;
+    private final SpellRequirements requirements;
 
     private SpellProperties(Builder builder) {
         this.manaCost = builder.manaCost;
         this.cooldownTicks = builder.cooldownTicks;
         this.icon = builder.icon;
         this.castRange = builder.castRange;
+        this.category = builder.category;
         this.castSound = builder.castSound;
         this.castParticles = builder.castParticles;
         this.baseDamage = builder.baseDamage;
         this.healingAmount = builder.healingAmount;
         this.description = builder.description;
         this.effectSummary = builder.effectSummary;
+        this.requirements = builder.requirements;
     }
 
     public static Builder builder() {
@@ -44,11 +50,13 @@ public final class SpellProperties {
     }
 
     public int getManaCost() {
-        return manaCost;
+        double multiplier = ModCommonConfig.COST_MULTIPLIER.get();
+        return Math.max(0, (int) Math.round(manaCost * multiplier));
     }
 
     public int getCooldownTicks() {
-        return cooldownTicks;
+        double multiplier = ModCommonConfig.COOLDOWN_MULTIPLIER.get();
+        return Math.max(0, (int) Math.round(cooldownTicks * multiplier));
     }
 
     public ResourceLocation getIcon() {
@@ -83,17 +91,27 @@ public final class SpellProperties {
         return Optional.ofNullable(effectSummary);
     }
 
+    public SpellCategory getCategory() {
+        return category;
+    }
+
+    public SpellRequirements getRequirements() {
+        return requirements;
+    }
+
     public static final class Builder {
         private Integer manaCost;
         private Integer cooldownTicks;
         private ResourceLocation icon;
         private double castRange = 16.0D;
+        private SpellCategory category;
         private SpellSound castSound;
         private SpellParticles castParticles;
         private Float baseDamage;
         private Float healingAmount;
         private Component description;
         private Component effectSummary;
+        private SpellRequirements requirements = SpellRequirements.NONE;
 
         private Builder() {
         }
@@ -110,6 +128,11 @@ public final class SpellProperties {
 
         public Builder icon(ResourceLocation icon) {
             this.icon = icon;
+            return this;
+        }
+
+        public Builder category(SpellCategory category) {
+            this.category = Objects.requireNonNull(category, "Category must be defined");
             return this;
         }
 
@@ -158,10 +181,21 @@ public final class SpellProperties {
             return this;
         }
 
+        public Builder requirements(SpellRequirements requirements) {
+            this.requirements = Objects.requireNonNull(requirements, "Requirements must be defined");
+            return this;
+        }
+
+        public Builder requirements(int requiredLevel, int intelligence, int faith, int arcane) {
+            return requirements(new SpellRequirements(requiredLevel, intelligence, faith, arcane, List.of()));
+        }
+
         public SpellProperties build() {
             Objects.requireNonNull(manaCost, "Mana cost must be defined");
             Objects.requireNonNull(cooldownTicks, "Cooldown must be defined");
             Objects.requireNonNull(icon, "Icon must be defined");
+            Objects.requireNonNull(category, "Category must be defined");
+            Objects.requireNonNull(requirements, "Requirements must be defined");
             return new SpellProperties(this);
         }
     }

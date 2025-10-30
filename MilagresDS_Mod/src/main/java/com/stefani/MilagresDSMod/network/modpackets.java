@@ -3,7 +3,7 @@ package com.stefani.MilagresDSMod.network;
 import com.stefani.MilagresDSMod.MilagresDSMod;
 import com.stefani.MilagresDSMod.capability.playermana;
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
-import com.stefani.MilagresDSMod.network.SyncManaS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SyncManaS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.castspellpackets;
 import com.stefani.MilagresDSMod.network.packets.selectspellpackets;
 import net.minecraft.server.level.ServerPlayer;
@@ -71,11 +71,14 @@ public class modpackets {
 
     public static void sendManaSync(ServerPlayer player) {
         player.getCapability(playermanaprovider.PLAYER_MANA).ifPresent(mana ->
-                sendManaSync(player, mana));
+                sendManaSync(player, mana.getMana(), mana.getMaxMana()));
+    }
+
+    public static void sendManaSync(ServerPlayer player, int mana, int maxMana) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SyncManaS2CPacket(mana, maxMana));
     }
 
     public static void sendManaSync(ServerPlayer player, playermana mana) {
-        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
-                new SyncManaS2CPacket(mana.getMana(), mana.getMaxMana()));
+        sendManaSync(player, mana.getMana(), mana.getMaxMana());
     }
 }

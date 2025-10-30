@@ -2,6 +2,7 @@ package com.stefani.MilagresDSMod.network.packets;
 
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
 import com.stefani.MilagresDSMod.capability.playerspellsprovider;
+import com.stefani.MilagresDSMod.config.ModCommonConfig;
 import com.stefani.MilagresDSMod.magic.spell;
 import com.stefani.MilagresDSMod.network.modpackets;
 import net.minecraft.network.FriendlyByteBuf;
@@ -32,12 +33,20 @@ public class castspellpackets {
                     return;
                 }
 
+                long now = player.level().getGameTime();
+                int minTicks = ModCommonConfig.MIN_TICKS_BETWEEN_CASTS.get();
+                if (minTicks > 0 && now - spells.getLastCastTick() < minTicks) {
+                    return;
+                }
+
                 player.getCapability(playermanaprovider.PLAYER_MANA).ifPresent(mana -> {
-                    if (mana.hasMana(equippedSpell.getManaCost())) {
-                        mana.consumeMana(equippedSpell.getManaCost());
+                    int manaCost = equippedSpell.getManaCost();
+                    if (mana.hasMana(manaCost)) {
+                        mana.consumeMana(manaCost);
                         equippedSpell.cast(player, player.level());
                         spells.setCooldown(equippedSpell, player.level());
-                        modpackets.sendManaSync(player, mana);
+                        spells.setLastCastTick(now);
+                        modpackets.sendManaSync(player, mana.getMana(), mana.getMaxMana());
                     }
                 });
             });

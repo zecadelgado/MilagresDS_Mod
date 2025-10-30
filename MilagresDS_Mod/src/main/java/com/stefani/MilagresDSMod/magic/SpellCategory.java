@@ -1,12 +1,11 @@
-package com.stefani.MilagresDSMod.client.data;
+package com.stefani.MilagresDSMod.magic;
 
-import com.stefani.MilagresDSMod.magic.SpellCategory;
 import net.minecraft.network.chat.Component;
 
 /**
- * Spell categories used for grouping on the memorize screen.
+ * Categories used to group spells. Shared between logical and client layers.
  */
-public enum Category {
+public enum SpellCategory {
     OFFENSIVE("ui.memorize.category.offensive"),
     DEFENSIVE("ui.memorize.category.defensive"),
     SUPPORT("ui.memorize.category.support"),
@@ -15,7 +14,7 @@ public enum Category {
 
     private final String translationKey;
 
-    Category(String translationKey) {
+    SpellCategory(String translationKey) {
         this.translationKey = translationKey;
     }
 
@@ -25,16 +24,5 @@ public enum Category {
 
     public String translationKey() {
         return translationKey;
-    }
-
-    public static Category fromSpellCategory(SpellCategory category) {
-        if (category == null) {
-            return OFFENSIVE;
-        }
-        try {
-            return Category.valueOf(category.name());
-        } catch (IllegalArgumentException ex) {
-            return OFFENSIVE;
-        }
     }
 }

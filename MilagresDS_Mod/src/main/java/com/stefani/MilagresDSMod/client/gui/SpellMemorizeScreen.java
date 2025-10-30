@@ -19,7 +19,9 @@ import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.OptionalInt;
 
 /**
@@ -46,6 +48,8 @@ public class SpellMemorizeScreen extends Screen {
     private final MagicStats magicStats = MagicStats.get();
     private Spell selectedSpell;
     private int selectedSlotIndex;
+    private List<Spell> availableSpells = List.of();
+    private Map<ResourceLocation, Spell> spellsById = Map.of();
 
     private int leftPos;
     private int topPos;
@@ -61,6 +65,8 @@ public class SpellMemorizeScreen extends Screen {
         this.leftPos = (this.width - BACKGROUND_WIDTH) / 2;
         this.topPos = (this.height - BACKGROUND_HEIGHT) / 2;
 
+        reloadSpells();
+
         int gridLeft = leftPos + 24;
         int slotsTop = topPos + 32;
         int gridTop = slotsTop + SLOT_SIZE + 16;
@@ -68,7 +74,7 @@ public class SpellMemorizeScreen extends Screen {
         int gridHeight = SLOT_SIZE * 4 + 8;
 
         this.gridWidget = new SpellGridWidget(gridLeft, gridTop, gridWidth, gridHeight,
-                SpellRegistryClient.getAll(), FRAME, FRAME_SELECTED);
+                availableSpells, FRAME, FRAME_SELECTED);
         this.gridWidget.setSelectionListener(this::onSpellSelected);
         addRenderableWidget(gridWidget);
         setInitialSelection();
@@ -144,7 +150,10 @@ public class SpellMemorizeScreen extends Screen {
             guiGraphics.blit(frame, slotX, slotsTop, 0, 0, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE);
 
             ResourceLocation spellId = magicStats.getSpellInSlot(i);
-            Spell spell = spellId != null ? SpellRegistryClient.get(spellId).orElse(null) : null;
+            Spell spell = spellId != null ? spellsById.get(spellId) : null;
+            if (spell == null && spellId != null) {
+                spell = SpellRegistryClient.get(spellId).orElse(null);
+            }
             ResourceLocation icon = resolveIcon(spell != null ? spell.icon() : null);
             guiGraphics.blit(icon, slotX + 2, slotsTop + 2, 0, 0, 48, 48, 48, 48);
 
@@ -279,6 +288,9 @@ public class SpellMemorizeScreen extends Screen {
 
     private void sendPrimarySlotToServer() {
         ResourceLocation primary = magicStats.getSpellInSlot(0);
+        if (primary != null && SpellRegistryClient.get(primary).isEmpty()) {
+            primary = null;
+        }
         // Only synchronise the primary slot for now so the server keeps the active spell used during casting.
         modpackets.sendSpellSelection(primary);
     }
@@ -290,6 +302,15 @@ public class SpellMemorizeScreen extends Screen {
         this.equipButton.active = hasSelection && !isEquipped && meetsRequirements;
         ResourceLocation slotSpell = magicStats.getSpellInSlot(selectedSlotIndex);
         this.removeButton.active = slotSpell != null;
+    }
+
+    private void reloadSpells() {
+        this.availableSpells = SpellRegistryClient.getAll();
+        Map<ResourceLocation, Spell> map = new LinkedHashMap<>();
+        for (Spell spell : availableSpells) {
+            map.put(spell.id(), spell);
+        }
+        this.spellsById = Map.copyOf(map);
     }
 
     private boolean checkRequirements(Spell spell) {

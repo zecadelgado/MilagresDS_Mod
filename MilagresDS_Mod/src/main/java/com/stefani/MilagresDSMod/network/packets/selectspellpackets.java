@@ -44,17 +44,27 @@ public class selectspellpackets {
                 return;
             }
 
-            spell selectedSpell = null;
-            if (spellId != null) {
-                selectedSpell = spellregistry.REGISTRY.get().getValue(spellId);
+            player.getCapability(playerspellsprovider.PLAYER_SPELLS).ifPresent(spells -> {
+                if (spellId == null) {
+                    spells.setEquippedSpell(null);
+                    return;
+                }
+
+                if (!spells.isUnlocked(spellId)) {
+                    return;
+                }
+
+                var registry = spellregistry.REGISTRY.get();
+                if (registry == null) {
+                    return;
+                }
+                spell selectedSpell = registry.getValue(spellId);
                 if (selectedSpell == null) {
                     return;
                 }
-            }
 
-            spell finalSelectedSpell = selectedSpell;
-            player.getCapability(playerspellsprovider.PLAYER_SPELLS)
-                    .ifPresent(spells -> spells.setEquippedSpell(finalSelectedSpell));
+                spells.setEquippedSpell(selectedSpell);
+            });
         });
         context.setPacketHandled(true);
         return true;
