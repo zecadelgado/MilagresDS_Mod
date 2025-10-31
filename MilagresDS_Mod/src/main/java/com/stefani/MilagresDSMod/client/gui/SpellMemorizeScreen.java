@@ -341,6 +341,13 @@ public class SpellMemorizeScreen extends Screen {
         this.removeButton.active = slotSpell != null;
     }
 
+    public void onSpellSelectionResult(boolean success, @Nullable ResourceLocation equippedSpell) {
+        if (gridWidget != null && selectedSlotIndex == 0) {
+            gridWidget.setSelectedSpell(magicStats.getSpellInSlot(selectedSlotIndex));
+        }
+        updateButtonState();
+    }
+
     private void reloadSpells() {
         this.availableSpells = SpellRegistryClient.getAll();
         Map<ResourceLocation, Spell> map = new LinkedHashMap<>();
