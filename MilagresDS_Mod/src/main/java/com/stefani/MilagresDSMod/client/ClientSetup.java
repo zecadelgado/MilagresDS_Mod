@@ -1,7 +1,8 @@
 package com.stefani.MilagresDSMod.client;
 
-import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingFallbackRenderer;
-import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearRenderer;
+import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingRenderer;
+import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearVanillaRenderer;
+import com.stefani.MilagresDSMod.magic.visual.lightning.client.LightningSpearLightClientHandler;
 import com.stefani.MilagresDSMod.particles.EmberParticle;
 import com.stefani.MilagresDSMod.particles.HealGlowParticle;
 import com.stefani.MilagresDSMod.particles.LightningSparkParticle;
@@ -18,6 +19,7 @@ public final class ClientSetup {
         modBus.addListener(ClientSetup::onRegisterRenderers);
         modBus.addListener(ClientSetup::onRegisterParticles);
         modBus.addListener(ClientSetup::onRegisterLayers);
+        LightningSpearLightClientHandler.init();
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers evt) {
@@ -31,10 +33,8 @@ public final class ClientSetup {
     }
 
     private static void onRegisterLayers(EntityRenderersEvent.RegisterLayerDefinitions evt) {
-        evt.registerLayerDefinition(LightningSpearRenderer.LAYER, LightningSpearRenderer::createLayer);
-        if (!net.minecraftforge.fml.ModList.get().isLoaded("geckolib")) {
-            evt.registerLayerDefinition(FlameSlingFallbackRenderer.LAYER, FlameSlingFallbackRenderer::createLayer);
-        }
+        evt.registerLayerDefinition(LightningSpearVanillaRenderer.LAYER, LightningSpearVanillaRenderer::createLayer);
+        evt.registerLayerDefinition(FlameSlingRenderer.LAYER, FlameSlingRenderer::createLayer);
         // HealAreaRenderer não precisa de layer definition
     }
 }
