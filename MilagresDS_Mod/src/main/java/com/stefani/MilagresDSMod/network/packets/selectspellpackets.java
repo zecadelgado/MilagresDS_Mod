@@ -3,6 +3,7 @@ package com.stefani.MilagresDSMod.network.packets;
 import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import com.stefani.MilagresDSMod.capability.playerspellsprovider;
 import com.stefani.MilagresDSMod.magic.spell;
+import com.stefani.MilagresDSMod.network.modpackets;
 import com.stefani.MilagresDSMod.registry.spellregistry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -49,6 +50,7 @@ public class selectspellpackets {
             player.getCapability(playerspellsprovider.PLAYER_SPELLS).ifPresent(spells -> {
                 if (spellId == null) {
                     spells.setEquippedSpell(null);
+                    modpackets.sendSpellSnapshot(player);
                     return;
                 }
 
@@ -80,6 +82,7 @@ public class selectspellpackets {
                 }
 
                 spells.setEquippedSpell(selectedSpell);
+                modpackets.sendSpellSnapshot(player);
             });
         });
         context.setPacketHandled(true);

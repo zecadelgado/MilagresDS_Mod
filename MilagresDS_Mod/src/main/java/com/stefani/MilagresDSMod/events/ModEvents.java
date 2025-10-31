@@ -49,6 +49,7 @@ public class ModEvents {
                 ConstitutionApplier.apply(serverPlayer, attributes);
                 modpackets.sendAttributesSync(serverPlayer, attributes);
             });
+            modpackets.sendSpellSnapshot(serverPlayer);
         }
     }
 
@@ -90,6 +91,7 @@ public class ModEvents {
                         ConstitutionApplier.apply(serverPlayer, attributes);
                         modpackets.sendAttributesSync(serverPlayer, attributes);
                     });
+            modpackets.sendSpellSnapshot(serverPlayer);
         }
     }
 
@@ -101,6 +103,7 @@ public class ModEvents {
                 ConstitutionApplier.apply(serverPlayer, attributes);
                 modpackets.sendAttributesSync(serverPlayer, attributes);
             });
+            modpackets.sendSpellSnapshot(serverPlayer);
         }
     }
 }
