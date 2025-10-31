@@ -3,6 +3,8 @@ package com.stefani.MilagresDSMod.util;
 import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingEntity;
 import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaEntity;
 import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearEntity;
+import com.stefani.MilagresDSMod.network.modpackets;
+import com.stefani.MilagresDSMod.network.packets.SpellLightS2CPacket;
 import com.stefani.MilagresDSMod.registry.EntityRegistry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -59,7 +61,7 @@ public final class SpellVisuals {
         entity.moveTo(caster.getX(), caster.getY() - 0.1, caster.getZ());
         level.addFreshEntity(entity);
         tryCastPose(caster, "CastHeal");
-        tryDynamicLight(level, entity, 0xF9EFAF, 8f, 800);
+        tryDynamicLight(level, entity, 0xF9EFAF, 8f, 3600);
     }
 
     private static void tryCastPose(LivingEntity caster, String animName) {
@@ -93,6 +95,7 @@ public final class SpellVisuals {
         if (level.isClientSide || !(level instanceof ServerLevel)) {
             return;
         }
-        // Integração real com Dynamic Lights pode ser feita futuramente via pacotes para o cliente.
+        int durationTicks = Math.max(1, durationMs / 50);
+        modpackets.sendTracking(entity, new SpellLightS2CPacket(entity.getId(), rgb, radius, durationTicks));
     }
 }

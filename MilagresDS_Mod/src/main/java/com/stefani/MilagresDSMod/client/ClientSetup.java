@@ -1,5 +1,6 @@
 package com.stefani.MilagresDSMod.client;
 
+import com.stefani.MilagresDSMod.client.lighting.DynamicLightClient;
 import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingRenderer;
 import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearRenderer;
 import com.stefani.MilagresDSMod.particles.EmberParticle;
@@ -18,6 +19,7 @@ public final class ClientSetup {
         modBus.addListener(ClientSetup::onRegisterRenderers);
         modBus.addListener(ClientSetup::onRegisterParticles);
         modBus.addListener(ClientSetup::onRegisterLayers);
+        DynamicLightClient.init();
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers evt) {

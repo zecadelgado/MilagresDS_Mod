@@ -23,22 +23,27 @@ public class HealAreaRenderer extends EntityRenderer<HealAreaEntity> {
     @Override
     public void render(HealAreaEntity entity, float yaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int light) {
         poseStack.pushPose();
-        float t = entity.tickCount + partialTick;
-        float baseRadius = 3.0f + Mth.sin(t * 0.15f) * 0.3f;
+        float baseRadius = entity.getAmbientRadius(partialTick);
         float alpha = 0.55f;
 
         VertexConsumer ringConsumer = buffer.getBuffer(RenderType.entityTranslucent(RING));
         poseStack.translate(0, 0.01, 0);
         renderRingQuad(poseStack, ringConsumer, baseRadius, alpha, light);
 
-        for (int i = 0; i < 3; i++) {
-            float pr = (t * 0.07f + i * 0.33f) % 1f;
-            float radius = 1.2f + pr * 2.5f;
-            float localAlpha = (1.0f - pr) * 0.5f;
+        for (HealAreaEntity.PulseInstance pulse : entity.getActivePulses()) {
+            float radius = pulse.getRadius(partialTick);
+            float localAlpha = 0.45f * pulse.getFade(partialTick);
+            if (localAlpha <= 0.01f) {
+                continue;
+            }
+            poseStack.pushPose();
+            poseStack.translate(0, pulse.getLayerHeight(), 0);
             renderRingQuad(poseStack, ringConsumer, radius, localAlpha, light);
+            poseStack.popPose();
         }
 
         VertexConsumer crossConsumer = buffer.getBuffer(RenderType.entityTranslucent(CROSS));
+        float t = entity.tickCount + partialTick;
         for (int i = 0; i < 2; i++) {
             float ang = (i * 0.5f + t * 0.03f) * ((float) Math.PI * 2);
             float r = 1.2f + (i * 1.2f);

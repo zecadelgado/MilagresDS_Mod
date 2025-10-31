@@ -7,16 +7,19 @@ import com.stefani.MilagresDSMod.capability.playermana;
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
 import com.stefani.MilagresDSMod.network.packets.AllocateAttributeC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.ResetAttributesC2SPacket;
+import com.stefani.MilagresDSMod.network.packets.SpellLightS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncAttributesS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncManaS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.castspellpackets;
 import com.stefani.MilagresDSMod.network.packets.selectspellpackets;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 import javax.annotation.Nullable;
 
@@ -78,6 +81,12 @@ public class modpackets {
                 .decoder(SyncAttributesS2CPacket::decode)
                 .consumerMainThread(SyncAttributesS2CPacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(SpellLightS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SpellLightS2CPacket::encode)
+                .decoder(SpellLightS2CPacket::new)
+                .consumerMainThread(SpellLightS2CPacket::handle)
+                .add();
     }
 
     public static void sendToServer(castspellpackets packet) {
@@ -129,5 +138,12 @@ public class modpackets {
                 attributes.getStrength(),
                 attributes.getDexterity(),
                 attributes.getConstitution()));
+    }
+
+    public static void sendTracking(Entity entity, Object packet) {
+        if (!(entity.level() instanceof ServerLevel)) {
+            return;
+        }
+        CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), packet);
     }
 }
