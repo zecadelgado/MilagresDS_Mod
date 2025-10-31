@@ -3,6 +3,7 @@ package com.stefani.MilagresDSMod.util;
 import com.stefani.MilagresDSMod.magic.visual.backend.lighting.DynamicLightDispatcher;
 import com.stefani.MilagresDSMod.magic.visual.backend.playeranim.PlayerAnimatorCompat;
 import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingEntity;
+import com.stefani.MilagresDSMod.magic.visual.backend.SpellLighting;
 import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaEntity;
 import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearEntity;
 import com.stefani.MilagresDSMod.registry.EntityRegistry;
@@ -11,6 +12,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+
+import javax.annotation.Nullable;
 
 public final class SpellVisuals {
     private static final int DEFAULT_LIGHTNING_SPEAR_CHARGE_TICKS = 28;
@@ -39,6 +42,10 @@ public final class SpellVisuals {
     }
 
     public static void showFlameSling(Level level, LivingEntity caster, Vec3 dir) {
+        showFlameSling(level, caster, dir, FlameSlingCastOptions.defaults());
+    }
+
+    public static void showFlameSling(Level level, LivingEntity caster, Vec3 dir, FlameSlingCastOptions options) {
         if (level.isClientSide) {
             return;
         }
@@ -48,7 +55,10 @@ public final class SpellVisuals {
         }
         Vec3 hand = caster.position().add(0, caster.getEyeHeight() * 0.65, 0);
         entity.moveTo(hand.x, hand.y, hand.z);
-        entity.setDeltaMovement(dir.normalize().scale(1.2));
+        entity.configureSounds(options.launchSound, options.impactSound);
+        entity.configureDynamicLight(options.dynamicLightColor, options.dynamicLightRadius, options.dynamicLightDurationMs, options.dynamicLightInterval);
+        Vec3 motion = dir.normalize().scale(options.projectileSpeed);
+        entity.configureLaunch(motion, options.chargeTicks);
         level.addFreshEntity(entity);
         PlayerAnimatorCompat.playClip(caster, "CastFlame");
         tryDynamicLight(level, entity, caster, 0xFF6A2A, 10f, 20);

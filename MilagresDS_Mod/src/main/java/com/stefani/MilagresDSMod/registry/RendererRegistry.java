@@ -1,7 +1,7 @@
 package com.stefani.MilagresDSMod.registry;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
-import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingRenderer;
+import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingFallbackRenderer;
 import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaRenderer;
 import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearVanillaRenderer;
 import com.stefani.MilagresDSMod.registry.EntityRegistry;
