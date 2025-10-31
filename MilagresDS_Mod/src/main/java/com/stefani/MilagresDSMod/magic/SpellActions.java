@@ -1,5 +1,7 @@
 package com.stefani.MilagresDSMod.magic;
 
+import com.stefani.MilagresDSMod.attribute.IPlayerAttributes;
+import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -27,7 +29,18 @@ public final class SpellActions {
     public static SpellAction dealDamageToTarget(Function<Level, DamageSource> damageSource, float amount) {
         return context -> context.entityHitResult()
                 .map(EntityHitResult::getEntity)
-                .ifPresent(entity -> entity.hurt(damageSource.apply(context.level()), amount));
+                .ifPresent(entity -> {
+                    SpellProperties properties = context.spell().getProperties();
+                    float baseDamage = properties.getBaseDamage().orElse(amount);
+                    float finalDamage = context.player()
+                            .getCapability(playerattributesprovider.PLAYER_ATTRIBUTES)
+                            .map(attributes -> (float) Math.max(0.0D, baseDamage
+                                    + computeScalingBonus(attributes, properties)))
+                            .orElse(baseDamage);
+                    if (finalDamage > 0.0F) {
+                        entity.hurt(damageSource.apply(context.level()), finalDamage);
+                    }
+                });
     }
 
     public static SpellAction healPlayer(float amount) {
@@ -50,5 +63,18 @@ public final class SpellActions {
                                                          double spreadX, double spreadY, double spreadZ, double speed) {
         return context -> new SpellProperties.SpellParticles(particle, count, spreadX, spreadY, spreadZ, speed)
                 .spawn(context.level(), context.origin());
+    }
+
+    private static double computeScalingBonus(IPlayerAttributes attributes, SpellProperties properties) {
+        double bonus = 0.0D;
+        for (SpellScaling scaling : properties.getScaling().values()) {
+            int value = switch (scaling.attribute()) {
+                case INTELLIGENCE -> attributes.getIntelligence();
+                case FAITH -> attributes.getFaith();
+                case ARCANE -> attributes.getArcane();
+            };
+            bonus += scaling.computeBonus(value);
+        }
+        return bonus;
     }
 }
