@@ -23,21 +23,38 @@ public class SpellGridWidget extends AbstractWidget {
     private static final int ICON_SIZE = 48;
     private static final int CELL_PADDING = 2;
     private static final int CELL_SIZE = ICON_SIZE + CELL_PADDING * 2;
+    public static final int DEFAULT_HORIZONTAL_SPACING = 8;
 
     private final List<Spell> spells;
     private final ResourceLocation frameTexture;
     private final ResourceLocation selectedFrameTexture;
+    private final int horizontalSpacing;
     private Consumer<Spell> selectionListener = spell -> {};
 
     private int selectedIndex = -1;
     private int scrollRow = 0;
 
-    public SpellGridWidget(int x, int y, int width, int height, List<Spell> spells,
+    public SpellGridWidget(int x, int y, int height, List<Spell> spells,
                            ResourceLocation frameTexture, ResourceLocation selectedFrameTexture) {
-        super(x, y, width, height, Component.empty());
+        this(x, y, height, spells, frameTexture, selectedFrameTexture, DEFAULT_HORIZONTAL_SPACING);
+    }
+
+    public SpellGridWidget(int x, int y, int height, List<Spell> spells,
+                           ResourceLocation frameTexture, ResourceLocation selectedFrameTexture,
+                           int horizontalSpacing) {
+        super(x, y, calculateWidth(horizontalSpacing), height, Component.empty());
         this.spells = List.copyOf(spells);
         this.frameTexture = frameTexture;
         this.selectedFrameTexture = selectedFrameTexture;
+        this.horizontalSpacing = horizontalSpacing;
+    }
+
+    public static int calculateWidth(int horizontalSpacing) {
+        return COLUMNS * CELL_SIZE + Math.max(0, COLUMNS - 1) * horizontalSpacing;
+    }
+
+    public int getHorizontalSpacing() {
+        return horizontalSpacing;
     }
 
     public void setSelectionListener(Consumer<Spell> listener) {
@@ -80,7 +97,8 @@ public class SpellGridWidget extends AbstractWidget {
         int maxScroll = Math.max(0, getRowCount() - visibleRows);
         scrollRow = Mth.clamp(scrollRow, 0, maxScroll);
 
-        guiGraphics.enableScissor(getX(), getY(), getX() + width, getY() + height);
+        guiGraphics.enableScissor(getX(), getY(), getX() + this.width, getY() + this.height);
+        int stepX = CELL_SIZE + horizontalSpacing;
         for (int row = 0; row < visibleRows; row++) {
             int gridRow = scrollRow + row;
             for (int column = 0; column < COLUMNS; column++) {
@@ -88,7 +106,7 @@ public class SpellGridWidget extends AbstractWidget {
                 if (index >= spells.size()) {
                     continue;
                 }
-                int cellX = getX() + column * CELL_SIZE;
+                int cellX = getX() + column * stepX;
                 int cellY = getY() + row * CELL_SIZE;
                 ResourceLocation frame = index == selectedIndex ? selectedFrameTexture : frameTexture;
                 guiGraphics.blit(frame, cellX, cellY, 0, 0, CELL_SIZE, CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -173,9 +191,14 @@ public class SpellGridWidget extends AbstractWidget {
         if (relativeX < 0 || relativeY < 0) {
             return -1;
         }
-        int column = (int) (relativeX / CELL_SIZE);
+        int stepX = CELL_SIZE + horizontalSpacing;
+        int column = (int) (relativeX / stepX);
         int rowInView = (int) (relativeY / CELL_SIZE);
+        int offsetInColumn = (int) (relativeX % stepX);
         if (column < 0 || column >= COLUMNS || rowInView < 0) {
+            return -1;
+        }
+        if (offsetInColumn >= CELL_SIZE) {
             return -1;
         }
         int index = (scrollRow + rowInView) * COLUMNS + column;
