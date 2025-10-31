@@ -75,5 +75,7 @@
   "ui.attributes.constitution.tooltip": "Constitution: +5%% maximum health per point.",
   "ui.attributes.intelligence.tooltip": "Intelligence: Required for sorceries and scaling magic damage.",
   "ui.attributes.faith.tooltip": "Faith: Required for miracles and scaling holy damage.",
-  "ui.attributes.arcane.tooltip": "Arcane: Required for occult arts and scaling dark damage."
+  "ui.attributes.arcane.tooltip": "Arcane: Required for occult arts and scaling dark damage.",
+
+  "item.milagresdsmod.lightning_spear": "Lightning Spear"
 }
