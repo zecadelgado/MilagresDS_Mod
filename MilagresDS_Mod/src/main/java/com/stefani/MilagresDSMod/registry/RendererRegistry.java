@@ -21,7 +21,7 @@ public final class RendererRegistry {
 
     private static void registerVanillaRenderers(EntityRenderersEvent.RegisterRenderers evt) {
         evt.registerEntityRenderer(EntityRegistry.LIGHTNING_SPEAR.get(), LightningSpearVanillaRenderer::new);
-        evt.registerEntityRenderer(EntityRegistry.FLAME_SLING.get(),   FlameSlingRenderer::new);
+        evt.registerEntityRenderer(EntityRegistry.FLAME_SLING.get(),   FlameSlingFallbackRenderer::new);
         evt.registerEntityRenderer(EntityRegistry.HEAL_AREA.get(),     HealAreaRenderer::new);
     }
 
