@@ -18,11 +18,13 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import software.bernie.geckolib.GeckoLib;
 import org.slf4j.Logger;
 
 @Mod(MilagresDSMod.MODID)
@@ -40,6 +42,10 @@ public class MilagresDSMod {
         ParticleRegistry.REGISTRY.register(modEventBus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ModCommonConfig.SPEC);
+
+        if (ModList.get().isLoaded("geckolib")) {
+            GeckoLib.initialize();
+        }
 
         modEventBus.addListener(this::commonSetup);
 

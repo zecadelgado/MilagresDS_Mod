@@ -1,14 +1,117 @@
 {
   "format_version": "1.12.0",
-  "minecraft:geometry": [{
-    "description": { "identifier": "milagresdsmod:heal_ring", "texture_width": 512, "texture_height": 512 },
-    "bones": [
-      { "name": "root", "pivot": [0,0,0] },
-      { "name": "ring", "parent": "root", "pivot": [0,0,0],
-        "cubes": [{ "origin": [-8,-0.1,-8], "size": [16,0.2,16], "uv": [0,0] }] },
-      { "name": "pulse1", "parent": "root", "pivot": [0,0,0] },
-      { "name": "pulse2", "parent": "root", "pivot": [0,0,0] },
-      { "name": "pulse3", "parent": "root", "pivot": [0,0,0] }
-    ]
-  }]
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.heal_ring",
+        "texture_width": 128,
+        "texture_height": 128,
+        "visible_bounds_width": 14,
+        "visible_bounds_height": 6,
+        "visible_bounds_offset": [0, 1, 0]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [0, 0, 0]
+        },
+        {
+          "name": "ring_core",
+          "parent": "root",
+          "pivot": [0, 0, 0],
+          "cubes": [
+            {
+              "origin": [-8, 0, -8],
+              "size": [16, 0, 16],
+              "uv": [0, 0]
+            }
+          ]
+        },
+        {
+          "name": "pulse_layer",
+          "parent": "root",
+          "pivot": [0, 0.02, 0],
+          "cubes": [
+            {
+              "origin": [-8, 0, -8],
+              "size": [16, 0, 16],
+              "uv": [0, 32]
+            }
+          ]
+        },
+        {
+          "name": "rune_plane_a",
+          "parent": "root",
+          "pivot": [0, 0.4, 0],
+          "cubes": [
+            {
+              "origin": [-6, -0.01, -6],
+              "size": [12, 0, 12],
+              "uv": [0, 64]
+            }
+          ]
+        },
+        {
+          "name": "rune_plane_b",
+          "parent": "root",
+          "pivot": [0, 0.8, 0],
+          "cubes": [
+            {
+              "origin": [-6, -0.01, -6],
+              "size": [12, 0, 12],
+              "uv": [0, 64]
+            }
+          ]
+        },
+        {
+          "name": "pillar_a",
+          "parent": "root",
+          "pivot": [4.6, 0, 0],
+          "cubes": [
+            {
+              "origin": [-0.4, 0, -0.4],
+              "size": [0.8, 3.8, 0.8],
+              "uv": [64, 0]
+            }
+          ]
+        },
+        {
+          "name": "pillar_b",
+          "parent": "root",
+          "pivot": [-4.6, 0, 0],
+          "cubes": [
+            {
+              "origin": [-0.4, 0, -0.4],
+              "size": [0.8, 3.8, 0.8],
+              "uv": [64, 0]
+            }
+          ]
+        },
+        {
+          "name": "pillar_c",
+          "parent": "root",
+          "pivot": [0, 0, 4.6],
+          "cubes": [
+            {
+              "origin": [-0.4, 0, -0.4],
+              "size": [0.8, 3.8, 0.8],
+              "uv": [64, 0]
+            }
+          ]
+        },
+        {
+          "name": "pillar_d",
+          "parent": "root",
+          "pivot": [0, 0, -4.6],
+          "cubes": [
+            {
+              "origin": [-0.4, 0, -0.4],
+              "size": [0.8, 3.8, 0.8],
+              "uv": [64, 0]
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

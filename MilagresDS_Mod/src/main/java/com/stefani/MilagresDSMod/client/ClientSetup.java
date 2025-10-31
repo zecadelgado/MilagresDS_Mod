@@ -1,5 +1,6 @@
 package com.stefani.MilagresDSMod.client;
 
+import com.stefani.MilagresDSMod.client.lighting.DynamicLightClient;
 import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingRenderer;
 import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearVanillaRenderer;
 import com.stefani.MilagresDSMod.magic.visual.lightning.client.LightningSpearLightClientHandler;
