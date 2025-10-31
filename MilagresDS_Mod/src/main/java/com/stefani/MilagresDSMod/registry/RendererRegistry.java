@@ -1,7 +1,7 @@
 package com.stefani.MilagresDSMod.registry;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
-import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingRenderer;
+import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingFallbackRenderer;
 import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaRenderer;
 import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearRenderer;
 import com.stefani.MilagresDSMod.registry.EntityRegistry;
@@ -21,7 +21,7 @@ public final class RendererRegistry {
 
     private static void registerVanillaRenderers(EntityRenderersEvent.RegisterRenderers evt) {
         evt.registerEntityRenderer(EntityRegistry.LIGHTNING_SPEAR.get(), LightningSpearRenderer::new);
-        evt.registerEntityRenderer(EntityRegistry.FLAME_SLING.get(),   FlameSlingRenderer::new);
+        evt.registerEntityRenderer(EntityRegistry.FLAME_SLING.get(),   FlameSlingFallbackRenderer::new);
         evt.registerEntityRenderer(EntityRegistry.HEAL_AREA.get(),     HealAreaRenderer::new);
     }
 
