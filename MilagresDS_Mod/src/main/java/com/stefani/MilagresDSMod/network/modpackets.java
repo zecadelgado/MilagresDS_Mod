@@ -11,6 +11,7 @@ import com.stefani.MilagresDSMod.network.packets.AllocateAttributeC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.LightningSpearLightS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.ResetAttributesC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.SpellLightS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SpellSelectionResultS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncAttributesS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncManaS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncMemorizedSpellsS2CPacket;
@@ -64,10 +65,10 @@ public class modpackets {
                 .consumerMainThread((packet, supplier) -> packet.handle(supplier))
                 .add();
 
-        CHANNEL.messageBuilder(UpdateMemorizedSpellsC2SPacket.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
-                .encoder(UpdateMemorizedSpellsC2SPacket::toBytes)
-                .decoder(UpdateMemorizedSpellsC2SPacket::new)
-                .consumerMainThread((packet, supplier) -> packet.handle(supplier))
+        CHANNEL.messageBuilder(SpellSelectionResultS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SpellSelectionResultS2CPacket::encode)
+                .decoder(SpellSelectionResultS2CPacket::decode)
+                .consumerMainThread(SpellSelectionResultS2CPacket::handle)
                 .add();
 
         CHANNEL.messageBuilder(AllocateAttributeC2SPacket.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
@@ -119,8 +120,8 @@ public class modpackets {
         CHANNEL.sendToServer(new selectspellpackets(spellId));
     }
 
-    public static void sendMemorizedSpellsUpdate(List<ResourceLocation> slots) {
-        CHANNEL.sendToServer(new UpdateMemorizedSpellsC2SPacket(slots));
+    public static void sendSpellSelectionResult(ServerPlayer player, boolean success, @Nullable ResourceLocation spellId) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SpellSelectionResultS2CPacket(success, spellId));
     }
 
     public static void sendAllocateAttribute(String attributeKey, int points) {
