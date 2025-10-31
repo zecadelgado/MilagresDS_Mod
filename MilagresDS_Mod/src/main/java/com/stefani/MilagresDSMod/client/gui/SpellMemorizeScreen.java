@@ -390,8 +390,9 @@ public class SpellMemorizeScreen extends Screen {
     private boolean handleSlotClick(double mouseX, double mouseY) {
         int slotsLeft = leftPos + 24;
         int slotsTop = topPos + 32;
+        int spacing = gridWidget != null ? gridWidget.getHorizontalSpacing() : horizontalSlotSpacing;
         for (int i = 0; i < magicStats.getSlotsMax(); i++) {
-            int slotX = slotsLeft + i * (SLOT_SIZE + SLOT_SPACING);
+            int slotX = slotsLeft + i * (SLOT_SIZE + spacing);
             if (mouseX >= slotX && mouseX < slotX + SLOT_SIZE && mouseY >= slotsTop && mouseY < slotsTop + SLOT_SIZE) {
                 selectedSlotIndex = i;
                 gridWidget.setSelectedSpell(magicStats.getSpellInSlot(i));
