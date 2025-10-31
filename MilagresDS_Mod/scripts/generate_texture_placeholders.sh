@@ -12,8 +12,8 @@ decode_png() {
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 
 decode_png "$ROOT/src/main/resources/assets/milagresdsmod/textures/gui/memorize_bg.png"
-for name in lightningspear fireball healingburst; do
-  decode_png "$ROOT/src/main/resources/assets/milagresdsmod/textures/gui/spells/${name}.png"
+for name in lightningspear fireball healingburst fallback; do
+  decode_png "$ROOT/src/main/resources/assets/milagresdsmod/textures/spells/${name}.png"
 done
 
 echo "Placeholder textures generated."

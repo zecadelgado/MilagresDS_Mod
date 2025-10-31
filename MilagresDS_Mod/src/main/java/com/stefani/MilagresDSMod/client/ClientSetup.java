@@ -1,7 +1,7 @@
 package com.stefani.MilagresDSMod.client;
 
 import com.stefani.MilagresDSMod.client.lighting.DynamicLightClient;
-import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingRenderer;
+import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingFallbackRenderer;
 import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearVanillaRenderer;
 import com.stefani.MilagresDSMod.magic.visual.lightning.client.LightningSpearLightClientHandler;
 import com.stefani.MilagresDSMod.particles.EmberParticle;
@@ -35,7 +35,7 @@ public final class ClientSetup {
 
     private static void onRegisterLayers(EntityRenderersEvent.RegisterLayerDefinitions evt) {
         evt.registerLayerDefinition(LightningSpearVanillaRenderer.LAYER, LightningSpearVanillaRenderer::createLayer);
-        evt.registerLayerDefinition(FlameSlingRenderer.LAYER, FlameSlingRenderer::createLayer);
+        evt.registerLayerDefinition(FlameSlingFallbackRenderer.LAYER, FlameSlingFallbackRenderer::createLayer);
         // HealAreaRenderer não precisa de layer definition
     }
 }
