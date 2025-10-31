@@ -84,7 +84,8 @@ public final class SpellRegistryClient {
                 properties.getManaCost(),
                 clientRequirements,
                 description,
-                icon);
+                icon,
+                List.copyOf(properties.getScaling().values()));
     }
 
     private record SpellSnapshot(List<Spell> spells, Map<ResourceLocation, Spell> lookup) {

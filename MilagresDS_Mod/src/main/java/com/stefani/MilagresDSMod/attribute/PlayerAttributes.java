@@ -1,7 +1,13 @@
 package com.stefani.MilagresDSMod.attribute;
 
 import com.stefani.MilagresDSMod.config.ModCommonConfig;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class PlayerAttributes implements IPlayerAttributes {
     private static final String KEY_LEVEL = "Level";
@@ -14,6 +20,8 @@ public class PlayerAttributes implements IPlayerAttributes {
     private static final String KEY_STRENGTH = "Strength";
     private static final String KEY_DEXTERITY = "Dexterity";
     private static final String KEY_CONSTITUTION = "Constitution";
+    private static final String KEY_LOST_RUNES = "LostRunes";
+    private static final String KEY_BLOODSTAIN = "Bloodstain";
 
     private int level;
     private long storedRunes;
@@ -24,6 +32,9 @@ public class PlayerAttributes implements IPlayerAttributes {
     private int strength;
     private int dexterity;
     private int constitution;
+    private long lostRunes;
+    @Nullable
+    private GlobalPos bloodstainLocation;
 
     public PlayerAttributes() {
         this.level = Math.max(1, ModCommonConfig.STARTING_LEVEL.get());
@@ -35,6 +46,8 @@ public class PlayerAttributes implements IPlayerAttributes {
         this.strength = 0;
         this.dexterity = 0;
         this.constitution = 0;
+        this.lostRunes = 0L;
+        this.bloodstainLocation = null;
     }
 
     @Override
@@ -189,6 +202,26 @@ public class PlayerAttributes implements IPlayerAttributes {
     }
 
     @Override
+    public long getLostRunes() {
+        return lostRunes;
+    }
+
+    @Override
+    public void setLostRunes(long value) {
+        this.lostRunes = Math.max(0L, value);
+    }
+
+    @Override
+    public Optional<GlobalPos> getBloodstainLocation() {
+        return Optional.ofNullable(this.bloodstainLocation);
+    }
+
+    @Override
+    public void setBloodstainLocation(@Nullable GlobalPos pos) {
+        this.bloodstainLocation = pos;
+    }
+
+    @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putInt(KEY_LEVEL, this.level);
@@ -201,6 +234,10 @@ public class PlayerAttributes implements IPlayerAttributes {
         tag.putInt(KEY_STRENGTH, this.strength);
         tag.putInt(KEY_DEXTERITY, this.dexterity);
         tag.putInt(KEY_CONSTITUTION, this.constitution);
+        tag.putLong(KEY_LOST_RUNES, this.lostRunes);
+        if (this.bloodstainLocation != null) {
+            tag.put(KEY_BLOODSTAIN, NbtUtils.writeGlobalPos(this.bloodstainLocation));
+        }
         return tag;
     }
 
@@ -219,5 +256,11 @@ public class PlayerAttributes implements IPlayerAttributes {
         this.strength = Math.max(0, tag.getInt(KEY_STRENGTH));
         this.dexterity = Math.max(0, tag.getInt(KEY_DEXTERITY));
         this.constitution = Math.max(0, tag.getInt(KEY_CONSTITUTION));
+        this.lostRunes = Math.max(0L, tag.getLong(KEY_LOST_RUNES));
+        if (tag.contains(KEY_BLOODSTAIN, Tag.TAG_COMPOUND)) {
+            this.bloodstainLocation = NbtUtils.readGlobalPos(tag.getCompound(KEY_BLOODSTAIN));
+        } else {
+            this.bloodstainLocation = null;
+        }
     }
 }

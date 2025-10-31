@@ -4,6 +4,8 @@ import com.stefani.MilagresDSMod.MilagresDSMod;
 import com.stefani.MilagresDSMod.magic.SpellActions;
 import com.stefani.MilagresDSMod.magic.SpellCategory;
 import com.stefani.MilagresDSMod.magic.SpellProperties;
+import com.stefani.MilagresDSMod.magic.SpellScalingAttribute;
+import com.stefani.MilagresDSMod.magic.SpellScalingGrade;
 import com.stefani.MilagresDSMod.magic.spell;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -24,6 +26,8 @@ public class lightningspear extends spell {
                         .castSound(SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.0F, 0.8F)
                         .castParticles(() -> ParticleTypes.ELECTRIC_SPARK, 20, 0.2D, 0.2D, 0.2D, 0.01D)
                         .baseDamage(12.0F)
+                        .scaling(SpellScalingAttribute.FAITH, SpellScalingGrade.S)
+                        .scaling(SpellScalingAttribute.ARCANE, SpellScalingGrade.E)
                         .requirements(10, 12, 0, 0)
                         .description(Component.translatable("spell.milagresdsmod.lightningspear.desc"))
                         .effectSummary(Component.translatable("spell.milagresdsmod.lightningspear.effect"))

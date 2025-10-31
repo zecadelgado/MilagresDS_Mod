@@ -1,6 +1,10 @@
 package com.stefani.MilagresDSMod.attribute;
 
+import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public interface IPlayerAttributes {
     int getLevel();
@@ -63,6 +67,26 @@ public interface IPlayerAttributes {
     }
 
     void resetAllAttributes();
+
+    long getLostRunes();
+
+    void setLostRunes(long value);
+
+    default void clearLostRunes() {
+        setLostRunes(0L);
+    }
+
+    Optional<GlobalPos> getBloodstainLocation();
+
+    void setBloodstainLocation(@Nullable GlobalPos pos);
+
+    default void clearBloodstain() {
+        setBloodstainLocation(null);
+    }
+
+    default boolean hasBloodstain() {
+        return getBloodstainLocation().isPresent();
+    }
 
     CompoundTag serializeNBT();
 

@@ -29,6 +29,7 @@ public final class SpellProperties {
     private final Component description;
     private final Component effectSummary;
     private final SpellRequirements requirements;
+    private final java.util.Map<SpellScalingAttribute, SpellScaling> scaling;
 
     private SpellProperties(Builder builder) {
         this.manaCost = builder.manaCost;
@@ -43,6 +44,7 @@ public final class SpellProperties {
         this.description = builder.description;
         this.effectSummary = builder.effectSummary;
         this.requirements = builder.requirements;
+        this.scaling = java.util.Map.copyOf(builder.scaling);
     }
 
     public static Builder builder() {
@@ -99,6 +101,10 @@ public final class SpellProperties {
         return requirements;
     }
 
+    public java.util.Map<SpellScalingAttribute, SpellScaling> getScaling() {
+        return scaling;
+    }
+
     public static final class Builder {
         private Integer manaCost;
         private Integer cooldownTicks;
@@ -112,6 +118,8 @@ public final class SpellProperties {
         private Component description;
         private Component effectSummary;
         private SpellRequirements requirements = SpellRequirements.NONE;
+        private final java.util.EnumMap<SpellScalingAttribute, SpellScaling> scaling =
+                new java.util.EnumMap<>(SpellScalingAttribute.class);
 
         private Builder() {
         }
@@ -188,6 +196,18 @@ public final class SpellProperties {
 
         public Builder requirements(int requiredLevel, int intelligence, int faith, int arcane) {
             return requirements(new SpellRequirements(requiredLevel, intelligence, faith, arcane, List.of()));
+        }
+
+        public Builder scaling(SpellScalingAttribute attribute, SpellScalingGrade grade) {
+            return scaling(attribute, grade, grade.baseCoefficient());
+        }
+
+        public Builder scaling(SpellScalingAttribute attribute, SpellScalingGrade grade, double coefficient) {
+            Objects.requireNonNull(attribute, "Attribute must be defined");
+            Objects.requireNonNull(grade, "Grade must be defined");
+            double sanitized = Math.max(0.0D, coefficient);
+            this.scaling.put(attribute, new SpellScaling(attribute, grade, sanitized));
+            return this;
         }
 
         public SpellProperties build() {
