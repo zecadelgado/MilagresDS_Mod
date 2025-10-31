@@ -6,6 +6,7 @@ import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import com.stefani.MilagresDSMod.capability.playermana;
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
 import com.stefani.MilagresDSMod.network.packets.AllocateAttributeC2SPacket;
+import com.stefani.MilagresDSMod.network.packets.LightningSpearLightS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.ResetAttributesC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.SpellLightS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncAttributesS2CPacket;
@@ -82,10 +83,10 @@ public class modpackets {
                 .consumerMainThread(SyncAttributesS2CPacket::handle)
                 .add();
 
-        CHANNEL.messageBuilder(SpellLightS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(SpellLightS2CPacket::encode)
-                .decoder(SpellLightS2CPacket::new)
-                .consumerMainThread(SpellLightS2CPacket::handle)
+        CHANNEL.messageBuilder(LightningSpearLightS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(LightningSpearLightS2CPacket::encode)
+                .decoder(LightningSpearLightS2CPacket::new)
+                .consumerMainThread(LightningSpearLightS2CPacket::handle)
                 .add();
     }
 
