@@ -17,14 +17,14 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
-public class LightningSpearRenderer extends EntityRenderer<LightningSpearEntity> {
+public class LightningSpearVanillaRenderer extends EntityRenderer<LightningSpearEntity> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(
             new ResourceLocation(MilagresDSMod.MODID, "lightning_spear"), "main");
     private static final ResourceLocation TEX = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/lightning_spear.png");
 
     private final ModelPart body;
 
-    public LightningSpearRenderer(EntityRendererProvider.Context ctx) {
+    public LightningSpearVanillaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
         this.body = ctx.bakeLayer(LAYER);
     }
