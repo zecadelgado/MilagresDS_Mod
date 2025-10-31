@@ -1,0 +1,13 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.flame_sling.idle": {
+      "loop": true,
+      "bones": {
+        "tongue1": { "rotation": { "0.0": [0,0,0], "5.0": [0,8,0], "10.0": [0,0,0] } },
+        "tongue2": { "rotation": { "0.0": [0,0,0], "5.0": [0,-10,0], "10.0": [0,0,0] } },
+        "tongue3": { "rotation": { "0.0": [0,0,0], "5.0": [0,6,0], "10.0": [0,0,0] } }
+      }
+    }
+  }
+}
