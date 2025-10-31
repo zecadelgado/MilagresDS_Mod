@@ -1,6 +1,7 @@
 package com.stefani.MilagresDSMod;
 
 import com.mojang.logging.LogUtils;
+import com.stefani.MilagresDSMod.block.ModBlocks;
 import com.stefani.MilagresDSMod.client.ClientSetup;
 import com.stefani.MilagresDSMod.client.keybindings.ModKeyBindings;
 import com.stefani.MilagresDSMod.commands.VisualTestCommands;
@@ -36,6 +37,7 @@ public class MilagresDSMod {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         spellregistry.SPELLS.register(modEventBus);
+        ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModEntities.register(modEventBus);
         EntityRegistry.REGISTRY.register(modEventBus);

@@ -51,11 +51,14 @@
   "msg.milagresdsmod.attr_set": "%s definido para %s.",
   "msg.milagresdsmod.attr_added": "%s aumentado em %s.",
   "msg.milagresdsmod.level_set": "Nível definido para %s.",
-  "msg.milagresdsmod.xp_added": "XP adicionada: %s.",
+  "msg.milagresdsmod.runes_added": "Runas adicionadas: %s.",
   "msg.milagresdsmod.points_set": "Pontos disponíveis: %s.",
   "msg.milagresdsmod.preset_max_applied": "Preset de atributos máximos aplicado.",
   "msg.milagresdsmod.attrs_applied": "Atributos atualizados.",
   "msg.milagresdsmod.no_points": "Você não possui pontos disponíveis.",
+  "msg.milagresdsmod.not_enough_runes": "Você precisa de %s runas para subir de nível.",
+  "msg.milagresdsmod.grace_too_far": "Você se afastou demais do Local de Graça.",
+  "msg.milagresdsmod.level_up_grace_success": "Nível aumentado para %s!",
 
   "ui.attributes.title": "Atributos",
   "ui.attributes.points": "Pontos disponíveis: %s",
@@ -70,12 +73,19 @@
   "ui.attributes.arcane": "Arcano",
   "ui.attributes.level": "Nível",
   "ui.attributes.hint": "Use os pontos para aprimorar seus atributos.",
+  "ui.attributes.runes": "Runas armazenadas: %s",
   "ui.attributes.strength.tooltip": "Força: +5%% de dano corpo a corpo por ponto.",
   "ui.attributes.dexterity.tooltip": "Destreza: +5%% de dano de projéteis por ponto.",
   "ui.attributes.constitution.tooltip": "Constituição: +5%% de vida máxima por ponto.",
   "ui.attributes.intelligence.tooltip": "Inteligência: requisito para feitiços e escala dano mágico.",
   "ui.attributes.faith.tooltip": "Fé: requisito para milagres e escala dano sagrado.",
   "ui.attributes.arcane.tooltip": "Arcano: requisito para artes ocultas e escala dano sombrio.",
+  "ui.grace.title": "Local de Graça",
+  "ui.grace.confirm": "Oferecer runas",
+  "ui.grace.cost": "Custo do próximo nível: %s",
+  "ui.grace.balance": "Runas armazenadas: %s",
+  "ui.grace.hint": "Ofereça runas para aumentar seu nível.",
 
-  "item.milagresdsmod.lightning_spear": "Lança de Relâmpago"
+  "item.milagresdsmod.lightning_spear": "Lança de Relâmpago",
+  "block.milagresdsmod.grace_site": "Local de Graça"
 }

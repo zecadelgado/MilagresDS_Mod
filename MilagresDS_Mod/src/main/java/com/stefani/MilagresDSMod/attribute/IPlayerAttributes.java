@@ -7,9 +7,17 @@ public interface IPlayerAttributes {
 
     void setLevel(int value);
 
-    long getXp();
+    long getStoredRunes();
 
-    void setXp(long value);
+    void setStoredRunes(long value);
+
+    default long getXp() {
+        return getStoredRunes();
+    }
+
+    default void setXp(long value) {
+        setStoredRunes(value);
+    }
 
     int getPoints();
 

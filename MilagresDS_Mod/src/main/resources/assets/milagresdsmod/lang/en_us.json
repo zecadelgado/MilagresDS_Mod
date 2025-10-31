@@ -51,11 +51,14 @@
   "msg.milagresdsmod.attr_set": "%s set to %s.",
   "msg.milagresdsmod.attr_added": "%s changed by %s.",
   "msg.milagresdsmod.level_set": "Level set to %s.",
-  "msg.milagresdsmod.xp_added": "XP added: %s.",
+  "msg.milagresdsmod.runes_added": "Runes added: %s.",
   "msg.milagresdsmod.points_set": "Available points: %s.",
   "msg.milagresdsmod.preset_max_applied": "Maximum attributes preset applied.",
   "msg.milagresdsmod.attrs_applied": "Attributes updated.",
   "msg.milagresdsmod.no_points": "You have no available points.",
+  "msg.milagresdsmod.not_enough_runes": "You need %s runes to level up.",
+  "msg.milagresdsmod.grace_too_far": "You moved too far away from the site of grace.",
+  "msg.milagresdsmod.level_up_grace_success": "Level increased to %s!",
 
   "ui.attributes.title": "Attributes",
   "ui.attributes.points": "Available points: %s",
@@ -70,12 +73,19 @@
   "ui.attributes.arcane": "Arcane",
   "ui.attributes.level": "Level",
   "ui.attributes.hint": "Use points to enhance your attributes.",
+  "ui.attributes.runes": "Stored runes: %s",
   "ui.attributes.strength.tooltip": "Strength: +5%% melee damage per point.",
   "ui.attributes.dexterity.tooltip": "Dexterity: +5%% projectile damage per point.",
   "ui.attributes.constitution.tooltip": "Constitution: +5%% maximum health per point.",
   "ui.attributes.intelligence.tooltip": "Intelligence: Required for sorceries and scaling magic damage.",
   "ui.attributes.faith.tooltip": "Faith: Required for miracles and scaling holy damage.",
   "ui.attributes.arcane.tooltip": "Arcane: Required for occult arts and scaling dark damage.",
+  "ui.grace.title": "Site of Grace",
+  "ui.grace.confirm": "Offer runes",
+  "ui.grace.cost": "Next level cost: %s",
+  "ui.grace.balance": "Stored runes: %s",
+  "ui.grace.hint": "Offer runes to increase your level.",
 
-  "item.milagresdsmod.lightning_spear": "Lightning Spear"
+  "item.milagresdsmod.lightning_spear": "Lightning Spear",
+  "block.milagresdsmod.grace_site": "Site of Grace"
 }

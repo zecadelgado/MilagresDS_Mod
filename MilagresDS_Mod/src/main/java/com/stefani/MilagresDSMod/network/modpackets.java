@@ -9,6 +9,7 @@ import com.stefani.MilagresDSMod.capability.playerspells;
 import com.stefani.MilagresDSMod.capability.playerspellsprovider;
 import com.stefani.MilagresDSMod.network.packets.AllocateAttributeC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.LightningSpearLightS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.LevelUpAtGraceC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.ResetAttributesC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.SpellLightS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SpellSelectionResultS2CPacket;
@@ -18,6 +19,7 @@ import com.stefani.MilagresDSMod.network.packets.SyncMemorizedSpellsS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.UpdateMemorizedSpellsC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.castspellpackets;
 import com.stefani.MilagresDSMod.network.packets.selectspellpackets;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
@@ -81,6 +83,12 @@ public class modpackets {
                 .encoder(ResetAttributesC2SPacket::encode)
                 .decoder(ResetAttributesC2SPacket::new)
                 .consumerMainThread((packet, supplier) -> packet.handle(supplier))
+                .add();
+
+        CHANNEL.messageBuilder(LevelUpAtGraceC2SPacket.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(LevelUpAtGraceC2SPacket::encode)
+                .decoder(LevelUpAtGraceC2SPacket::decode)
+                .consumerMainThread(LevelUpAtGraceC2SPacket::handle)
                 .add();
 
         CHANNEL.messageBuilder(SyncManaS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
@@ -163,7 +171,7 @@ public class modpackets {
     public static void sendAttributesSync(ServerPlayer player, IPlayerAttributes attributes) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SyncAttributesS2CPacket(
                 attributes.getLevel(),
-                attributes.getXp(),
+                attributes.getStoredRunes(),
                 attributes.getPoints(),
                 attributes.getIntelligence(),
                 attributes.getFaith(),
@@ -171,6 +179,10 @@ public class modpackets {
                 attributes.getStrength(),
                 attributes.getDexterity(),
                 attributes.getConstitution()));
+    }
+
+    public static void sendGraceLevelUp(BlockPos pos) {
+        CHANNEL.sendToServer(new LevelUpAtGraceC2SPacket(pos));
     }
 
     public static void sendTracking(Entity entity, Object packet) {
