@@ -169,8 +169,8 @@ public final class AttributesCommands {
         return target.getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).map(attributes -> {
             long xpToNext = attributes.xpToNextLevel();
             source.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
-                    "Level: %d | XP: %d | XP->Next: %d | Points: %d | STR: %d | DEX: %d | CON: %d | INT: %d | FAITH: %d | ARCANE: %d",
-                    attributes.getLevel(), attributes.getXp(), xpToNext, attributes.getPoints(),
+                    "Level: %d | XP: %d | Lost: %d | XP->Next: %d | Points: %d | STR: %d | DEX: %d | CON: %d | INT: %d | FAITH: %d | ARCANE: %d",
+                    attributes.getLevel(), attributes.getXp(), attributes.getLostRunes(), xpToNext, attributes.getPoints(),
                     attributes.getStrength(), attributes.getDexterity(), attributes.getConstitution(),
                     attributes.getIntelligence(), attributes.getFaith(), attributes.getArcane())), false);
             return 1;

@@ -7,6 +7,10 @@ import com.stefani.MilagresDSMod.capability.playerspellsprovider;
 import com.stefani.MilagresDSMod.config.ModCommonConfig;
 import com.stefani.MilagresDSMod.network.modpackets;
 import com.stefani.MilagresDSMod.server.stats.ConstitutionApplier;
+import com.stefani.MilagresDSMod.util.BloodstainHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -48,6 +52,8 @@ public class ModEvents {
             event.getEntity().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).ifPresent(attributes -> {
                 ConstitutionApplier.apply(serverPlayer, attributes);
                 modpackets.sendAttributesSync(serverPlayer, attributes);
+                modpackets.sendRunesSync(serverPlayer, attributes);
+                modpackets.sendBloodstainSync(serverPlayer, attributes);
             });
             modpackets.sendSpellSnapshot(serverPlayer);
         }
@@ -75,6 +81,28 @@ public class ModEvents {
                 event.getEntity().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES)
                         .ifPresent(newAttributes -> {
                             newAttributes.deserializeNBT(oldAttributes.serializeNBT());
+                            if (wasDeath && event.getEntity() instanceof ServerPlayer newServerPlayer
+                                    && event.getOriginal() instanceof ServerPlayer oldServerPlayer) {
+                                MinecraftServer server = newServerPlayer.serverLevel().getServer();
+                                GlobalPos previous = newAttributes.getBloodstainLocation().orElse(null);
+                                BloodstainHelper.remove(server, previous);
+
+                                long lostRunes = Math.max(0L, oldAttributes.getXp());
+                                newAttributes.setLostRunes(lostRunes);
+                                newAttributes.setXp(0L);
+                                newAttributes.clearBloodstain();
+
+                                if (lostRunes > 0L) {
+                                    BlockPos deathPos = oldServerPlayer.blockPosition();
+                                    BloodstainHelper.place(oldServerPlayer.serverLevel(), deathPos,
+                                            newServerPlayer.getUUID(), lostRunes)
+                                            .ifPresent(placed -> newAttributes.setBloodstainLocation(
+                                                    GlobalPos.of(oldServerPlayer.serverLevel().dimension(), placed)));
+                                }
+
+                                modpackets.sendRunesSync(newServerPlayer, newAttributes);
+                                modpackets.sendBloodstainSync(newServerPlayer, newAttributes);
+                            }
                             if (event.getEntity() instanceof ServerPlayer newServerPlayer) {
                                 ConstitutionApplier.apply(newServerPlayer, newAttributes);
                             }
@@ -102,6 +130,8 @@ public class ModEvents {
             event.getEntity().getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).ifPresent(attributes -> {
                 ConstitutionApplier.apply(serverPlayer, attributes);
                 modpackets.sendAttributesSync(serverPlayer, attributes);
+                modpackets.sendRunesSync(serverPlayer, attributes);
+                modpackets.sendBloodstainSync(serverPlayer, attributes);
             });
             modpackets.sendSpellSnapshot(serverPlayer);
         }

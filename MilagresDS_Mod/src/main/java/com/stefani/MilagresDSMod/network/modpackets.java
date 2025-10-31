@@ -13,8 +13,10 @@ import com.stefani.MilagresDSMod.network.packets.ResetAttributesC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.SpellLightS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SpellSelectionResultS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncAttributesS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SyncBloodstainS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncManaS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncMemorizedSpellsS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SyncRunesS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.UpdateMemorizedSpellsC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.castspellpackets;
 import com.stefani.MilagresDSMod.network.packets.selectspellpackets;
@@ -106,6 +108,18 @@ public class modpackets {
                 .decoder(SyncMemorizedSpellsS2CPacket::decode)
                 .consumerMainThread(SyncMemorizedSpellsS2CPacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(SyncRunesS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncRunesS2CPacket::encode)
+                .decoder(SyncRunesS2CPacket::decode)
+                .consumerMainThread(SyncRunesS2CPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(SyncBloodstainS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncBloodstainS2CPacket::encode)
+                .decoder(SyncBloodstainS2CPacket::decode)
+                .consumerMainThread(SyncBloodstainS2CPacket::handle)
+                .add();
     }
 
     public static void sendToServer(castspellpackets packet) {
@@ -171,6 +185,19 @@ public class modpackets {
                 attributes.getStrength(),
                 attributes.getDexterity(),
                 attributes.getConstitution()));
+        sendRunesSync(player, attributes);
+    }
+
+    public static void sendRunesSync(ServerPlayer player, IPlayerAttributes attributes) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                new SyncRunesS2CPacket(attributes.getXp(), attributes.getLostRunes()));
+    }
+
+    public static void sendBloodstainSync(ServerPlayer player, IPlayerAttributes attributes) {
+        SyncBloodstainS2CPacket packet = attributes.getBloodstainLocation()
+                .map(pos -> new SyncBloodstainS2CPacket(pos.dimension().location(), pos.pos()))
+                .orElseGet(SyncBloodstainS2CPacket::new);
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
     public static void sendTracking(Entity entity, Object packet) {
