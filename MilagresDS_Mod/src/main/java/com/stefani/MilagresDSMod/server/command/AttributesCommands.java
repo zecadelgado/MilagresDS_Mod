@@ -196,7 +196,7 @@ public final class AttributesCommands {
         return target.getCapability(playerattributesprovider.PLAYER_ATTRIBUTES).map(attributes -> {
             attributes.addXp(amount);
             modpackets.sendAttributesSync(target, attributes);
-            source.sendSuccess(() -> Component.translatable("msg.milagresdsmod.xp_added", amount), false);
+            source.sendSuccess(() -> Component.translatable("msg.milagresdsmod.runes_added", amount), false);
             return 1;
         }).orElseGet(() -> {
             source.sendFailure(Component.literal("Player is missing attribute capability"));

@@ -27,6 +27,8 @@ public class AttributesScreen extends Screen {
     private static final int BACKGROUND_WIDTH = 520;
     private static final int BACKGROUND_HEIGHT = 360;
 
+    private static final Component DEFAULT_TITLE = Component.translatable("ui.attributes.title");
+
     private final List<AttributeRow> rows = new ArrayList<>();
     private final Map<AttributeRow, Button> allocationButtons = new HashMap<>();
 
@@ -40,7 +42,11 @@ public class AttributesScreen extends Screen {
     private int buttonColumn;
 
     public AttributesScreen() {
-        super(Component.translatable("ui.attributes.title"));
+        this(DEFAULT_TITLE);
+    }
+
+    protected AttributesScreen(Component title) {
+        super(title);
     }
 
     @Override
@@ -77,6 +83,7 @@ public class AttributesScreen extends Screen {
                 button -> onClose()).bounds(leftPos + BACKGROUND_WIDTH - 32 - 80, buttonsY, 80, 20).build());
 
         updateAllocationButtons();
+        afterInit();
     }
 
     private void setupRows() {
@@ -126,6 +133,9 @@ public class AttributesScreen extends Screen {
         int pointsX = leftPos + BACKGROUND_WIDTH - 32 - this.font.width(points);
         guiGraphics.drawString(this.font, points, pointsX, topPos + 36, 0xF7E7CE, false);
 
+        Component runes = Component.translatable("ui.attributes.runes", AttributesClientCache.storedRunes());
+        guiGraphics.drawString(this.font, runes, leftPos + 32, topPos + 56, 0xF7E7CE, false);
+
         for (AttributeRow row : rows) {
             guiGraphics.drawString(this.font, row.name(), leftPos + 40, row.y(), 0xFFFFFF, false);
             int baseValue = getValueFor(row.key());
@@ -143,8 +153,10 @@ public class AttributesScreen extends Screen {
             }
         }
 
-        Component hint = Component.translatable("ui.attributes.hint");
-        guiGraphics.drawString(this.font, hint, leftPos + 32, topPos + BACKGROUND_HEIGHT - 80, 0xBBAA88, false);
+        Component hint = hintMessage();
+        if (hint != null) {
+            guiGraphics.drawString(this.font, hint, leftPos + 32, topPos + BACKGROUND_HEIGHT - 80, 0xBBAA88, false);
+        }
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
@@ -154,6 +166,8 @@ public class AttributesScreen extends Screen {
                 guiGraphics.renderTooltip(this.font, row.tooltip(), mouseX, mouseY);
             }
         }
+
+        renderAdditional(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     private int getValueFor(String key) {
