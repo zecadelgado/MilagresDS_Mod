@@ -5,6 +5,8 @@ import com.stefani.MilagresDSMod.attribute.IPlayerAttributes;
 import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import com.stefani.MilagresDSMod.capability.playermana;
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
+import com.stefani.MilagresDSMod.capability.playerspells;
+import com.stefani.MilagresDSMod.capability.playerspellsprovider;
 import com.stefani.MilagresDSMod.network.packets.AllocateAttributeC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.LightningSpearLightS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.ResetAttributesC2SPacket;
@@ -12,6 +14,8 @@ import com.stefani.MilagresDSMod.network.packets.SpellLightS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SpellSelectionResultS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncAttributesS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncManaS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SyncMemorizedSpellsS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.UpdateMemorizedSpellsC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.castspellpackets;
 import com.stefani.MilagresDSMod.network.packets.selectspellpackets;
 import net.minecraft.server.level.ServerLevel;
@@ -24,6 +28,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class modpackets {
     private static final String PROTOCOL_VERSION = "1";
@@ -95,6 +100,12 @@ public class modpackets {
                 .decoder(LightningSpearLightS2CPacket::new)
                 .consumerMainThread(LightningSpearLightS2CPacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(SyncMemorizedSpellsS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncMemorizedSpellsS2CPacket::encode)
+                .decoder(SyncMemorizedSpellsS2CPacket::decode)
+                .consumerMainThread(SyncMemorizedSpellsS2CPacket::handle)
+                .add();
     }
 
     public static void sendToServer(castspellpackets packet) {
@@ -132,6 +143,16 @@ public class modpackets {
 
     public static void sendManaSync(ServerPlayer player, playermana mana) {
         sendManaSync(player, mana.getMana(), mana.getMaxMana());
+    }
+
+    public static void sendSpellSnapshot(ServerPlayer player) {
+        player.getCapability(playerspellsprovider.PLAYER_SPELLS)
+                .ifPresent(spells -> sendSpellSnapshot(player, spells));
+    }
+
+    public static void sendSpellSnapshot(ServerPlayer player, playerspells spells) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                new SyncMemorizedSpellsS2CPacket(spells.getSlotCount(), spells.getMemorizedSlots()));
     }
 
     public static void sendAttributesSync(ServerPlayer player) {

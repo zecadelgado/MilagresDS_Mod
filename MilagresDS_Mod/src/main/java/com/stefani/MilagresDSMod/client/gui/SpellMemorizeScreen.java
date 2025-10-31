@@ -312,24 +312,26 @@ public class SpellMemorizeScreen extends Screen {
         }
         // Atualiza primeiro o snapshot local para que a grade responda imediatamente ao jogador.
         magicStats.equipSpell(selectedSlotIndex, selectedSpell.id());
-        sendPrimarySlotToServer();
+        sendSnapshotToServer();
         updateButtonState();
     }
 
     private void removeSelectedSpell() {
         // Ao remover usamos o mesmo fluxo do equipar: estado local primeiro, sincronização depois.
         magicStats.clearSlot(selectedSlotIndex);
-        sendPrimarySlotToServer();
+        sendSnapshotToServer();
         updateButtonState();
     }
 
-    private void sendPrimarySlotToServer() {
-        ResourceLocation primary = magicStats.getSpellInSlot(0);
-        if (primary != null && SpellRegistryClient.get(primary).isEmpty()) {
-            primary = null;
+    private void sendSnapshotToServer() {
+        List<ResourceLocation> snapshot = new ArrayList<>(magicStats.getEquippedSpells());
+        for (int i = 0; i < snapshot.size(); i++) {
+            ResourceLocation id = snapshot.get(i);
+            if (id != null && SpellRegistryClient.get(id).isEmpty()) {
+                snapshot.set(i, null);
+            }
         }
-        // Only synchronise the primary slot for now so the server keeps the active spell used during casting.
-        modpackets.sendSpellSelection(primary);
+        modpackets.sendMemorizedSpellsUpdate(snapshot);
     }
 
     private void updateButtonState() {
