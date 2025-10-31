@@ -41,9 +41,9 @@ public class SpellMemorizeScreen extends Screen {
     private static final int BACKGROUND_WIDTH = 520;
     private static final int BACKGROUND_HEIGHT = 360;
     private static final int SLOT_SIZE = 52;
-    private static final int SLOT_SPACING = 8;
 
     private SpellGridWidget gridWidget;
+    private final int horizontalSlotSpacing = SpellGridWidget.DEFAULT_HORIZONTAL_SPACING;
     private Button equipButton;
     private Button removeButton;
     private Button backButton;
@@ -74,15 +74,15 @@ public class SpellMemorizeScreen extends Screen {
         int gridLeft = leftPos + 24;
         int slotsTop = topPos + 32;
         int gridTop = slotsTop + SLOT_SIZE + 16;
-        int gridWidth = SLOT_SIZE * 6;
         int gridHeight = SLOT_SIZE * 4 + 8;
 
-        this.gridWidget = new SpellGridWidget(gridLeft, gridTop, gridWidth, gridHeight,
-                availableSpells, FRAME, FRAME_SELECTED);
+        this.gridWidget = new SpellGridWidget(gridLeft, gridTop, gridHeight,
+                availableSpells, FRAME, FRAME_SELECTED, horizontalSlotSpacing);
         this.gridWidget.setSelectionListener(this::onSpellSelected);
         addRenderableWidget(gridWidget);
         setInitialSelection();
 
+        int gridWidth = this.gridWidget.getWidth();
         int detailLeft = gridLeft + gridWidth + 24;
         int detailWidth = BACKGROUND_WIDTH - (detailLeft - leftPos) - 32;
         int buttonsTop = topPos + BACKGROUND_HEIGHT - 60;
@@ -153,8 +153,10 @@ public class SpellMemorizeScreen extends Screen {
             magicStats.getSlotsMax());
         guiGraphics.drawString(this.font, slotsTitle, slotsLeft, slotsTop - 12, 0xF7E7CE, false);
 
+        int spacing = this.gridWidget != null ? this.gridWidget.getHorizontalSpacing() : horizontalSlotSpacing;
+        int slotStep = SLOT_SIZE + spacing;
         for (int i = 0; i < magicStats.getSlotsMax(); i++) {
-            int slotX = slotsLeft + i * (SLOT_SIZE + SLOT_SPACING);
+            int slotX = slotsLeft + i * slotStep;
             ResourceLocation frame = i == selectedSlotIndex ? FRAME_SELECTED : FRAME;
             guiGraphics.blit(frame, slotX, slotsTop, 0, 0, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE);
 
