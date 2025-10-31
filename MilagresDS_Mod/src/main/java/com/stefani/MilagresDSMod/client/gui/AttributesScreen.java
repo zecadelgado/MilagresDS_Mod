@@ -2,7 +2,11 @@ package com.stefani.MilagresDSMod.client.gui;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
 import com.stefani.MilagresDSMod.client.data.AttributesClientCache;
+import com.stefani.MilagresDSMod.magic.SpellScalingGrade;
 import com.stefani.MilagresDSMod.network.modpackets;
+import com.stefani.MilagresDSMod.util.AttributeScaling;
+import com.stefani.MilagresDSMod.util.WeaponScaling;
+import com.stefani.MilagresDSMod.util.WeaponScaling.WeaponScalingProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -32,6 +36,7 @@ public class AttributesScreen extends Screen {
     private int leftPos;
     private int topPos;
     private int valueColumn;
+    private int bonusColumn;
     private int buttonColumn;
 
     public AttributesScreen() {
@@ -43,7 +48,8 @@ public class AttributesScreen extends Screen {
         super.init();
         this.leftPos = (this.width - BACKGROUND_WIDTH) / 2;
         this.topPos = (this.height - BACKGROUND_HEIGHT) / 2;
-        this.valueColumn = leftPos + BACKGROUND_WIDTH - 140;
+        this.valueColumn = leftPos + BACKGROUND_WIDTH - 260;
+        this.bonusColumn = leftPos + BACKGROUND_WIDTH - 150;
         this.buttonColumn = leftPos + BACKGROUND_WIDTH - 72;
 
         setupRows();
@@ -122,9 +128,19 @@ public class AttributesScreen extends Screen {
 
         for (AttributeRow row : rows) {
             guiGraphics.drawString(this.font, row.name(), leftPos + 40, row.y(), 0xFFFFFF, false);
-            String valueText = String.format(Locale.ROOT, "%d", getValueFor(row.key()));
-            int valueWidth = this.font.width(valueText);
-            guiGraphics.drawString(this.font, valueText, valueColumn - valueWidth, row.y(), 0xF7E7CE, false);
+            int baseValue = getValueFor(row.key());
+            double effective = AttributeScaling.applySoftcaps(baseValue);
+            Component valueComponent = Component.translatable("ui.attributes.value_format",
+                    baseValue,
+                    formatNumber(effective),
+                    formatNumber(effective - baseValue));
+            String valueText = valueComponent.getString();
+            guiGraphics.drawString(this.font, valueText, valueColumn - this.font.width(valueText), row.y(), 0xF7E7CE, false);
+
+            Component bonusComponent = getBonusComponent(row.key(), baseValue, effective);
+            if (!bonusComponent.getString().isBlank()) {
+                guiGraphics.drawString(this.font, bonusComponent, bonusColumn, row.y(), 0xBBAA88, false);
+            }
         }
 
         Component hint = Component.translatable("ui.attributes.hint");
@@ -197,6 +213,46 @@ public class AttributesScreen extends Screen {
         if (this.minecraft != null) {
             this.minecraft.setScreen(null);
         }
+    }
+
+    private Component getBonusComponent(String key, int baseValue, double effective) {
+        return switch (key) {
+            case "strength" -> {
+                WeaponScalingProfile melee = WeaponScaling.defaultMelee();
+                double percent = melee.computeStrengthBonus(baseValue) * 100.0D;
+                yield Component.translatable("ui.attributes.bonus.melee", formatPercent(percent));
+            }
+            case "dexterity" -> {
+                WeaponScalingProfile ranged = WeaponScaling.defaultRanged();
+                double percent = ranged.computeDexterityBonus(baseValue) * 100.0D;
+                yield Component.translatable("ui.attributes.bonus.ranged", formatPercent(percent));
+            }
+            case "constitution" -> {
+                double buffer = Math.max(0.0D, effective - baseValue);
+                yield Component.translatable("ui.attributes.bonus.constitution", formatNumber(buffer));
+            }
+            case "intelligence" -> {
+                double bonus = AttributeScaling.computeSpellBonus(baseValue, SpellScalingGrade.A);
+                yield Component.translatable("ui.attributes.bonus.sorcery", formatNumber(bonus));
+            }
+            case "faith" -> {
+                double bonus = AttributeScaling.computeSpellBonus(baseValue, SpellScalingGrade.S);
+                yield Component.translatable("ui.attributes.bonus.miracle", formatNumber(bonus));
+            }
+            case "arcane" -> {
+                double bonus = AttributeScaling.computeSpellBonus(baseValue, SpellScalingGrade.B);
+                yield Component.translatable("ui.attributes.bonus.occult", formatNumber(bonus));
+            }
+            default -> Component.empty();
+        };
+    }
+
+    private static String formatNumber(double value) {
+        return String.format(Locale.ROOT, "%.1f", value);
+    }
+
+    private static String formatPercent(double value) {
+        return String.format(Locale.ROOT, "%.0f", value);
     }
 
     private static final class AttributeRow {
