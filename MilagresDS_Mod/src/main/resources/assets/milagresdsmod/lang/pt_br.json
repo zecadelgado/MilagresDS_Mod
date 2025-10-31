@@ -20,6 +20,10 @@
   "tooltip.milagresdsmod.spell.heal": "Cura: %s",
 
   "hud.milagresdsmod.mana": "Mana: %s/%s",
+  "hud.milagresdsmod.runes.active": "Runas: %s",
+  "hud.milagresdsmod.runes.lost": "Runas perdidas: %s",
+  "hud.milagresdsmod.runes.stain.distance": "Mancha de sangue: %s blocos",
+  "hud.milagresdsmod.runes.stain.dimension": "Mancha de sangue: %s",
 
   "ui.memorize.title": "Memorização de Feitiços",
   "ui.memorize.button.equip": "Equipar",
@@ -89,5 +93,6 @@
   "ui.attributes.bonus.miracle": "Bônus de milagre (S): +%s",
   "ui.attributes.bonus.occult": "Bônus oculto (B): +%s",
 
-  "item.milagresdsmod.lightning_spear": "Lança de Relâmpago"
+  "item.milagresdsmod.lightning_spear": "Lança de Relâmpago",
+  "block.milagresdsmod.bloodstain": "Mancha de Sangue"
 }

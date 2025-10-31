@@ -20,6 +20,10 @@
   "tooltip.milagresdsmod.spell.heal": "Healing: %s",
 
   "hud.milagresdsmod.mana": "Mana: %s/%s",
+  "hud.milagresdsmod.runes.active": "Runes: %s",
+  "hud.milagresdsmod.runes.lost": "Lost Runes: %s",
+  "hud.milagresdsmod.runes.stain.distance": "Bloodstain: %s blocks",
+  "hud.milagresdsmod.runes.stain.dimension": "Bloodstain: %s",
 
   "ui.memorize.title": "Spell Memorization",
   "ui.memorize.button.equip": "Equip",
@@ -89,5 +93,6 @@
   "ui.attributes.bonus.miracle": "Miracle bonus (S): +%s",
   "ui.attributes.bonus.occult": "Occult bonus (B): +%s",
 
-  "item.milagresdsmod.lightning_spear": "Lightning Spear"
+  "item.milagresdsmod.lightning_spear": "Lightning Spear",
+  "block.milagresdsmod.bloodstain": "Bloodstain"
 }
