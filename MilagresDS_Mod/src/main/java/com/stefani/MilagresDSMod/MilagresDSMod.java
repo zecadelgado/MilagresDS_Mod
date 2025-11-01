@@ -38,6 +38,7 @@ public class MilagresDSMod {
 
         spellregistry.SPELLS.register(modEventBus);
         BlockRegistry.register(modEventBus);
+        ModBlocks.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         EntityRegistry.REGISTRY.register(modEventBus);
         ParticleRegistry.REGISTRY.register(modEventBus);
