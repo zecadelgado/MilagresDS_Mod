@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 
 public class SyncAttributesS2CPacket {
     private final int level;
-    private final long xp;
+    private final long storedRunes;
     private final int points;
     private final int intelligence;
     private final int faith;
@@ -17,10 +17,10 @@ public class SyncAttributesS2CPacket {
     private final int dexterity;
     private final int constitution;
 
-    public SyncAttributesS2CPacket(int level, long xp, int points, int intelligence, int faith, int arcane,
+    public SyncAttributesS2CPacket(int level, long storedRunes, int points, int intelligence, int faith, int arcane,
                                    int strength, int dexterity, int constitution) {
         this.level = level;
-        this.xp = xp;
+        this.storedRunes = storedRunes;
         this.points = points;
         this.intelligence = intelligence;
         this.faith = faith;
@@ -32,7 +32,7 @@ public class SyncAttributesS2CPacket {
 
     public static void encode(SyncAttributesS2CPacket packet, FriendlyByteBuf buffer) {
         buffer.writeVarInt(packet.level);
-        buffer.writeVarLong(packet.xp);
+        buffer.writeVarLong(packet.storedRunes);
         buffer.writeVarInt(packet.points);
         buffer.writeVarInt(packet.intelligence);
         buffer.writeVarInt(packet.faith);
@@ -44,7 +44,7 @@ public class SyncAttributesS2CPacket {
 
     public static SyncAttributesS2CPacket decode(FriendlyByteBuf buffer) {
         int level = buffer.readVarInt();
-        long xp = buffer.readVarLong();
+        long storedRunes = buffer.readVarLong();
         int points = buffer.readVarInt();
         int intelligence = buffer.readVarInt();
         int faith = buffer.readVarInt();
@@ -52,12 +52,12 @@ public class SyncAttributesS2CPacket {
         int strength = buffer.readVarInt();
         int dexterity = buffer.readVarInt();
         int constitution = buffer.readVarInt();
-        return new SyncAttributesS2CPacket(level, xp, points, intelligence, faith, arcane, strength, dexterity, constitution);
+        return new SyncAttributesS2CPacket(level, storedRunes, points, intelligence, faith, arcane, strength, dexterity, constitution);
     }
 
     public static void handle(SyncAttributesS2CPacket packet, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
-        context.enqueueWork(() -> AttributesClientCache.update(packet.level, packet.xp, packet.points,
+        context.enqueueWork(() -> AttributesClientCache.update(packet.level, packet.storedRunes, packet.points,
                 packet.intelligence, packet.faith, packet.arcane,
                 packet.strength, packet.dexterity, packet.constitution));
         context.setPacketHandled(true);

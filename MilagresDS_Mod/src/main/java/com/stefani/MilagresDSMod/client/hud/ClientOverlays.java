@@ -14,5 +14,6 @@ public final class ClientOverlays {
     @SubscribeEvent
     public static void onRegisterOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("mana", ManaOverlay.HUD);
+        event.registerAbove("mana", "runes", RunesOverlay.HUD);
     }
 }

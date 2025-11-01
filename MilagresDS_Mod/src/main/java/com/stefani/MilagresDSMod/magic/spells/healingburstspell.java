@@ -4,6 +4,8 @@ import com.stefani.MilagresDSMod.MilagresDSMod;
 import com.stefani.MilagresDSMod.magic.SpellActions;
 import com.stefani.MilagresDSMod.magic.SpellCategory;
 import com.stefani.MilagresDSMod.magic.SpellProperties;
+import com.stefani.MilagresDSMod.magic.SpellScalingAttribute;
+import com.stefani.MilagresDSMod.magic.SpellScalingGrade;
 import com.stefani.MilagresDSMod.magic.spell;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -25,6 +27,7 @@ public class healingburstspell extends spell {
                         .castSound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8F, 1.2F)
                         .castParticles(() -> ParticleTypes.HEART, 18, 0.35D, 0.5D, 0.35D, 0.02D)
                         .healingAmount(8.0F)
+                        .scaling(SpellScalingAttribute.FAITH, SpellScalingGrade.A)
                         .requirements(8, 0, 12, 0)
                         .description(Component.translatable("spell.milagresdsmod.healingburst.desc"))
                         .effectSummary(Component.translatable("spell.milagresdsmod.healingburst.effect"))

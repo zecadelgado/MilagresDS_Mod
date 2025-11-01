@@ -5,14 +5,23 @@ import com.stefani.MilagresDSMod.attribute.IPlayerAttributes;
 import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import com.stefani.MilagresDSMod.capability.playermana;
 import com.stefani.MilagresDSMod.capability.playermanaprovider;
+import com.stefani.MilagresDSMod.capability.playerspells;
+import com.stefani.MilagresDSMod.capability.playerspellsprovider;
 import com.stefani.MilagresDSMod.network.packets.AllocateAttributeC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.LightningSpearLightS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.LevelUpAtGraceC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.ResetAttributesC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.SpellLightS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SpellSelectionResultS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncAttributesS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SyncBloodstainS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncManaS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SyncMemorizedSpellsS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.SyncRunesS2CPacket;
+import com.stefani.MilagresDSMod.network.packets.UpdateMemorizedSpellsC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.castspellpackets;
 import com.stefani.MilagresDSMod.network.packets.selectspellpackets;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +32,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class modpackets {
     private static final String PROTOCOL_VERSION = "1";
@@ -59,6 +69,12 @@ public class modpackets {
                 .consumerMainThread((packet, supplier) -> packet.handle(supplier))
                 .add();
 
+        CHANNEL.messageBuilder(SpellSelectionResultS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SpellSelectionResultS2CPacket::encode)
+                .decoder(SpellSelectionResultS2CPacket::decode)
+                .consumerMainThread(SpellSelectionResultS2CPacket::handle)
+                .add();
+
         CHANNEL.messageBuilder(AllocateAttributeC2SPacket.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(AllocateAttributeC2SPacket::encode)
                 .decoder(AllocateAttributeC2SPacket::new)
@@ -69,6 +85,12 @@ public class modpackets {
                 .encoder(ResetAttributesC2SPacket::encode)
                 .decoder(ResetAttributesC2SPacket::new)
                 .consumerMainThread((packet, supplier) -> packet.handle(supplier))
+                .add();
+
+        CHANNEL.messageBuilder(LevelUpAtGraceC2SPacket.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(LevelUpAtGraceC2SPacket::encode)
+                .decoder(LevelUpAtGraceC2SPacket::decode)
+                .consumerMainThread(LevelUpAtGraceC2SPacket::handle)
                 .add();
 
         CHANNEL.messageBuilder(SyncManaS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
@@ -88,6 +110,24 @@ public class modpackets {
                 .decoder(LightningSpearLightS2CPacket::new)
                 .consumerMainThread(LightningSpearLightS2CPacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(SyncMemorizedSpellsS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncMemorizedSpellsS2CPacket::encode)
+                .decoder(SyncMemorizedSpellsS2CPacket::decode)
+                .consumerMainThread(SyncMemorizedSpellsS2CPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(SyncRunesS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncRunesS2CPacket::encode)
+                .decoder(SyncRunesS2CPacket::decode)
+                .consumerMainThread(SyncRunesS2CPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(SyncBloodstainS2CPacket.class, nextId(), NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncBloodstainS2CPacket::encode)
+                .decoder(SyncBloodstainS2CPacket::decode)
+                .consumerMainThread(SyncBloodstainS2CPacket::handle)
+                .add();
     }
 
     public static void sendToServer(castspellpackets packet) {
@@ -100,6 +140,10 @@ public class modpackets {
 
     public static void sendSpellSelection(@Nullable ResourceLocation spellId) {
         CHANNEL.sendToServer(new selectspellpackets(spellId));
+    }
+
+    public static void sendSpellSelectionResult(ServerPlayer player, boolean success, @Nullable ResourceLocation spellId) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SpellSelectionResultS2CPacket(success, spellId));
     }
 
     public static void sendAllocateAttribute(String attributeKey, int points) {
@@ -123,6 +167,16 @@ public class modpackets {
         sendManaSync(player, mana.getMana(), mana.getMaxMana());
     }
 
+    public static void sendSpellSnapshot(ServerPlayer player) {
+        player.getCapability(playerspellsprovider.PLAYER_SPELLS)
+                .ifPresent(spells -> sendSpellSnapshot(player, spells));
+    }
+
+    public static void sendSpellSnapshot(ServerPlayer player, playerspells spells) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                new SyncMemorizedSpellsS2CPacket(spells.getSlotCount(), spells.getMemorizedSlots()));
+    }
+
     public static void sendAttributesSync(ServerPlayer player) {
         player.getCapability(playerattributesprovider.PLAYER_ATTRIBUTES)
                 .ifPresent(attributes -> sendAttributesSync(player, attributes));
@@ -131,7 +185,7 @@ public class modpackets {
     public static void sendAttributesSync(ServerPlayer player, IPlayerAttributes attributes) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SyncAttributesS2CPacket(
                 attributes.getLevel(),
-                attributes.getXp(),
+                attributes.getStoredRunes(),
                 attributes.getPoints(),
                 attributes.getIntelligence(),
                 attributes.getFaith(),
@@ -139,6 +193,23 @@ public class modpackets {
                 attributes.getStrength(),
                 attributes.getDexterity(),
                 attributes.getConstitution()));
+        sendRunesSync(player, attributes);
+    }
+
+    public static void sendRunesSync(ServerPlayer player, IPlayerAttributes attributes) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                new SyncRunesS2CPacket(attributes.getXp(), attributes.getLostRunes()));
+    }
+
+    public static void sendBloodstainSync(ServerPlayer player, IPlayerAttributes attributes) {
+        SyncBloodstainS2CPacket packet = attributes.getBloodstainLocation()
+                .map(pos -> new SyncBloodstainS2CPacket(pos.dimension().location(), pos.pos()))
+                .orElseGet(SyncBloodstainS2CPacket::new);
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    public static void sendGraceLevelUp(BlockPos pos) {
+        CHANNEL.sendToServer(new LevelUpAtGraceC2SPacket(pos));
     }
 
     public static void sendTracking(Entity entity, Object packet) {

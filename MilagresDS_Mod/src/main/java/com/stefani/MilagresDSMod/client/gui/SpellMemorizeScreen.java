@@ -9,6 +9,12 @@ import com.stefani.MilagresDSMod.client.data.Spell;
 import com.stefani.MilagresDSMod.client.data.SpellRegistryClient;
 import com.stefani.MilagresDSMod.client.gui.AttributesScreen;
 import com.stefani.MilagresDSMod.network.modpackets;
+import com.stefani.MilagresDSMod.util.AttributeScaling;
+import com.stefani.MilagresDSMod.util.WeaponScaling;
+import com.stefani.MilagresDSMod.util.WeaponScaling.WeaponScalingProfile;
+import com.stefani.MilagresDSMod.magic.SpellScaling;
+import com.stefani.MilagresDSMod.magic.SpellScalingAttribute;
+import com.stefani.MilagresDSMod.magic.SpellScalingGrade;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -213,7 +219,8 @@ public class SpellMemorizeScreen extends Screen {
         y += 22;
 
         int bottom = renderRequirementBlock(guiGraphics, left, y, width, selectedSpell.requirements());
-        renderAttributeSummary(guiGraphics, left, bottom + 8);
+        int scalingBottom = renderScalingBlock(guiGraphics, left, bottom + 8, width);
+        renderAttributeSummary(guiGraphics, left, scalingBottom + 8);
     }
 
     private int renderRequirementBlock(GuiGraphics guiGraphics, int left, int y, int width, Requirements requirements) {
@@ -247,15 +254,91 @@ public class SpellMemorizeScreen extends Screen {
     private void renderAttributeSummary(GuiGraphics guiGraphics, int left, int y) {
         guiGraphics.drawString(this.font, Component.translatable("ui.attributes.hint"), left, y, 0xBBAA88, false);
         y += 12;
-        Component summary = Component.literal(String.format(Locale.ROOT,
-                "STR %d | DEX %d | CON %d | INT %d | FAI %d | ARC %d",
-                AttributesClientCache.strength(),
-                AttributesClientCache.dexterity(),
-                AttributesClientCache.constitution(),
-                AttributesClientCache.intelligence(),
-                AttributesClientCache.faith(),
-                AttributesClientCache.arcane()));
-        guiGraphics.drawString(this.font, summary, left, y, 0xFFFFFF, false);
+
+        int str = AttributesClientCache.strength();
+        int dex = AttributesClientCache.dexterity();
+        int con = AttributesClientCache.constitution();
+        int intel = AttributesClientCache.intelligence();
+        int faith = AttributesClientCache.faith();
+        int arc = AttributesClientCache.arcane();
+
+        double effStr = AttributeScaling.applySoftcaps(str);
+        double effDex = AttributeScaling.applySoftcaps(dex);
+        double effCon = AttributeScaling.applySoftcaps(con);
+        double effInt = AttributeScaling.applySoftcaps(intel);
+        double effFaith = AttributeScaling.applySoftcaps(faith);
+        double effArc = AttributeScaling.applySoftcaps(arc);
+
+        Component effectiveLine = Component.translatable("ui.memorize.attributes.effective",
+                str, formatNumber(effStr), formatNumber(effStr - str),
+                dex, formatNumber(effDex), formatNumber(effDex - dex),
+                con, formatNumber(effCon), formatNumber(effCon - con),
+                intel, formatNumber(effInt), formatNumber(effInt - intel),
+                faith, formatNumber(effFaith), formatNumber(effFaith - faith),
+                arc, formatNumber(effArc), formatNumber(effArc - arc));
+        guiGraphics.drawString(this.font, effectiveLine, left, y, 0xFFFFFF, false);
+        y += 12;
+
+        WeaponScalingProfile melee = WeaponScaling.defaultMelee();
+        WeaponScalingProfile ranged = WeaponScaling.defaultRanged();
+        double meleeBonus = melee.computeBonus(str, dex) * 100.0D;
+        double rangedBonus = ranged.computeBonus(str, dex) * 100.0D;
+        double sorceryBonus = AttributeScaling.computeSpellBonus(intel, SpellScalingGrade.A);
+        double miracleBonus = AttributeScaling.computeSpellBonus(faith, SpellScalingGrade.S);
+        double occultBonus = AttributeScaling.computeSpellBonus(arc, SpellScalingGrade.B);
+
+        Component bonusLine = Component.translatable("ui.memorize.attributes.bonuses",
+                formatPercent(meleeBonus),
+                formatPercent(rangedBonus),
+                formatNumber(sorceryBonus),
+                formatNumber(miracleBonus),
+                formatNumber(occultBonus));
+        guiGraphics.drawString(this.font, bonusLine, left, y, 0xE0D4A6, false);
+    }
+
+    private int renderScalingBlock(GuiGraphics guiGraphics, int left, int y, int width) {
+        guiGraphics.drawString(this.font, Component.translatable("ui.memorize.scaling.title"), left, y, 0xF7E7CE, false);
+        y += 10;
+        if (selectedSpell.scaling().isEmpty()) {
+            guiGraphics.drawString(this.font, Component.translatable("ui.memorize.scaling.none"), left + 8, y, 0xAAAAAA, false);
+            return y + 10;
+        }
+
+        int str = AttributesClientCache.strength();
+        int dex = AttributesClientCache.dexterity();
+        int intel = AttributesClientCache.intelligence();
+        int faith = AttributesClientCache.faith();
+        int arc = AttributesClientCache.arcane();
+
+        for (SpellScaling scaling : selectedSpell.scaling()) {
+            SpellScalingAttribute attribute = scaling.attribute();
+            int baseValue = switch (attribute) {
+                case INTELLIGENCE -> intel;
+                case FAITH -> faith;
+                case ARCANE -> arc;
+            };
+            double effectiveValue = AttributeScaling.applySoftcaps(baseValue);
+            double bonus = scaling.computeBonus(baseValue);
+            Component line = Component.translatable("ui.memorize.scaling.line",
+                    attribute.displayName(),
+                    Component.literal(scaling.grade().name()),
+                    formatNumber(bonus),
+                    baseValue,
+                    formatNumber(effectiveValue));
+            for (FormattedCharSequence seq : this.font.split(line, width)) {
+                guiGraphics.drawString(this.font, seq, left + 8, y, 0xDCCF9E, false);
+                y += 10;
+            }
+        }
+        return y;
+    }
+
+    private static String formatNumber(double value) {
+        return String.format(Locale.ROOT, "%.1f", value);
+    }
+
+    private static String formatPercent(double value) {
+        return String.format(Locale.ROOT, "%.0f", value);
     }
 
     private Component formatRequirement(String translationKey, int required, OptionalInt current) {
@@ -312,24 +395,26 @@ public class SpellMemorizeScreen extends Screen {
         }
         // Atualiza primeiro o snapshot local para que a grade responda imediatamente ao jogador.
         magicStats.equipSpell(selectedSlotIndex, selectedSpell.id());
-        sendPrimarySlotToServer();
+        sendSnapshotToServer();
         updateButtonState();
     }
 
     private void removeSelectedSpell() {
         // Ao remover usamos o mesmo fluxo do equipar: estado local primeiro, sincronização depois.
         magicStats.clearSlot(selectedSlotIndex);
-        sendPrimarySlotToServer();
+        sendSnapshotToServer();
         updateButtonState();
     }
 
-    private void sendPrimarySlotToServer() {
-        ResourceLocation primary = magicStats.getSpellInSlot(0);
-        if (primary != null && SpellRegistryClient.get(primary).isEmpty()) {
-            primary = null;
+    private void sendSnapshotToServer() {
+        List<ResourceLocation> snapshot = new ArrayList<>(magicStats.getEquippedSpells());
+        for (int i = 0; i < snapshot.size(); i++) {
+            ResourceLocation id = snapshot.get(i);
+            if (id != null && SpellRegistryClient.get(id).isEmpty()) {
+                snapshot.set(i, null);
+            }
         }
-        // Only synchronise the primary slot for now so the server keeps the active spell used during casting.
-        modpackets.sendSpellSelection(primary);
+        modpackets.sendMemorizedSpellsUpdate(snapshot);
     }
 
     private void updateButtonState() {
@@ -339,6 +424,13 @@ public class SpellMemorizeScreen extends Screen {
         this.equipButton.active = hasSelection && !isEquipped && meetsRequirements;
         ResourceLocation slotSpell = magicStats.getSpellInSlot(selectedSlotIndex);
         this.removeButton.active = slotSpell != null;
+    }
+
+    public void onSpellSelectionResult(boolean success, @Nullable ResourceLocation equippedSpell) {
+        if (gridWidget != null && selectedSlotIndex == 0) {
+            gridWidget.setSelectedSpell(magicStats.getSpellInSlot(selectedSlotIndex));
+        }
+        updateButtonState();
     }
 
     private void reloadSpells() {
@@ -390,8 +482,9 @@ public class SpellMemorizeScreen extends Screen {
     private boolean handleSlotClick(double mouseX, double mouseY) {
         int slotsLeft = leftPos + 24;
         int slotsTop = topPos + 32;
+        int spacing = gridWidget != null ? gridWidget.getHorizontalSpacing() : horizontalSlotSpacing;
         for (int i = 0; i < magicStats.getSlotsMax(); i++) {
-            int slotX = slotsLeft + i * (SLOT_SIZE + SLOT_SPACING);
+            int slotX = slotsLeft + i * (SLOT_SIZE + spacing);
             if (mouseX >= slotX && mouseX < slotX + SLOT_SIZE && mouseY >= slotsTop && mouseY < slotsTop + SLOT_SIZE) {
                 selectedSlotIndex = i;
                 gridWidget.setSelectedSpell(magicStats.getSpellInSlot(i));
