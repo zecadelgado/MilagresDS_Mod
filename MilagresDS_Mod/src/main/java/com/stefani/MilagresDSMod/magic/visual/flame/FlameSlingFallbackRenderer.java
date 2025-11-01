@@ -5,11 +5,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stefani.MilagresDSMod.MilagresDSMod;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartDefinition;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -19,12 +19,12 @@ import net.minecraft.resources.ResourceLocation;
 
 public class FlameSlingFallbackRenderer extends EntityRenderer<FlameSlingEntity> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(
-            new ResourceLocation(MilagresDSMod.MODID, "flame_sling"), "main");
-    private static final ResourceLocation BASE = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_base.png");
-    private static final ResourceLocation OVER0 = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_0.png");
-    private static final ResourceLocation OVER1 = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_1.png");
-    private static final ResourceLocation OVER2 = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_2.png");
-    private static final ResourceLocation OVER3 = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_3.png");
+            ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "flame_sling"), "main");
+    private static final ResourceLocation BASE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_base.png");
+    private static final ResourceLocation OVER0 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_0.png");
+    private static final ResourceLocation OVER1 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_1.png");
+    private static final ResourceLocation OVER2 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_2.png");
+    private static final ResourceLocation OVER3 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_3.png");
 
     private final ModelPart body;
 

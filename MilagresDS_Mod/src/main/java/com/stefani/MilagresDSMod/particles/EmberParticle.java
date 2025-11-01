@@ -6,6 +6,8 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.core.particles.SimpleParticleType;
+import org.jetbrains.annotations.NotNull;
 
 public class EmberParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
@@ -35,21 +37,16 @@ public class EmberParticle extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
+    public @NotNull ParticleRenderType getRenderType() {
         return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
 
-    public static class Provider implements ParticleProvider<net.minecraft.core.particles.SimpleParticleType> {
-        private final SpriteSet sprites;
-
-        public Provider(SpriteSet sprites) {
-            this.sprites = sprites;
-        }
+    public record Provider(SpriteSet sprites) implements ParticleProvider<SimpleParticleType> {
 
         @Override
-        public Particle createParticle(net.minecraft.core.particles.SimpleParticleType type, ClientLevel level,
-                                       double x, double y, double z, double vx, double vy, double vz) {
-            return new EmberParticle(level, x, y, z, vx, vy, vz, sprites);
+            public Particle createParticle(@NotNull SimpleParticleType type, @NotNull ClientLevel level,
+                                           double x, double y, double z, double vx, double vy, double vz) {
+                return new EmberParticle(level, x, y, z, vx, vy, vz, sprites);
+            }
         }
-    }
 }

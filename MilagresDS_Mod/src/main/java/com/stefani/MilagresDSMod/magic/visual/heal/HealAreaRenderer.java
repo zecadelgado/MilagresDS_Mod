@@ -13,8 +13,8 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 
 public class HealAreaRenderer extends EntityRenderer<HealAreaEntity> {
-    private static final ResourceLocation RING = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/heal_ring.png");
-    private static final ResourceLocation CROSS = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/heal_cross_soft.png");
+    private static final ResourceLocation RING = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_ring.png");
+    private static final ResourceLocation CROSS = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_cross_soft.png");
 
     public HealAreaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);

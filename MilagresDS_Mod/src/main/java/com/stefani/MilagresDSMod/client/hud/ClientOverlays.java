@@ -1,6 +1,7 @@
 package com.stefani.MilagresDSMod.client.hud;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,6 +15,6 @@ public final class ClientOverlays {
     @SubscribeEvent
     public static void onRegisterOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("mana", ManaOverlay.HUD);
-        event.registerAbove("mana", "runes", RunesOverlay.HUD);
+        event.registerAbove(ResourceLocation.parse("mana"), "runes", RunesOverlay.HUD);
     }
 }

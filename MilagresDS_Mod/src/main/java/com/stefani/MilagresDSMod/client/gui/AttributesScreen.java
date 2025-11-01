@@ -83,7 +83,10 @@ public class AttributesScreen extends Screen {
                 button -> onClose()).bounds(leftPos + BACKGROUND_WIDTH - 32 - 80, buttonsY, 80, 20).build());
 
         updateAllocationButtons();
-        afterInit();
+    }
+
+    protected void afterInit() {
+        // Hook for subclasses
     }
 
     private void setupRows() {
@@ -154,7 +157,7 @@ public class AttributesScreen extends Screen {
         }
 
         Component hint = hintMessage();
-        if (hint != null) {
+        if (hint != null && !hint.getString().isEmpty()) {
             guiGraphics.drawString(this.font, hint, leftPos + 32, topPos + BACKGROUND_HEIGHT - 80, 0xBBAA88, false);
         }
 
@@ -168,6 +171,15 @@ public class AttributesScreen extends Screen {
         }
 
         renderAdditional(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    protected Component hintMessage() {
+        // Hook for subclasses
+        return Component.empty();
+    }
+
+    protected void renderAdditional(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        // Hook for subclasses
     }
 
     private int getValueFor(String key) {

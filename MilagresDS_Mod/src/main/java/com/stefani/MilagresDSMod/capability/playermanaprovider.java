@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class playermanaprovider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
-    public static final ResourceLocation ID = new ResourceLocation(MilagresDSMod.MODID, "player_mana");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "player_mana");
     public static final Capability<playermana> PLAYER_MANA = CapabilityManager.get(new CapabilityToken<>(){});
 
     private playermana mana = null;

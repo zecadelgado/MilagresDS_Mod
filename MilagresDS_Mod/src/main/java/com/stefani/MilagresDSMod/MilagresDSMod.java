@@ -6,7 +6,6 @@ import com.stefani.MilagresDSMod.client.ClientSetup;
 import com.stefani.MilagresDSMod.client.keybindings.ModKeyBindings;
 import com.stefani.MilagresDSMod.commands.VisualTestCommands;
 import com.stefani.MilagresDSMod.config.ModCommonConfig;
-import com.stefani.MilagresDSMod.entity.ModEntities;
 import com.stefani.MilagresDSMod.item.ModItems;
 import com.stefani.MilagresDSMod.network.modpackets;
 import com.stefani.MilagresDSMod.registry.BlockRegistry;
@@ -40,7 +39,6 @@ public class MilagresDSMod {
         spellregistry.SPELLS.register(modEventBus);
         BlockRegistry.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
-        ModEntities.register(modEventBus);
         EntityRegistry.REGISTRY.register(modEventBus);
         ParticleRegistry.REGISTRY.register(modEventBus);
 
@@ -53,7 +51,9 @@ public class MilagresDSMod {
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> ClientSetup.init(modEventBus));
+        if (Dist.CLIENT.isClient()) {
+            ClientSetup.init(modEventBus);
+        }
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

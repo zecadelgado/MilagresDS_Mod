@@ -26,6 +26,6 @@ public record Spell(ResourceLocation id,
         Objects.requireNonNull(requirements, "requirements");
         Objects.requireNonNull(description, "description");
         Objects.requireNonNull(icon, "icon");
-        this.scaling = List.copyOf(scaling);
+        scaling = List.copyOf(scaling);
     }
 }

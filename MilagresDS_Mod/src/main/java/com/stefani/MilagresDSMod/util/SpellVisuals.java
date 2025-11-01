@@ -16,11 +16,39 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
+import net.minecraft.sounds.SoundEvent;
 
 public final class SpellVisuals {
     private static final int DEFAULT_LIGHTNING_SPEAR_CHARGE_TICKS = 28;
 
     private SpellVisuals() {}
+
+    public static class FlameSlingCastOptions {
+        public final int chargeTicks;
+        public final double projectileSpeed;
+        public final SoundEvent launchSound;
+        public final SoundEvent impactSound;
+        public final int dynamicLightColor;
+        public final float dynamicLightRadius;
+        public final int dynamicLightDurationMs;
+        public final int dynamicLightInterval;
+
+        public FlameSlingCastOptions(int chargeTicks, double projectileSpeed, SoundEvent launchSound, SoundEvent impactSound,
+                                      int dynamicLightColor, float dynamicLightRadius, int dynamicLightDurationMs, int dynamicLightInterval) {
+            this.chargeTicks = chargeTicks;
+            this.projectileSpeed = projectileSpeed;
+            this.launchSound = launchSound;
+            this.impactSound = impactSound;
+            this.dynamicLightColor = dynamicLightColor;
+            this.dynamicLightRadius = dynamicLightRadius;
+            this.dynamicLightDurationMs = dynamicLightDurationMs;
+            this.dynamicLightInterval = dynamicLightInterval;
+        }
+
+        public static FlameSlingCastOptions defaults() {
+            return new FlameSlingCastOptions(10, 1.2, null, null, 0xFF6A2A, 10f, 500, 2);
+        }
+    }
 
     public static void showLightningSpear(Level level, LivingEntity caster, Vec3 dir) {
         showLightningSpear(level, caster, dir, DEFAULT_LIGHTNING_SPEAR_CHARGE_TICKS);

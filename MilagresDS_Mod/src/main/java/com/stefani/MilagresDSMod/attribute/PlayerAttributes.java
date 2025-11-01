@@ -236,7 +236,7 @@ public class PlayerAttributes implements IPlayerAttributes {
         tag.putInt(KEY_CONSTITUTION, this.constitution);
         tag.putLong(KEY_LOST_RUNES, this.lostRunes);
         if (this.bloodstainLocation != null) {
-            tag.put(KEY_BLOODSTAIN, NbtUtils.writeGlobalPos(this.bloodstainLocation));
+            tag.put(KEY_BLOODSTAIN, GlobalPos.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, this.bloodstainLocation).result().orElse(new CompoundTag()));
         }
         return tag;
     }
@@ -258,7 +258,7 @@ public class PlayerAttributes implements IPlayerAttributes {
         this.constitution = Math.max(0, tag.getInt(KEY_CONSTITUTION));
         this.lostRunes = Math.max(0L, tag.getLong(KEY_LOST_RUNES));
         if (tag.contains(KEY_BLOODSTAIN, Tag.TAG_COMPOUND)) {
-            this.bloodstainLocation = NbtUtils.readGlobalPos(tag.getCompound(KEY_BLOODSTAIN));
+            this.bloodstainLocation = GlobalPos.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, tag.getCompound(KEY_BLOODSTAIN)).result().orElse(null);
         } else {
             this.bloodstainLocation = null;
         }

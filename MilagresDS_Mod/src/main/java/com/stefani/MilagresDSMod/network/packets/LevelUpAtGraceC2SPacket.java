@@ -4,7 +4,7 @@ import com.stefani.MilagresDSMod.attribute.PlayerAttributes;
 import com.stefani.MilagresDSMod.attribute.playerattributesprovider;
 import com.stefani.MilagresDSMod.config.ModCommonConfig;
 import com.stefani.MilagresDSMod.network.modpackets;
-import com.stefani.MilagresDSMod.registry.ModBlocks;
+import com.stefani.MilagresDSMod.block.ModBlocks;
 import com.stefani.MilagresDSMod.server.stats.ConstitutionApplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;

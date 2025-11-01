@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class playerattributesprovider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
-    public static final ResourceLocation ID = new ResourceLocation(MilagresDSMod.MODID, "player_attributes");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "player_attributes");
     public static final Capability<IPlayerAttributes> PLAYER_ATTRIBUTES = CapabilityManager.get(new CapabilityToken<>() {});
 
     private IPlayerAttributes attributes;

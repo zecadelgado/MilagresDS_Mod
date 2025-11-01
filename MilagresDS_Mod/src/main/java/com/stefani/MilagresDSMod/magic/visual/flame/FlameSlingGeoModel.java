@@ -5,9 +5,9 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class FlameSlingGeoModel extends GeoModel<FlameSlingEntity> {
-    private static final ResourceLocation MODEL = new ResourceLocation(MilagresDSMod.MODID, "geo/FlameSlingModel.geo.json");
-    private static final ResourceLocation TEXTURE = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_base.png");
-    private static final ResourceLocation ANIMATION = new ResourceLocation(MilagresDSMod.MODID, "animations/FlameSling.anim.json");
+    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "geo/FlameSlingModel.geo.json");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_base.png");
+    private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "animations/FlameSling.anim.json");
 
     @Override
     public ResourceLocation getModelResource(FlameSlingEntity animatable) {

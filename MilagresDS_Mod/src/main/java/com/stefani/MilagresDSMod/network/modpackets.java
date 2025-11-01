@@ -36,7 +36,7 @@ import java.util.List;
 
 public class modpackets {
     private static final String PROTOCOL_VERSION = "1";
-    private static final ResourceLocation CHANNEL_ID = new ResourceLocation(MilagresDSMod.MODID, "main");
+    private static final ResourceLocation CHANNEL_ID = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "main");
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             CHANNEL_ID,
             () -> PROTOCOL_VERSION,
@@ -128,6 +128,12 @@ public class modpackets {
                 .decoder(SyncBloodstainS2CPacket::decode)
                 .consumerMainThread(SyncBloodstainS2CPacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(UpdateMemorizedSpellsC2SPacket.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(UpdateMemorizedSpellsC2SPacket::toBytes)
+                .decoder(UpdateMemorizedSpellsC2SPacket::new)
+                .consumerMainThread(UpdateMemorizedSpellsC2SPacket::handle)
+                .add();
     }
 
     public static void sendToServer(castspellpackets packet) {
@@ -210,6 +216,10 @@ public class modpackets {
 
     public static void sendGraceLevelUp(BlockPos pos) {
         CHANNEL.sendToServer(new LevelUpAtGraceC2SPacket(pos));
+    }
+
+    public static void sendMemorizedSpellsUpdate(List<ResourceLocation> slots) {
+        CHANNEL.sendToServer(new UpdateMemorizedSpellsC2SPacket(slots));
     }
 
     public static void sendTracking(Entity entity, Object packet) {

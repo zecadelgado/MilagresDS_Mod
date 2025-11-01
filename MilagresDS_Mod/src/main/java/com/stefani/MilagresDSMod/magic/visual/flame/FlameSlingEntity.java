@@ -19,8 +19,8 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fml.common.Optional;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -29,11 +29,10 @@ import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-@Optional.Interface(modid = "geckolib", iface = "software.bernie.geckolib.animatable.GeoEntity", strip = true)
 public class FlameSlingEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_STATE =
             SynchedEntityData.defineId(FlameSlingEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Vec3> DATA_LAUNCH_VECTOR =
+    private static final EntityDataAccessor<Vector3f> DATA_LAUNCH_VECTOR =
             SynchedEntityData.defineId(FlameSlingEntity.class, EntityDataSerializers.VECTOR3);
 
     private static final int STATE_CHARGING = 0;
@@ -66,13 +65,13 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
     @Override
     protected void defineSynchedData() {
         entityData.define(DATA_STATE, STATE_CHARGING);
-        entityData.define(DATA_LAUNCH_VECTOR, Vec3.ZERO);
+        entityData.define(DATA_LAUNCH_VECTOR, new Vector3f(0, 0, 0));
     }
 
     public void configureLaunch(Vec3 motion, int chargeDuration) {
         this.queuedLaunch = motion;
         this.chargeTicks = Math.max(0, chargeDuration);
-        this.entityData.set(DATA_LAUNCH_VECTOR, motion);
+        this.entityData.set(DATA_LAUNCH_VECTOR, motion.toVector3f());
         if (chargeDuration <= 0) {
             beginFlight();
         } else {
@@ -291,7 +290,8 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
         if (DATA_LAUNCH_VECTOR.equals(key)) {
-            this.queuedLaunch = entityData.get(DATA_LAUNCH_VECTOR);
+            Vector3f vec = entityData.get(DATA_LAUNCH_VECTOR);
+            this.queuedLaunch = new Vec3(vec.x, vec.y, vec.z);
         } else if (DATA_STATE.equals(key)) {
             switch (entityData.get(DATA_STATE)) {
                 case STATE_FLYING -> beginFlight();
@@ -334,7 +334,7 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
         dynamicLightRadius = tag.getFloat("lightRadius");
         dynamicLightDurationMs = tag.getInt("lightDuration");
         dynamicLightInterval = Math.max(1, tag.getInt("lightInterval"));
-        entityData.set(DATA_LAUNCH_VECTOR, queuedLaunch);
+        entityData.set(DATA_LAUNCH_VECTOR, queuedLaunch.toVector3f());
         entityData.set(DATA_STATE, state);
     }
 
@@ -349,7 +349,6 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
     }
 
     @Override
-    @Optional.Method(modid = "geckolib")
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "idle", 0, state -> {
             if (isImpactState()) {
@@ -366,7 +365,6 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
     }
 
     @Override
-    @Optional.Method(modid = "geckolib")
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         if (geckoCache == null) {
             geckoCache = GeckoLibUtil.createInstanceCache(this);

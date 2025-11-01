@@ -20,8 +20,8 @@ public class GraceAttributesScreen extends AttributesScreen {
     protected void afterInit() {
         int buttonWidth = 140;
         int buttonHeight = 20;
-        int x = leftPos() + (backgroundWidth() / 2) - (buttonWidth / 2);
-        int y = topPos() + backgroundHeight() - 90;
+        int x = (this.width - 520) / 2 + (520 / 2) - (buttonWidth / 2);
+        int y = (this.height - 360) / 2 + 360 - 90;
         this.levelUpButton = addRenderableWidget(Button.builder(Component.translatable("ui.grace.confirm"),
                 button -> attemptLevelUp()).bounds(x, y, buttonWidth, buttonHeight).build());
         updateButtonState();
@@ -42,8 +42,8 @@ public class GraceAttributesScreen extends AttributesScreen {
     protected void renderAdditional(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         long cost = AttributesClientCache.nextLevelCost();
         long runes = AttributesClientCache.storedRunes();
-        int textX = leftPos() + 32;
-        int costY = topPos() + backgroundHeight() - 140;
+        int textX = (this.width - 520) / 2 + 32;
+        int costY = (this.height - 360) / 2 + 360 - 140;
         int balanceY = costY + 16;
         int costColor = runes >= cost ? 0x9FE070 : 0xFF6B6B;
         guiGraphics.drawString(this.font, Component.translatable("ui.grace.cost", cost), textX, costY, costColor, false);

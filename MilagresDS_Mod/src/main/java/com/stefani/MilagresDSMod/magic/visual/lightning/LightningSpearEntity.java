@@ -24,12 +24,15 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LightningSpearEntity extends Entity {
+public class LightningSpearEntity extends Entity implements GeoAnimatable {
     public static final int MAX_FLIGHT_TICKS = 40;
     public static final int IMPACT_LINGER_TICKS = 35;
     private static final double FLIGHT_SPEED = 1.85;
@@ -326,7 +329,13 @@ public class LightningSpearEntity extends Entity {
         if (level() instanceof ServerLevel serverLevel) {
             entity = serverLevel.getEntity(uuid.get());
         } else if (level() instanceof ClientLevel clientLevel) {
-            entity = clientLevel.getEntity(uuid.get());
+            // On client side, search all entities by UUID
+            for (Entity e : clientLevel.entitiesForRendering()) {
+                if (e.getUUID().equals(uuid.get()) && e instanceof LivingEntity) {
+                    entity = e;
+                    break;
+                }
+            }
         }
         if (entity instanceof LivingEntity living) {
             cachedCaster = living;
@@ -357,6 +366,21 @@ public class LightningSpearEntity extends Entity {
         if (DATA_STATE.equals(key)) {
             impactSpawned = false;
         }
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return null;
+    }
+
+    @Override
+    public double getTick(Object object) {
+        return 0;
     }
 
     private enum SpearState {

@@ -5,11 +5,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stefani.MilagresDSMod.MilagresDSMod;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartDefinition;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -19,8 +19,8 @@ import net.minecraft.resources.ResourceLocation;
 
 public class LightningSpearVanillaRenderer extends EntityRenderer<LightningSpearEntity> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(
-            new ResourceLocation(MilagresDSMod.MODID, "lightning_spear"), "main");
-    private static final ResourceLocation TEX = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/lightning_spear.png");
+            ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "lightning_spear"), "main");
+    private static final ResourceLocation TEX = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/lightning_spear.png");
 
     private final ModelPart body;
 

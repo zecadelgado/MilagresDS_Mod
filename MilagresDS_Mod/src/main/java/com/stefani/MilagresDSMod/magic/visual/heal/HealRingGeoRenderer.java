@@ -14,9 +14,9 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
-    private static final ResourceLocation RUNE_TEXTURE = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/heal_cross_soft.png");
-    private static final ResourceLocation PULSE_TEXTURE = new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/heal_ring.png");
-    private static final ResourceLocation BEAM_TEXTURE = new ResourceLocation("textures/entity/beacon_beam.png");
+    private static final ResourceLocation RUNE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_cross_soft.png");
+    private static final ResourceLocation PULSE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_ring.png");
+    private static final ResourceLocation BEAM_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/beacon_beam.png");
 
     public HealRingGeoRenderer(net.minecraft.client.renderer.entity.EntityRendererProvider.Context context) {
         super(context, new HealRingModel());
@@ -45,7 +45,6 @@ public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
             super(renderer);
         }
 
-        @Override
         public void render(PoseStack poseStack, HealAreaEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
                            MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight,
                            int packedOverlay, float red, float green, float blue, float alpha) {
@@ -78,7 +77,6 @@ public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
             super(renderer);
         }
 
-        @Override
         public void render(PoseStack poseStack, HealAreaEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
                            MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight,
                            int packedOverlay, float red, float green, float blue, float alpha) {
@@ -130,7 +128,6 @@ public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
             super(renderer);
         }
 
-        @Override
         public void render(PoseStack poseStack, HealAreaEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
                            MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight,
                            int packedOverlay, float red, float green, float blue, float alpha) {

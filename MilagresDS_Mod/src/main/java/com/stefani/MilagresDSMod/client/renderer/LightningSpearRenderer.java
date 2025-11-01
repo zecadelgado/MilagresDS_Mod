@@ -2,7 +2,7 @@ package com.stefani.MilagresDSMod.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import com.stefani.MilagresDSMod.entity.LightningSpearEntity;
+import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearEntity;
 import com.stefani.MilagresDSMod.item.ModItems;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
