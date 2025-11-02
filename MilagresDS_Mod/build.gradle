@@ -8,6 +8,9 @@ buildscript {
             name = 'ParchmentMC'
             url = 'https://maven.parchmentmc.org'
         }
+        maven {
+            url = 'https://repo.spongepowered.org/repository/maven-public/'
+        }
         mavenCentral()
     }
     dependencies {
@@ -21,6 +24,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'java-library'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -34,6 +38,7 @@ def forge_version_range      = project.property('forge_version_range')
 def loader_version_range     = project.property('loader_version_range')
 def mapping_channel          = project.property('mapping_channel')
 def mapping_version          = project.property('mapping_version')
+def geckolib_version         = project.property('geckolib_version')
 def mod_id                   = project.property('mod_id')
 def mod_name                 = project.property('mod_name')
 def mod_license              = project.property('mod_license')
@@ -112,6 +117,10 @@ repositories {
     maven {
         name = "GeckoLib"
         url = uri("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
+        content {
+            includeGroupByRegex "software\\.bernie.*"
+            includeGroup "com.eliotlash.mclib"
+        }
     }
     maven {
         name = "ParchmentMC"
@@ -121,7 +130,8 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:4.4.4")
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
+    implementation "com.eliotlash.mclib:mclib:20"
 }
 
 tasks.named('processResources', ProcessResources).configure {
