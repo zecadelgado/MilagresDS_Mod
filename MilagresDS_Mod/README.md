@@ -8,10 +8,12 @@
 
 GeckoLib 4.7.x é resolvido automaticamente via Maven (Cloudsmith/Modrinth).
 
-## Se ainda falhar, limpe caches localmente
-- Execute `./gradlew --stop`.
-- Execute `./gradlew clean`.
-- Apague manualmente (Windows):
-  - `%USERPROFILE%\.gradle\caches\forge_gradle`
-  - `%USERPROFILE%\.gradle\caches\modules-2\files-2.1\software.bernie.geckolib`
-- Apague o diretório `run` do projeto.
+## Limpeza antes de rodar
+```
+gradlew --stop
+gradlew clean
+# Apagar manualmente:
+# %USERPROFILE%\.gradle\caches\forge_gradle
+# %USERPROFILE%\.gradle\caches\modules-2\files-2.1\software.bernie.geckolib
+# Excluir a pasta 'run' do projeto
+```
