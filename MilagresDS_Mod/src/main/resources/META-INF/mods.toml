@@ -5,3 +5,10 @@ license="All Rights Reserved"
 modId="milagresdsmod"
 version="1.0.0"
 displayName="Milagres DS Mod"
+
+[[dependencies.milagresdsmod]]
+modId="geckolib"
+type="required"
+versionRange="[4.7,)"
+ordering="NONE"
+side="BOTH"
