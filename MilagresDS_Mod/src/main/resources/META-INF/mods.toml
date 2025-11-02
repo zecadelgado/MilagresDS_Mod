@@ -6,6 +6,7 @@ modId="milagresdsmod"
 version="1.0.0"
 displayName="Milagres DS Mod"
 
+# GeckoLib runtime dependency
 [[dependencies.milagresdsmod]]
 modId="geckolib"
 type="required"
