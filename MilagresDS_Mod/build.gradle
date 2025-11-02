@@ -1,30 +1,12 @@
-buildscript {
-    repositories {
-        maven {
-            name = 'ForgeGradle'
-            url = 'https://maven.minecraftforge.net/'
-        }
-        maven {
-            name = 'ParchmentMC'
-            url = 'https://maven.parchmentmc.org'
-        }
-        mavenCentral()
-    }
-    dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:${project.property('forge_gradle_version')}"
-        classpath 'org.parchmentmc:librarian:1.+'
-    }
-}
-
 plugins {
     id 'eclipse'
-    id 'idea'
     id 'maven-publish'
-    id 'java-library'
+    id 'net.minecraftforge.gradle' version '6.0.25'
 }
 
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
+ext {
+    geckolib_version = project.findProperty('geckolib_version') ?: '4.7.4'
+}
 
 /* ==== Configurações do projeto/mod ==== */
 def minecraft_version        = project.property('minecraft_version')
@@ -42,9 +24,8 @@ def mod_group_id             = project.property('mod_group_id')
 def mod_authors              = project.property('mod_authors')
 def mod_description          = project.property('mod_description')
 
-version = mod_version
 group = mod_group_id
-
+version = mod_version
 
 java {
     toolchain {
@@ -62,10 +43,10 @@ minecraft {
         configureEach {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
             property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/extractSrg/output.srg"
-            property 'mixin.env.readInput', 'false'
+            def srg1 = "${project.projectDir}/build/extractSrg/output.srg"
+            def srg2 = "${project.projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.env.refMapRemappingFile', new File(srg1).exists() ? srg1 : srg2
 
             mods {
                 "${mod_id}" {
@@ -75,7 +56,13 @@ minecraft {
         }
 
         client {
+            property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', mod_id
+            jvmArgs '-Dmixin.debug.export=true',
+                    '-Dmixin.dumpTargetOnFailure=true',
+                    '-Dmixin.debug.verify=true',
+                    '-Dmixin.checks.interfaces=true',
+                    '-Dmixin.verbose=true'
         }
 
         server {
@@ -88,7 +75,8 @@ minecraft {
         }
 
         data {
-            workingDirectory project.file('run-data')
+            workingDirectory project.file('run')
+            property 'forge.enabledGameTestNamespaces', mod_id
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
         }
     }
@@ -97,31 +85,20 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    maven {
-        name = "Forge Maven"
-        url = uri("https://maven.minecraftforge.net/")
-    }
-    maven {
-        name = "Forge Maven Http Fallback"
-        url = uri("http://maven.minecraftforge.net/")
-        allowInsecureProtocol = true
-        content {
-            includeGroup "net.minecraftforge"
-        }
-    }
-    maven {
-        name = "GeckoLib"
-        url = uri("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
-    }
-    maven {
-        name = "ParchmentMC"
-        url = uri("https://maven.parchmentmc.org")
-    }
+    maven { url = "https://maven.minecraftforge.net" }
+    maven { name = "GeckoLib"; url = uri("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/") }
+    maven { name = "Modrinth"; url = uri("https://api.modrinth.com/maven") }
+    mavenCentral()
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:4.4.4")
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
+    implementation "com.eliotlash.mclib:mclib:20"
+}
+
+configurations.all {
+    exclude group: 'org.spongepowered', module: 'mixin'
 }
 
 tasks.named('processResources', ProcessResources).configure {
