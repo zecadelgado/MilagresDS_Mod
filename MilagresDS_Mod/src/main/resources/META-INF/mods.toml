@@ -6,7 +6,7 @@ modId="milagresdsmod"
 version="1.0.0"
 displayName="Milagres DS Mod"
 
-# GeckoLib runtime dependency
+# Required GeckoLib runtime dependency for Forge 1.20.1
 [[dependencies.milagresdsmod]]
 modId="geckolib"
 type="required"
