@@ -1,18 +1,8 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven {
-            name = 'MinecraftForge'
-            url = uri('https://maven.minecraftforge.net/')
-        }
-        maven {
-            name = 'MinecraftForgeHttpFallback'
-            url = uri('http://maven.minecraftforge.net/')
-            allowInsecureProtocol = true
-            content {
-                includeGroup 'net.minecraftforge.gradle'
-            }
-        }
+        maven { url = "https://maven.minecraftforge.net" }
+        mavenCentral()
     }
     resolutionStrategy {
         eachPlugin {
