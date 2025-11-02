@@ -4,10 +4,15 @@ buildscript {
             name = 'ForgeGradle'
             url = 'https://maven.minecraftforge.net/'
         }
+        maven {
+            name = 'ParchmentMC'
+            url = 'https://maven.parchmentmc.org'
+        }
         mavenCentral()
     }
     dependencies {
         classpath "net.minecraftforge.gradle:ForgeGradle:${project.property('forge_gradle_version')}"
+        classpath 'org.parchmentmc:librarian:1.+'
     }
 }
 
@@ -19,6 +24,7 @@ plugins {
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
 /* ==== Configurações do projeto/mod ==== */
 def minecraft_version        = project.property('minecraft_version')
@@ -109,6 +115,10 @@ repositories {
     maven {
         name = "GeckoLib"
         url = uri("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
+    }
+    maven {
+        name = "ParchmentMC"
+        url = uri("https://maven.parchmentmc.org")
     }
 }
 
