@@ -52,9 +52,7 @@ public class MilagresDSMod {
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
-        if (Dist.CLIENT.isClient()) {
-            ClientSetup.init(modEventBus);
-        }
+        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> ClientSetup.init(modEventBus));
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
