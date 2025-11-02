@@ -83,6 +83,8 @@ public class AttributesScreen extends Screen {
                 button -> onClose()).bounds(leftPos + BACKGROUND_WIDTH - 32 - 80, buttonsY, 80, 20).build());
 
         updateAllocationButtons();
+
+        afterInit();
     }
 
     protected void afterInit() {
