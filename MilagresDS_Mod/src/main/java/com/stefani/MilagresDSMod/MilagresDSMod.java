@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 @Mod(MilagresDSMod.MODID)
 public class MilagresDSMod {
     public static final String MODID = "milagresdsmod";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public MilagresDSMod() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();

@@ -26,6 +26,9 @@ public class LightningSpearRenderer extends EntityRenderer<LightningSpearEntity>
         this.renderStack = new ItemStack(ModItems.LIGHTNING_SPEAR_ITEM.get());
     }
 
+    public static void schedule(int entityId, int casterId, int rgb, float radius, int durationTicks) {
+    }
+
     @Override
     public void render(LightningSpearEntity entity, float entityYaw, float partialTicks,
                        PoseStack poseStack, MultiBufferSource buffer, int packedLight) {

@@ -5,7 +5,6 @@ import com.stefani.MilagresDSMod.client.keybindings.ModKeyBindings;
 import com.stefani.MilagresDSMod.client.lighting.DynamicLightClient;
 import com.stefani.MilagresDSMod.client.magic.visual.flame.FlameSlingFallbackRenderer;
 import com.stefani.MilagresDSMod.client.magic.visual.lightning.LightningSpearVanillaRenderer;
-import com.stefani.MilagresDSMod.client.magic.visual.lightning.client.LightningSpearLightClientHandler;
 import com.stefani.MilagresDSMod.client.particles.EmberParticle;
 import com.stefani.MilagresDSMod.client.particles.HealGlowParticle;
 import com.stefani.MilagresDSMod.client.particles.LightningSparkParticle;
@@ -26,7 +25,6 @@ public final class MilagresDSModClientEvents {
     @SubscribeEvent
     public static void onClientSetup(final FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            LightningSpearLightClientHandler.init();
             DynamicLightClient.init();
         });
     }
