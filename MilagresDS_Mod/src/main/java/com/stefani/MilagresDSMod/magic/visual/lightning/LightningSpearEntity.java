@@ -29,6 +29,9 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -38,6 +41,8 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
     public static final int MAX_FLIGHT_TICKS = 40;
     public static final int IMPACT_LINGER_TICKS = 35;
     private static final double FLIGHT_SPEED = 1.85;
+
+    private final AnimatableInstanceCache geckoCache = GeckoLibUtil.createInstanceCache(this);
 
     private static final EntityDataAccessor<Integer> DATA_STATE = SynchedEntityData.defineId(LightningSpearEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_CHARGE_DURATION = SynchedEntityData.defineId(LightningSpearEntity.class, EntityDataSerializers.INT);
@@ -371,17 +376,17 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-
+        controllers.add(new AnimationController<>(this, "lightning_spear", 0, state -> PlayState.CONTINUE));
     }
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return null;
+        return geckoCache;
     }
 
     @Override
     public double getTick(Object object) {
-        return 0;
+        return tickCount;
     }
 
     private enum SpearState {
