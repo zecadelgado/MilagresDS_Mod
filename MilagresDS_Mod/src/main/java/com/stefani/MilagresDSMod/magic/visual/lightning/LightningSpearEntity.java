@@ -1,5 +1,6 @@
 package com.stefani.MilagresDSMod.magic.visual.lightning;
 
+import com.stefani.MilagresDSMod.client.LightningSpearClientAccess;
 import com.stefani.MilagresDSMod.magic.visual.backend.playeranim.PlayerAnimatorCompat;
 import com.stefani.MilagresDSMod.registry.ParticleRegistry;
 import net.minecraft.core.particles.ParticleTypes;
@@ -23,6 +24,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -324,19 +327,20 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
         if (uuid.isEmpty()) {
             return null;
         }
-        Entity entity = null;
+        LivingEntity living = null;
         if (level() instanceof ServerLevel serverLevel) {
-            entity = serverLevel.getEntity(uuid.get());
-        } else if (level() instanceof net.minecraft.client.multiplayer.ClientLevel clientLevel) {
-            // On client side, search all entities by UUID
-            for (Entity e : clientLevel.entitiesForRendering()) {
-                if (e.getUUID().equals(uuid.get()) && e instanceof LivingEntity) {
-                    entity = e;
-                    break;
-                }
+            Entity entity = serverLevel.getEntity(uuid.get());
+            if (entity instanceof LivingEntity serverLiving) {
+                living = serverLiving;
             }
+        } else if (FMLEnvironment.dist.isClient()) {
+            UUID casterId = uuid.get();
+            LivingEntity[] holder = new LivingEntity[1];
+            DistExecutor.safeRunWhenOn(Dist.CLIENT,
+                    () -> () -> holder[0] = LightningSpearClientAccess.resolveCaster(casterId));
+            living = holder[0];
         }
-        if (entity instanceof LivingEntity living) {
+        if (living != null) {
             cachedCaster = living;
             return living;
         }
