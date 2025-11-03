@@ -109,6 +109,24 @@ tasks.register('failOnClientImports') {
 }
 compileJava.dependsOn tasks.named('failOnClientImports')
 
+tasks.register('validateResourcePaths') {
+    doLast {
+        def bad = fileTree('src/main/resources/assets/milagresdsmod') {
+            include '**/*.*'
+        }.files.findAll { f ->
+            def rel = f.path.replace(File.separatorChar, '/')
+            rel =~ /[A-Z ]/
+        }
+        if (!bad.isEmpty()) {
+            println '✖ Recursos com maiúsculas ou espaços detectados:'
+            bad.each { println " - $it" }
+            throw new GradleException('Invalid resource paths (uppercase/space) found')
+        }
+    }
+}
+
+processResources.dependsOn tasks.named('validateResourcePaths')
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
