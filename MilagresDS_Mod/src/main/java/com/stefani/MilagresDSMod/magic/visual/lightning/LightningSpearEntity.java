@@ -30,7 +30,7 @@ import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.PlayState;
+import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
@@ -378,7 +378,7 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "lightning_spear", 0, state -> PlayState.CONTINUE));
+        controllers.add(new AnimationController<>(this, "lightning_spear", 0, state -> software.bernie.geckolib.core.object.PlayState.CONTINUE.CONTINUE));
     }
 
     @Override

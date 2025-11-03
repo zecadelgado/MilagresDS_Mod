@@ -1,12 +1,9 @@
 package com.stefani.MilagresDSMod.magic.spells;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
-import com.stefani.MilagresDSMod.magic.SpellActions;
-import com.stefani.MilagresDSMod.magic.SpellCategory;
-import com.stefani.MilagresDSMod.magic.SpellProperties;
-import com.stefani.MilagresDSMod.magic.SpellScalingAttribute;
-import com.stefani.MilagresDSMod.magic.SpellScalingGrade;
-import com.stefani.MilagresDSMod.magic.spell;
+import com.stefani.MilagresDSMod.magic.*;
+import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingEntity;
+import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingGeoModel;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +19,7 @@ public class fireballspell extends spell {
                         .manaCost(35)
                         .cooldown(120)
                         .category(SpellCategory.OFFENSIVE)
-                        .icon(ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/spells/fireball.png"))
+                        .icon(ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/gui/spells/fireball.png"))
                         .castSound(SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F)
                         .castParticles(() -> ParticleTypes.FLAME, 24, 0.2D, 0.2D, 0.2D, 0.02D)
                         .baseDamage(14.0F)

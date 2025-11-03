@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class AttributesScreen extends Screen {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(
-            MilagresDSMod.MODID, "textures/gui/spell_menu_bg.png");
+            MilagresDSMod.MODID, "textures/gui/memorize_bg.png");
 
     private static final int BACKGROUND_WIDTH = 520;
     private static final int BACKGROUND_HEIGHT = 360;
