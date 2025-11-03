@@ -1,8 +1,8 @@
-package com.stefani.MilagresDSMod.magic.visual.backend.gecko;
+package com.stefani.MilagresDSMod.client.magic.visual.backend.gecko;
 
-import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingRenderer;
-import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaRenderer;
-import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearGeoRenderer;
+import com.stefani.MilagresDSMod.client.magic.visual.flame.FlameSlingRenderer;
+import com.stefani.MilagresDSMod.client.magic.visual.heal.HealAreaRenderer;
+import com.stefani.MilagresDSMod.client.magic.visual.lightning.LightningSpearGeoRenderer;
 import com.stefani.MilagresDSMod.registry.EntityRegistry;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 

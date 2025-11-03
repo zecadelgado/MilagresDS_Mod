@@ -1,4 +1,4 @@
-package com.stefani.MilagresDSMod.particles;
+package com.stefani.MilagresDSMod.client.particles;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;

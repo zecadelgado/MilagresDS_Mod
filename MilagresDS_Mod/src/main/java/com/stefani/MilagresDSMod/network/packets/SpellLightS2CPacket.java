@@ -1,9 +1,7 @@
 package com.stefani.MilagresDSMod.network.packets;
 
-import com.stefani.MilagresDSMod.client.lighting.DynamicLightClient;
+import com.stefani.MilagresDSMod.client.network.ClientPacketHandlers;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -37,8 +35,7 @@ public class SpellLightS2CPacket {
 
     public void handle(Supplier<NetworkEvent.Context> ctxSupplier) {
         NetworkEvent.Context ctx = ctxSupplier.get();
-        ctx.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                DynamicLightClient.addLight(entityId, rgb, radius, durationTicks)));
+        ctx.enqueueWork(() -> ClientPacketHandlers.addSpellLight(entityId, rgb, radius, durationTicks));
         ctx.setPacketHandled(true);
     }
 }
