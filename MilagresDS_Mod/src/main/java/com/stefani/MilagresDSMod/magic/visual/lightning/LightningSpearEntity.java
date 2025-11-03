@@ -1,5 +1,6 @@
 package com.stefani.MilagresDSMod.magic.visual.lightning;
 
+import com.stefani.MilagresDSMod.client.LightningSpearClientAccess;
 import com.stefani.MilagresDSMod.magic.visual.backend.playeranim.PlayerAnimatorCompat;
 import com.stefani.MilagresDSMod.registry.ParticleRegistry;
 import net.minecraft.core.particles.ParticleTypes;
@@ -23,9 +24,14 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -35,6 +41,8 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
     public static final int MAX_FLIGHT_TICKS = 40;
     public static final int IMPACT_LINGER_TICKS = 35;
     private static final double FLIGHT_SPEED = 1.85;
+
+    private final AnimatableInstanceCache geckoCache = GeckoLibUtil.createInstanceCache(this);
 
     private static final EntityDataAccessor<Integer> DATA_STATE = SynchedEntityData.defineId(LightningSpearEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_CHARGE_DURATION = SynchedEntityData.defineId(LightningSpearEntity.class, EntityDataSerializers.INT);
@@ -324,19 +332,18 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
         if (uuid.isEmpty()) {
             return null;
         }
-        Entity entity = null;
+        LivingEntity living = null;
         if (level() instanceof ServerLevel serverLevel) {
-            entity = serverLevel.getEntity(uuid.get());
-        } else if (level() instanceof net.minecraft.client.multiplayer.ClientLevel clientLevel) {
-            // On client side, search all entities by UUID
-            for (Entity e : clientLevel.entitiesForRendering()) {
-                if (e.getUUID().equals(uuid.get()) && e instanceof LivingEntity) {
-                    entity = e;
-                    break;
-                }
+            Entity entity = serverLevel.getEntity(uuid.get());
+            if (entity instanceof LivingEntity serverLiving) {
+                living = serverLiving;
             }
+        } else if (FMLEnvironment.dist.isClient()) {
+            living = DistExecutor.safeCallWhenOn(Dist.CLIENT,
+                    () -> () -> LightningSpearClientAccess.resolveCaster(uuid.get()))
+                .orElse(null);
         }
-        if (entity instanceof LivingEntity living) {
+        if (living != null) {
             cachedCaster = living;
             return living;
         }
@@ -369,17 +376,17 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-
+        controllers.add(new AnimationController<>(this, "lightning_spear", 0, state -> PlayState.CONTINUE));
     }
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return null;
+        return geckoCache;
     }
 
     @Override
     public double getTick(Object object) {
-        return 0;
+        return tickCount;
     }
 
     private enum SpearState {
