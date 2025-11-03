@@ -3,7 +3,6 @@ package com.stefani.MilagresDSMod.attribute;
 import com.stefani.MilagresDSMod.config.ModCommonConfig;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 

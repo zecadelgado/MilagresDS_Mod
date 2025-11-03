@@ -1,0 +1,7 @@
+Done in this pass:
+- Removed redundant imports in common/client classes and cleaned SpellVisuals dependencies.
+- Deprecated unused-but-preserved client renderers and S2C packet for traceability.
+- Moved unused spell GUI/render textures and obsolete models into .quarantine/resources/11-03/ (LFS pointers).
+- Added placeholders for missing grace/attributes translations and pruned unused tooltip keys.
+- Centralized dependency versions (GeckoLib/MCLib) in gradle.properties and wired mods.toml to use placeholders.
+- Added binary patterns to .gitattributes to protect texture blobs.

@@ -1,0 +1,32 @@
+[LFS pointers quarantined in .quarantine/resources/11-03]
+  - .quarantine/resources/11-03/assets/milagresdsmod/models/block/bloodstain.json
+  - .quarantine/resources/11-03/assets/milagresdsmod/models/item/grace_site.json
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/entity/spells/flame_sling_base.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/entity/spells/flame_sling_fire_0.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/entity/spells/flame_sling_fire_1.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/entity/spells/flame_sling_fire_2.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/entity/spells/flame_sling_fire_3.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/entity/spells/heal_cross_soft.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/entity/spells/heal_ring.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/entity/spells/lightning_spear.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/gui/icon_frame.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/gui/icon_frame_selected.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/gui/spell_menu_bg.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/particle/ember.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/particle/heal_glow.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/particle/lightning_spark.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/spells/fallback.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/spells/fireball.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/spells/healingburst.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/spells/lightning_spear.png
+  - .quarantine/resources/11-03/assets/milagresdsmod/textures/spells/lightningspear.png
+
+[Dynamic translation prefixes resolved by code]
+  - spell.milagresdsmod. (base prefix concatenated with spell id)
+  - ui.attributes. (prefix concatenated with attribute keys)
+
+[gradle/meta] No duplicate repositories or dependencies detected in build.gradle/settings.gradle.
+[gradle/meta] Versions centralized in gradle.properties; no redundant overrides found.
+[mods.toml] Uses allowed placeholders and mandatory=true entries already set.
+[pack.mcmeta] Present with pack_format=15 and description string.
+[meta] No META-INF/services entries or mixin configs detected.

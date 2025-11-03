@@ -14,11 +14,6 @@
   "spell.milagresdsmod.healingburst.desc": "Envolve o conjurador em energia restauradora.",
   "spell.milagresdsmod.healingburst.effect": "Cura instantânea seguida de uma breve regeneração. Escala com Fé (A).",
 
-  "tooltip.milagresdsmod.spell.mana": "Custo de Mana: %s",
-  "tooltip.milagresdsmod.spell.cooldown": "Recarga: %s ticks",
-  "tooltip.milagresdsmod.spell.damage": "Dano Base: %s",
-  "tooltip.milagresdsmod.spell.heal": "Cura: %s",
-
   "hud.milagresdsmod.mana": "Mana: %s/%s",
   "hud.milagresdsmod.runes.active": "Runas: %s",
   "hud.milagresdsmod.runes.lost": "Runas perdidas: %s",
@@ -95,6 +90,13 @@
   "ui.attributes.bonus.sorcery": "Bônus de feitiço (A): +%s",
   "ui.attributes.bonus.miracle": "Bônus de milagre (S): +%s",
   "ui.attributes.bonus.occult": "Bônus oculto (B): +%s",
+  "ui.attributes.runes": "<missing translation>",
+
+  "ui.grace.title": "<missing translation>",
+  "ui.grace.confirm": "<missing translation>",
+  "ui.grace.hint": "<missing translation>",
+  "ui.grace.cost": "<missing translation>",
+  "ui.grace.balance": "<missing translation>",
 
   "item.milagresdsmod.lightning_spear": "Lança de Relâmpago",
   "block.milagresdsmod.bloodstain": "Mancha de Sangue"

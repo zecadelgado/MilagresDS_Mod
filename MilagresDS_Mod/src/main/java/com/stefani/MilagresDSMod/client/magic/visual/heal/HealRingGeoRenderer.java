@@ -15,6 +15,7 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
+@Deprecated // no internal references (kept for safety)
 public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
     private static final ResourceLocation RUNE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_cross_soft.png");
     private static final ResourceLocation PULSE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_ring.png");

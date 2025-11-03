@@ -6,6 +6,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
+@Deprecated // no internal references (kept for safety)
 public class SpellLightS2CPacket {
     private final int entityId;
     private final int rgb;

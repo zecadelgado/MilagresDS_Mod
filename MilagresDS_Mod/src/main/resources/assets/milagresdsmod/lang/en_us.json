@@ -14,11 +14,6 @@
   "spell.milagresdsmod.healingburst.desc": "Bathes the caster in restorative energy.",
   "spell.milagresdsmod.healingburst.effect": "Instant heal followed by a short regeneration buff. Scaling: Faith (A).",
 
-  "tooltip.milagresdsmod.spell.mana": "Mana Cost: %s",
-  "tooltip.milagresdsmod.spell.cooldown": "Cooldown: %s ticks",
-  "tooltip.milagresdsmod.spell.damage": "Base Damage: %s",
-  "tooltip.milagresdsmod.spell.heal": "Healing: %s",
-
   "hud.milagresdsmod.mana": "Mana: %s/%s",
   "hud.milagresdsmod.runes.active": "Runes: %s",
   "hud.milagresdsmod.runes.lost": "Lost Runes: %s",
@@ -95,6 +90,13 @@
   "ui.attributes.bonus.sorcery": "Sorcery bonus (A): +%s",
   "ui.attributes.bonus.miracle": "Miracle bonus (S): +%s",
   "ui.attributes.bonus.occult": "Occult bonus (B): +%s",
+  "ui.attributes.runes": "Stored Runes: %s",
+
+  "ui.grace.title": "Grace Level Up",
+  "ui.grace.confirm": "Level Up",
+  "ui.grace.hint": "Spend runes to increase your attributes.",
+  "ui.grace.cost": "Required Runes: %s",
+  "ui.grace.balance": "Runes Held: %s",
 
   "item.milagresdsmod.lightning_spear": "Lightning Spear",
   "block.milagresdsmod.bloodstain": "Bloodstain"
