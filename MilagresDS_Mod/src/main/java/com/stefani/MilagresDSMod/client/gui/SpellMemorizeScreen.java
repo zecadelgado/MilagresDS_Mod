@@ -38,7 +38,7 @@ import java.util.Locale;
  */
 public class SpellMemorizeScreen extends Screen {
     private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(
-            MilagresDSMod.MODID, "textures/gui/spell_menu_bg.png");
+            MilagresDSMod.MODID, "textures/gui/memorize_bg.png");
     private static final ResourceLocation FRAME = ResourceLocation.fromNamespaceAndPath(
             MilagresDSMod.MODID, "textures/gui/icon_frame.png");
     private static final ResourceLocation FRAME_SELECTED = ResourceLocation.fromNamespaceAndPath(
@@ -51,7 +51,7 @@ public class SpellMemorizeScreen extends Screen {
     private SpellGridWidget gridWidget;
     private final int horizontalSlotSpacing = SpellGridWidget.DEFAULT_HORIZONTAL_SPACING;
     private Button equipButton;
-    private Button removeButton;
+    private Button unequipButton;
     private Button backButton;
     private Button attributesButton;
 
@@ -63,6 +63,7 @@ public class SpellMemorizeScreen extends Screen {
 
     private int leftPos;
     private int topPos;
+    private boolean uiReady;
 
     public SpellMemorizeScreen() {
         super(Component.translatable("ui.memorize.title"));
@@ -72,60 +73,73 @@ public class SpellMemorizeScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        this.uiReady = false;
         this.leftPos = (this.width - BACKGROUND_WIDTH) / 2;
         this.topPos = (this.height - BACKGROUND_HEIGHT) / 2;
 
         reloadSpells();
 
-        int gridLeft = leftPos + 24;
-        int slotsTop = topPos + 32;
+        int gridLeft = this.leftPos + 24;
+        int slotsTop = this.topPos + 32;
         int gridTop = slotsTop + SLOT_SIZE + 16;
         int gridHeight = SLOT_SIZE * 4 + 8;
 
-        this.gridWidget = new SpellGridWidget(gridLeft, gridTop, gridHeight,
-                availableSpells, FRAME, FRAME_SELECTED, horizontalSlotSpacing);
-        this.gridWidget.setSelectionListener(this::onSpellSelected);
-        addRenderableWidget(gridWidget);
-        setInitialSelection();
+        this.gridWidget = this.addRenderableWidget(new SpellGridWidget(gridLeft, gridTop, gridHeight,
+                this.availableSpells, FRAME, FRAME_SELECTED, this.horizontalSlotSpacing));
 
         int gridWidth = this.gridWidget.getWidth();
         int detailLeft = gridLeft + gridWidth + 24;
-        int detailWidth = BACKGROUND_WIDTH - (detailLeft - leftPos) - 32;
-        int buttonsTop = topPos + BACKGROUND_HEIGHT - 60;
+        int detailWidth = BACKGROUND_WIDTH - (detailLeft - this.leftPos) - 32;
+        int buttonsTop = this.topPos + BACKGROUND_HEIGHT - 60;
 
-        this.equipButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.equip"), button -> {
-            equipSelectedSpell();
-        }).bounds(detailLeft, buttonsTop, detailWidth, 20).build());
+        this.equipButton = Button.builder(Component.translatable("ui.memorize.button.equip"), button -> equipSelectedSpell())
+                .bounds(detailLeft, buttonsTop, detailWidth, 20).build();
+        this.addRenderableWidget(this.equipButton);
 
-        this.removeButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.remove"), button -> {
-            removeSelectedSpell();
-        }).bounds(detailLeft, buttonsTop + 24, detailWidth, 20).build());
+        this.unequipButton = Button.builder(Component.translatable("ui.memorize.button.remove"), button -> unequipSelectedSpell())
+                .bounds(detailLeft, buttonsTop + 24, detailWidth, 20).build();
+        this.addRenderableWidget(this.unequipButton);
 
         int halfWidth = Math.max(60, (detailWidth - 4) / 2);
-        this.backButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.back"), button -> onClose())
-                .bounds(detailLeft, buttonsTop + 48, halfWidth, 20).build());
+        this.backButton = Button.builder(Component.translatable("ui.memorize.button.back"), button -> onClose())
+                .bounds(detailLeft, buttonsTop + 48, halfWidth, 20).build();
+        this.addRenderableWidget(this.backButton);
 
-        this.attributesButton = addRenderableWidget(Button.builder(Component.translatable("ui.memorize.button.attributes"),
+        this.attributesButton = Button.builder(Component.translatable("ui.memorize.button.attributes"),
                 button -> openAttributesScreen()).bounds(detailLeft + halfWidth + 4, buttonsTop + 48,
-                detailWidth - halfWidth - 4, 20).build());
+                detailWidth - halfWidth - 4, 20).build();
+        this.addRenderableWidget(this.attributesButton);
 
-        updateButtonState();
-        setInitialFocus(gridWidget);
+        this.gridWidget.setSelectionListener(this::onSpellSelected);
+
+        this.uiReady = true;
+
+        this.setInitialSelection();
+        this.updateButtonState();
+        this.setInitialFocus(this.gridWidget);
     }
 
     private void setInitialSelection() {
+        if (this.gridWidget == null) {
+            return;
+        }
         for (int slot = 0; slot < magicStats.getSlotsMax(); slot++) {
             ResourceLocation spellId = magicStats.getSpellInSlot(slot);
             if (spellId != null) {
+                this.selectedSlotIndex = slot;
                 this.gridWidget.setSelectedSpell(spellId);
                 return;
             }
         }
+        this.selectedSpell = null;
+        this.gridWidget.setSelectedSpell(null);
     }
 
     private void onSpellSelected(@Nullable Spell spell) {
         this.selectedSpell = spell;
-        updateButtonState();
+        if (this.uiReady && this.equipButton != null) {
+            this.updateButtonState();
+        }
     }
 
     @Override
@@ -399,7 +413,7 @@ public class SpellMemorizeScreen extends Screen {
         updateButtonState();
     }
 
-    private void removeSelectedSpell() {
+    private void unequipSelectedSpell() {
         // Ao remover usamos o mesmo fluxo do equipar: estado local primeiro, sincronização depois.
         magicStats.clearSlot(selectedSlotIndex);
         sendSnapshotToServer();
@@ -418,12 +432,32 @@ public class SpellMemorizeScreen extends Screen {
     }
 
     private void updateButtonState() {
-        boolean hasSelection = selectedSpell != null;
-        boolean isEquipped = hasSelection && magicStats.isEquipped(selectedSpell.id());
-        boolean meetsRequirements = hasSelection && checkRequirements(selectedSpell);
-        this.equipButton.active = hasSelection && !isEquipped && meetsRequirements;
+        if (this.equipButton == null || this.unequipButton == null) {
+            return;
+        }
+        final boolean hasSelection = this.selectedSpell != null;
+        final boolean isEquipped = hasSelection && this.isEquipped(this.selectedSpell);
+        final boolean canEquip = hasSelection && this.canEquip(this.selectedSpell);
+        this.equipButton.active = hasSelection && !isEquipped && canEquip;
+        this.unequipButton.active = hasSelection && isEquipped;
+    }
+
+    private boolean isEquipped(Spell spell) {
+        if (spell == null) {
+            return false;
+        }
         ResourceLocation slotSpell = magicStats.getSpellInSlot(selectedSlotIndex);
-        this.removeButton.active = slotSpell != null;
+        return slotSpell != null && slotSpell.equals(spell.id());
+    }
+
+    private boolean canEquip(Spell spell) {
+        if (spell == null) {
+            return false;
+        }
+        if (!checkRequirements(spell)) {
+            return false;
+        }
+        return !magicStats.isEquipped(spell.id()) || isEquipped(spell);
     }
 
     public void onSpellSelectionResult(boolean success, @Nullable ResourceLocation equippedSpell) {
@@ -538,3 +572,4 @@ public class SpellMemorizeScreen extends Screen {
         }
     }
 }
+
