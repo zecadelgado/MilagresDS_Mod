@@ -1,3 +1,5 @@
+import groovy.json.JsonSlurper
+
 plugins {
     id 'eclipse'
     id 'maven-publish'
@@ -135,6 +137,69 @@ tasks.register('validateResourcePaths') {
 
 // Garante que a validação rode antes de processar recursos
 processResources.dependsOn tasks.named('validateResourcePaths')
+
+tasks.register('validateGeckoAnimations') {
+    doLast {
+        def animDir = file('src/main/resources/assets/milagresdsmod/animations')
+        if (!animDir.exists()) return
+
+        def bad = []
+        def slurper = new JsonSlurper()
+
+        fileTree(animDir) { include '**/*.json' }.files.each { f ->
+            def json = slurper.parse(f)
+            def relativePath = project.relativePath(f).replace(File.separator, "/")
+
+            def animations = []
+            if (json instanceof Map) {
+                if (json.animations instanceof Map) {
+                    json.animations.each { name, anim ->
+                        if (anim instanceof Map) animations << anim
+                    }
+                } else if (json.bones instanceof Map) {
+                    animations << json
+                }
+            }
+
+            def checkKeyframe
+            checkKeyframe = { kf, filePath ->
+                if (!(kf instanceof Map)) return
+                if (kf.containsKey('vector')) {
+                    def v = kf.vector
+                    if (!(v instanceof List) || v.size() != 3 || !v.every { it instanceof Number }) {
+                        bad << "${filePath} -> invalid 'vector' (must be [x,y,z])"
+                    }
+                } else if (kf.containsKey('x') || kf.containsKey('y') || kf.containsKey('z')) {
+                    bad << "${filePath} -> missing 'vector' (found x/y/z split)"
+                }
+            }
+
+            def checkChannel = { ch, filePath ->
+                if (!(ch instanceof Map)) return
+                ch.each { t, kf -> checkKeyframe(kf, filePath) }
+            }
+
+            animations.each { anim ->
+                def bones = anim.bones instanceof Map ? anim.bones : [:]
+                bones.values().each { bone ->
+                    if (!(bone instanceof Map)) return
+                    ['rotation', 'position', 'scale'].each { chan ->
+                        if (bone.containsKey(chan)) {
+                            checkChannel(bone[chan], relativePath)
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!bad.isEmpty()) {
+            println '✖ GeckoLib animations with invalid vectors:'
+            bad.each { println " - $it" }
+            throw new GradleException('Invalid GeckoLib animation vectors detected')
+        }
+    }
+}
+processResources.dependsOn tasks.named('validateGeckoAnimations')
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
