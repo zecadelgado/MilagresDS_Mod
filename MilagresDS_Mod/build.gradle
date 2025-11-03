@@ -15,7 +15,6 @@ def loader_version_range     = project.property('loader_version_range')
 def mapping_channel          = project.property('mapping_channel')
 def mapping_version          = project.property('mapping_version')
 def geckolib_version         = project.property 'geckolib_version'
-def mclib_version            = project.property('mclib_version')
 def mod_id                   = project.property('mod_id')
 def mod_name                 = project.property('mod_name')
 def mod_license              = project.property('mod_license')
@@ -88,7 +87,6 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 repositories {
     maven { url = "https://maven.minecraftforge.net" }
     maven { name = "GeckoLib"; url = uri("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/") }
-    maven { name = "Modrinth"; url = uri("https://api.modrinth.com/maven") }
     mavenCentral()
 }
 
@@ -204,7 +202,6 @@ processResources.dependsOn tasks.named('validateGeckoAnimations')
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
-    implementation "com.eliotlash.mclib:mclib:${mclib_version}"
 }
 
 configurations.all {
@@ -212,23 +209,21 @@ configurations.all {
 }
 
 tasks.named('processResources', ProcessResources).configure {
-    var replaceProperties = [
-            minecraft_version       : minecraft_version,
+    var allowedProperties = [
             minecraft_version_range : minecraft_version_range,
-            forge_version           : forge_version,
             forge_version_range     : forge_version_range,
             loader_version_range    : loader_version_range,
+            minecraft_version       : minecraft_version,
             mod_id                  : mod_id,
             mod_name                : mod_name,
-            mod_license             : mod_license,
             mod_version             : mod_version,
             mod_authors             : mod_authors,
-            mod_description         : mod_description,
+            mod_license             : mod_license,
     ]
-    inputs.properties replaceProperties
+    inputs.properties allowedProperties
 
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties + [project: project]
+    filesMatching('META-INF/mods.toml') {
+        expand allowedProperties
     }
 }
 
