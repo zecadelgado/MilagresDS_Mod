@@ -1,8 +1,9 @@
-package com.stefani.MilagresDSMod.magic.visual.heal;
+package com.stefani.MilagresDSMod.client.magic.visual.heal;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stefani.MilagresDSMod.MilagresDSMod;
+import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;

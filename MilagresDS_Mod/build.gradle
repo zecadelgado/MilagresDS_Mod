@@ -58,6 +58,7 @@ minecraft {
 
         client {
             property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.markers', 'REGISTRIES,SCAN,LOADING,CORE'
             property 'forge.enabledGameTestNamespaces', mod_id
             jvmArgs '-Dmixin.debug.export=true',
                     '-Dmixin.dumpTargetOnFailure=true',
@@ -91,6 +92,25 @@ repositories {
     maven { name = "Modrinth"; url = uri("https://api.modrinth.com/maven") }
     mavenCentral()
 }
+
+// Falha o build se houver import de net.minecraft.client.* fora do pacote client/
+tasks.register('failOnClientImports') {
+    doLast {
+        def bad = fileTree('src/main/java') {
+            include '**/*.java'
+            exclude '**/client/**'
+        }.files.findAll { f ->
+            def t = f.getText('UTF-8')
+            t.contains('import net.minecraft.client.')
+        }
+        if (!bad.isEmpty()) {
+            println '✖ Client-only imports encontrados fora de src/main/java/**/client/**:'
+            bad.each { println " - $it" }
+            throw new GradleException("Client-only imports em código comum")
+        }
+    }
+}
+compileJava.dependsOn tasks.named('failOnClientImports')
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"

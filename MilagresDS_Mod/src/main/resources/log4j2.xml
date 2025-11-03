@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" packages="">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger{36}]: %msg%n"/>
+    </Console>
+    <RollingFile name="File" fileName="logs/dev-latest.log" filePattern="logs/dev-%d{MM-dd-HH}.log.gz">
+      <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger{36}]: %msg%n"/>
+      <Policies>
+        <SizeBasedTriggeringPolicy size="10 MB"/>
+      </Policies>
+      <DefaultRolloverStrategy max="5"/>
+    </RollingFile>
+  </Appenders>
+  <Loggers>
+    <Logger name="net.minecraftforge" level="debug"/>
+    <Logger name="com.stefani.MilagresDSMod" level="debug"/>
+    <Root level="info">
+      <AppenderRef ref="Console"/>
+      <AppenderRef ref="File"/>
+    </Root>
+  </Loggers>
+</Configuration>
