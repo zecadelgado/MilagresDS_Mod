@@ -339,9 +339,11 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
                 living = serverLiving;
             }
         } else if (FMLEnvironment.dist.isClient()) {
-            living = DistExecutor.safeCallWhenOn(Dist.CLIENT,
-                    () -> () -> LightningSpearClientAccess.resolveCaster(uuid.get()))
-                .orElse(null);
+            UUID casterId = uuid.get();
+            LivingEntity[] holder = new LivingEntity[1];
+            DistExecutor.safeRunWhenOn(Dist.CLIENT,
+                    () -> () -> holder[0] = LightningSpearClientAccess.resolveCaster(casterId));
+            living = holder[0];
         }
         if (living != null) {
             cachedCaster = living;
