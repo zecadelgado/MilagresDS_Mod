@@ -109,22 +109,31 @@ tasks.register('failOnClientImports') {
 }
 compileJava.dependsOn tasks.named('failOnClientImports')
 
+// Valida nomes de recursos em assets/milagresdsmod para evitar ResourceLocationException
 tasks.register('validateResourcePaths') {
     doLast {
-        def bad = fileTree('src/main/resources/assets/milagresdsmod') {
+        def assetsDir = file('src/main/resources/assets/milagresdsmod')
+        if (!assetsDir.exists()) return
+
+        def bad = fileTree(assetsDir) {
             include '**/*.*'
         }.files.findAll { f ->
-            def rel = f.path.replace(File.separatorChar, '/')
-            rel =~ /[A-Z ]/
+            // Caminho relativo e normalização de separador (funciona em Windows/Linux/macOS)
+            def rel = project.relativePath(f).replace(File.separator, "/")
+            // Valida contra o conjunto permitido por ResourceLocation: [a-z0-9/._-]
+            // (qualquer caractere fora desse conjunto reprova — maiúsculas e espaços inclusos)
+            rel =~ /[^a-z0-9\/._-]/
         }
+
         if (!bad.isEmpty()) {
-            println '✖ Recursos com maiúsculas ou espaços detectados:'
-            bad.each { println " - $it" }
-            throw new GradleException('Invalid resource paths (uppercase/space) found')
+            println '✖ Recursos com caracteres inválidos (apenas [a-z0-9/._-] são permitidos):'
+            bad.each { println " - ${project.relativePath(it).replace(File.separator, "/")}" }
+            throw new GradleException('Invalid resource paths found (uppercase/space/special char)')
         }
     }
 }
 
+// Garante que a validação rode antes de processar recursos
 processResources.dependsOn tasks.named('validateResourcePaths')
 
 dependencies {
