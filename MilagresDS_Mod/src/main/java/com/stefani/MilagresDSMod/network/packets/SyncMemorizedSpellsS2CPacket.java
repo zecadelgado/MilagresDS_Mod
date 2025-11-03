@@ -1,8 +1,6 @@
 package com.stefani.MilagresDSMod.network.packets;
 
-import com.stefani.MilagresDSMod.capability.playerspellsprovider;
-import com.stefani.MilagresDSMod.client.MagicStats;
-import net.minecraft.client.Minecraft;
+import com.stefani.MilagresDSMod.client.network.ClientPacketHandlers;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent;
@@ -55,17 +53,7 @@ public class SyncMemorizedSpellsS2CPacket {
 
     public static void handle(SyncMemorizedSpellsS2CPacket packet, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
-        context.enqueueWork(() -> {
-            Minecraft minecraft = Minecraft.getInstance();
-            if (minecraft.player == null) {
-                return;
-            }
-            MagicStats.get().syncFromServer(packet.slots, packet.memorised);
-            minecraft.player.getCapability(playerspellsprovider.PLAYER_SPELLS).ifPresent(spells -> {
-                spells.setSlotCount(packet.slots);
-                spells.setMemorizedSlots(packet.memorised);
-            });
-        });
+        context.enqueueWork(() -> ClientPacketHandlers.applyMemorizedSpells(packet.slots, packet.memorised));
         context.setPacketHandled(true);
     }
 }

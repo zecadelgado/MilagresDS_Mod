@@ -1,9 +1,11 @@
-package com.stefani.MilagresDSMod.magic.visual.heal;
+package com.stefani.MilagresDSMod.client.magic.visual.heal;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.stefani.MilagresDSMod.MilagresDSMod;
+import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaEntity;
+import com.stefani.MilagresDSMod.magic.visual.heal.HealRingModel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -13,6 +15,7 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
+@Deprecated // no internal references (kept for safety)
 public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
     private static final ResourceLocation RUNE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_cross_soft.png");
     private static final ResourceLocation PULSE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_ring.png");

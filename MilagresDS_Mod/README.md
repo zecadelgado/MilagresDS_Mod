@@ -17,3 +17,9 @@ gradlew clean
 # %USERPROFILE%\.gradle\caches\modules-2\files-2.1\software.bernie.geckolib
 # Excluir a pasta 'run' do projeto
 ```
+
+## Se o dev-run falhar sem stack
+1) gradlew --stop
+2) gradlew clean
+3) Apague a pasta 'run' e 'run/logs'
+4) Rode novamente

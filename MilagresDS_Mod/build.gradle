@@ -4,10 +4,6 @@ plugins {
     id 'net.minecraftforge.gradle' version '6.0.25'
 }
 
-ext {
-    geckolib_version = project.findProperty('geckolib_version') ?: '4.7.4'
-}
-
 /* ==== Configurações do projeto/mod ==== */
 def minecraft_version        = project.property('minecraft_version')
 def minecraft_version_range  = project.property('minecraft_version_range')
@@ -17,6 +13,7 @@ def loader_version_range     = project.property('loader_version_range')
 def mapping_channel          = project.property('mapping_channel')
 def mapping_version          = project.property('mapping_version')
 def geckolib_version         = project.property('geckolib_version')
+def mclib_version            = project.property('mclib_version')
 def mod_id                   = project.property('mod_id')
 def mod_name                 = project.property('mod_name')
 def mod_license              = project.property('mod_license')
@@ -58,6 +55,7 @@ minecraft {
 
         client {
             property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.markers', 'REGISTRIES,SCAN,LOADING,CORE'
             property 'forge.enabledGameTestNamespaces', mod_id
             jvmArgs '-Dmixin.debug.export=true',
                     '-Dmixin.dumpTargetOnFailure=true',
@@ -92,10 +90,29 @@ repositories {
     mavenCentral()
 }
 
+// Falha o build se houver import de net.minecraft.client.* fora do pacote client/
+tasks.register('failOnClientImports') {
+    doLast {
+        def bad = fileTree('src/main/java') {
+            include '**/*.java'
+            exclude '**/client/**'
+        }.files.findAll { f ->
+            def t = f.getText('UTF-8')
+            t.contains('import net.minecraft.client.')
+        }
+        if (!bad.isEmpty()) {
+            println '✖ Client-only imports encontrados fora de src/main/java/**/client/**:'
+            bad.each { println " - $it" }
+            throw new GradleException("Client-only imports em código comum")
+        }
+    }
+}
+compileJava.dependsOn tasks.named('failOnClientImports')
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
-    implementation "com.eliotlash.mclib:mclib:20"
+    implementation "com.eliotlash.mclib:mclib:${mclib_version}"
 }
 
 configurations.all {

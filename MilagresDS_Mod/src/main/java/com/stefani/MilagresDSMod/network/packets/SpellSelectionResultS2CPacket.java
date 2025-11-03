@@ -1,8 +1,6 @@
 package com.stefani.MilagresDSMod.network.packets;
 
-import com.stefani.MilagresDSMod.client.MagicStats;
-import com.stefani.MilagresDSMod.client.gui.SpellMemorizeScreen;
-import net.minecraft.client.Minecraft;
+import com.stefani.MilagresDSMod.client.network.ClientPacketHandlers;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent;
@@ -41,19 +39,7 @@ public class SpellSelectionResultS2CPacket {
 
     public static void handle(SpellSelectionResultS2CPacket packet, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
-        context.enqueueWork(() -> {
-            MagicStats magicStats = MagicStats.get();
-            if (packet.equippedSpell != null) {
-                magicStats.equipSpell(0, packet.equippedSpell);
-            } else {
-                magicStats.clearSlot(0);
-            }
-
-            Minecraft minecraft = Minecraft.getInstance();
-            if (minecraft.screen instanceof SpellMemorizeScreen screen) {
-                screen.onSpellSelectionResult(packet.success, packet.equippedSpell);
-            }
-        });
+        context.enqueueWork(() -> ClientPacketHandlers.applySpellSelectionResult(packet.success, packet.equippedSpell));
         context.setPacketHandled(true);
     }
 }

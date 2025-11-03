@@ -15,6 +15,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
+@Deprecated // no internal references (kept for safety)
 public class LightningSpearRenderer extends EntityRenderer<LightningSpearEntity> {
     private final ItemRenderer itemRenderer;
     private final ItemStack renderStack;

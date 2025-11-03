@@ -13,42 +13,41 @@ import com.stefani.MilagresDSMod.registry.spellregistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import software.bernie.geckolib.GeckoLib;
 import org.slf4j.Logger;
 
 @Mod(MilagresDSMod.MODID)
 public class MilagresDSMod {
     public static final String MODID = "milagresdsmod";
-    public static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     public MilagresDSMod() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        spellregistry.SPELLS.register(modEventBus);
-        BlockRegistry.register(modEventBus);
-        ModBlocks.register(modEventBus);
-        ModItems.ITEMS.register(modEventBus);
-        EntityRegistry.REGISTRY.register(modEventBus);
-        ParticleRegistry.REGISTRY.register(modEventBus);
+        // Registries comuns aqui (Items, Blocks, Entities, Menus, Creative Tabs via DeferredRegister etc.)
+        spellregistry.SPELLS.register(modBus);
+        BlockRegistry.register(modBus);
+        ModBlocks.register(modBus);
+        ModItems.ITEMS.register(modBus);
+        EntityRegistry.REGISTRY.register(modBus);
+        ParticleRegistry.REGISTRY.register(modBus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ModCommonConfig.SPEC);
 
-        if (ModList.get().isLoaded("geckolib")) {
-            GeckoLib.initialize();
-        }
+        // GeckoLib é safe no common
+        software.bernie.geckolib.GeckoLib.initialize();
 
-        modEventBus.addListener(this::commonSetup);
+        modBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        // Nada de net.minecraft.client.* aqui
         modpackets.register();
     }
 

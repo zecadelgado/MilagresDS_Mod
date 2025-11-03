@@ -11,7 +11,6 @@ import com.stefani.MilagresDSMod.network.packets.AllocateAttributeC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.LightningSpearLightS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.LevelUpAtGraceC2SPacket;
 import com.stefani.MilagresDSMod.network.packets.ResetAttributesC2SPacket;
-import com.stefani.MilagresDSMod.network.packets.SpellLightS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SpellSelectionResultS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncAttributesS2CPacket;
 import com.stefani.MilagresDSMod.network.packets.SyncBloodstainS2CPacket;

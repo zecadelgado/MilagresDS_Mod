@@ -1,8 +1,9 @@
-package com.stefani.MilagresDSMod.magic.visual.flame;
+package com.stefani.MilagresDSMod.client.magic.visual.flame;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stefani.MilagresDSMod.MilagresDSMod;
+import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingEntity;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;

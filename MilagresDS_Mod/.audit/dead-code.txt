@@ -1,0 +1,3 @@
+[Possibly unused class] com/stefani/MilagresDSMod/client/magic/visual/heal/HealRingGeoRenderer.java :: HealRingGeoRenderer
+[Possibly unused class] com/stefani/MilagresDSMod/client/renderer/LightningSpearRenderer.java :: LightningSpearRenderer
+[Possibly unused class] com/stefani/MilagresDSMod/network/packets/SpellLightS2CPacket.java :: SpellLightS2CPacket

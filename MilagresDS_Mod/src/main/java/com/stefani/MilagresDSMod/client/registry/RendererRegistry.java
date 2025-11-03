@@ -1,9 +1,9 @@
-package com.stefani.MilagresDSMod.registry;
+package com.stefani.MilagresDSMod.client.registry;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
-import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingFallbackRenderer;
-import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaRenderer;
-import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearVanillaRenderer;
+import com.stefani.MilagresDSMod.client.magic.visual.flame.FlameSlingFallbackRenderer;
+import com.stefani.MilagresDSMod.client.magic.visual.heal.HealAreaRenderer;
+import com.stefani.MilagresDSMod.client.magic.visual.lightning.LightningSpearVanillaRenderer;
 import com.stefani.MilagresDSMod.registry.EntityRegistry;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.fml.ModList;
@@ -27,7 +27,7 @@ public final class RendererRegistry {
 
     private static void tryRegisterGeckoRenderers(EntityRenderersEvent.RegisterRenderers evt) {
         try {
-            Class<?> bootstrap = Class.forName("com.stefani.MilagresDSMod.magic.visual.backend.gecko.GeckoBackend");
+            Class<?> bootstrap = Class.forName("com.stefani.MilagresDSMod.client.magic.visual.backend.gecko.GeckoBackend");
             var method = bootstrap.getMethod("registerRenderers", EntityRenderersEvent.RegisterRenderers.class);
             Object result = method.invoke(null, evt);
             if (result instanceof Boolean bool && bool) {

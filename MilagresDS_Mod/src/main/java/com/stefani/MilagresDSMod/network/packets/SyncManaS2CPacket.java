@@ -1,8 +1,6 @@
 package com.stefani.MilagresDSMod.network.packets;
 
-import com.stefani.MilagresDSMod.capability.playermanaprovider;
-import com.stefani.MilagresDSMod.client.MagicStats;
-import net.minecraft.client.Minecraft;
+import com.stefani.MilagresDSMod.client.network.ClientPacketHandlers;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -30,17 +28,7 @@ public class SyncManaS2CPacket {
 
     public static void handle(SyncManaS2CPacket packet, Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context context = supplier.get();
-        context.enqueueWork(() -> {
-            Minecraft minecraft = Minecraft.getInstance();
-            if (minecraft.player == null) {
-                return;
-            }
-            minecraft.player.getCapability(playermanaprovider.PLAYER_MANA).ifPresent(mana -> {
-                mana.setMaxMana(packet.maxMana);
-                mana.setMana(packet.mana);
-            });
-            MagicStats.setClientMana(packet.mana, packet.maxMana);
-        });
+        context.enqueueWork(() -> ClientPacketHandlers.applyManaSync(packet.mana, packet.maxMana));
         context.setPacketHandled(true);
     }
 }

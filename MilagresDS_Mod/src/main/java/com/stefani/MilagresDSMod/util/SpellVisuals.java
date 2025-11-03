@@ -3,20 +3,15 @@ package com.stefani.MilagresDSMod.util;
 import com.stefani.MilagresDSMod.magic.visual.backend.lighting.DynamicLightDispatcher;
 import com.stefani.MilagresDSMod.magic.visual.backend.playeranim.PlayerAnimatorCompat;
 import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingEntity;
-import com.stefani.MilagresDSMod.magic.visual.backend.SpellLighting;
 import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaEntity;
 import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearEntity;
-import com.stefani.MilagresDSMod.network.modpackets;
-import com.stefani.MilagresDSMod.network.packets.SpellLightS2CPacket;
 import com.stefani.MilagresDSMod.registry.EntityRegistry;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-
-import javax.annotation.Nullable;
-import net.minecraft.sounds.SoundEvent;
 
 public final class SpellVisuals {
     private static final int DEFAULT_LIGHTNING_SPEAR_CHARGE_TICKS = 28;
