@@ -7,16 +7,20 @@ import software.bernie.geckolib.model.GeoModel;
 public class FlameSlingGeoModel extends GeoModel<FlameSlingEntity> {
     @Override
     public ResourceLocation getModelResource(FlameSlingEntity animatable) {
-        return new ResourceLocation(MilagresDSMod.MODID, "geo/flame_sling_model.geo.json");
+        return rl("geo/flame_sling.geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(FlameSlingEntity animatable) {
-        return new ResourceLocation(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_base.png");
+        return rl("textures/entity/flame_sling.png");
     }
 
     @Override
     public ResourceLocation getAnimationResource(FlameSlingEntity animatable) {
-        return new ResourceLocation(MilagresDSMod.MODID, "animations/flame_sling.anim.json");
+        return rl("animations/flame_sling.animation.json");
+    }
+
+    private static ResourceLocation rl(String path) {
+        return new ResourceLocation(MilagresDSMod.MODID, path);
     }
 }

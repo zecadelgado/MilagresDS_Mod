@@ -21,7 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 public class LightningSpearVanillaRenderer extends EntityRenderer<LightningSpearEntity> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(
             ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "lightning_spear"), "main");
-    private static final ResourceLocation TEX = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/lightning_spear.png");
+    private static final ResourceLocation TEX = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/lightning_spear.png");
 
     private final ModelPart body;
 

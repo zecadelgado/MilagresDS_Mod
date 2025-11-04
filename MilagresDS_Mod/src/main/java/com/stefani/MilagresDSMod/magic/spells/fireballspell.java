@@ -1,15 +1,18 @@
 package com.stefani.MilagresDSMod.magic.spells;
 
 import com.stefani.MilagresDSMod.MilagresDSMod;
-import com.stefani.MilagresDSMod.magic.*;
-import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingEntity;
-import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingGeoModel;
+import com.stefani.MilagresDSMod.magic.SpellActions;
+import com.stefani.MilagresDSMod.magic.SpellCategory;
+import com.stefani.MilagresDSMod.magic.SpellProperties;
+import com.stefani.MilagresDSMod.magic.SpellScalingAttribute;
+import com.stefani.MilagresDSMod.magic.SpellScalingGrade;
+import com.stefani.MilagresDSMod.magic.spell;
+import com.stefani.MilagresDSMod.util.SpellVisuals;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.projectile.LargeFireball;
 
 public class fireballspell extends spell {
     public fireballspell() {
@@ -29,19 +32,8 @@ public class fireballspell extends spell {
                         .description(Component.translatable("spell.milagresdsmod.fireball.desc"))
                         .effectSummary(Component.translatable("spell.milagresdsmod.fireball.effect"))
                         .build(),
-                SpellActions.spawnProjectile(context -> {
-                    LargeFireball fireball = new LargeFireball(
-                            context.level(),
-                            context.player(),
-                            context.direction().x,
-                            context.direction().y,
-                            context.direction().z,
-                            2
-                    );
-                    fireball.setPos(context.origin().x, context.origin().y, context.origin().z);
-                    fireball.shoot(context.direction().x, context.direction().y, context.direction().z, 1.5F, 0.0F);
-                    return fireball;
-                })
+                SpellActions.runOnServer(context ->
+                        SpellVisuals.showFlameSling(context.level(), context.player(), context.direction()))
         );
     }
 }

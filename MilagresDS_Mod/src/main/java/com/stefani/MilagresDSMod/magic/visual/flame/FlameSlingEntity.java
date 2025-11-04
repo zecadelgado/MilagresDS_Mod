@@ -1,24 +1,25 @@
 package com.stefani.MilagresDSMod.magic.visual.flame;
 
 import com.stefani.MilagresDSMod.magic.visual.backend.SpellLighting;
-import com.stefani.MilagresDSMod.registry.ParticleRegistry;
+import com.stefani.MilagresDSMod.registry.ModParticles;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -29,7 +30,7 @@ import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class FlameSlingEntity extends Entity implements GeoEntity {
+public class FlameSlingEntity extends ThrowableItemProjectile implements GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_STATE =
             SynchedEntityData.defineId(FlameSlingEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Vector3f> DATA_LAUNCH_VECTOR =
@@ -60,10 +61,17 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
     public FlameSlingEntity(EntityType<? extends FlameSlingEntity> type, Level level) {
         super(type, level);
         this.noPhysics = true;
+        this.setNoGravity(true);
+    }
+
+    @Override
+    protected Item getDefaultItem() {
+        return Items.AIR;
     }
 
     @Override
     protected void defineSynchedData() {
+        super.defineSynchedData();
         entityData.define(DATA_STATE, STATE_CHARGING);
         entityData.define(DATA_LAUNCH_VECTOR, new Vector3f(0, 0, 0));
     }
@@ -77,6 +85,7 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
         } else {
             this.entityData.set(DATA_STATE, STATE_CHARGING);
             setDeltaMovement(Vec3.ZERO);
+            this.noPhysics = true;
         }
     }
 
@@ -131,18 +140,10 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
     private void tickFlying() {
         Vec3 motion = getDeltaMovement().add(0, -0.01, 0);
         setDeltaMovement(motion);
-        setPos(getX() + motion.x, getY() + motion.y, getZ() + motion.z);
 
         if (!level().isClientSide) {
             if (--lifetime <= 0) {
                 beginImpact(position());
-                return;
-            }
-            HitResult hit = level().clip(new ClipContext(
-                    position(), position().add(motion.scale(1.2)),
-                    ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
-            if (hit.getType() != HitResult.Type.MISS) {
-                beginImpact(hit.getLocation());
                 return;
             }
             if (dynamicLightRadius > 0f && ++dynamicLightTicker >= dynamicLightInterval) {
@@ -156,6 +157,9 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
             spawnRibbon(0.4f);
         }
     }
+
+    @Override
+    protected void onHit(HitResult result) {\r\n        beginImpact(result.getLocation());\r\n    }
 
     private void tickImpact() {
         if (impactTicks == 0 && !level().isClientSide) {
@@ -178,6 +182,7 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
             return;
         }
         setDeltaMovement(queuedLaunch);
+        this.noPhysics = false;
         entityData.set(DATA_STATE, STATE_FLYING);
         if (!level().isClientSide && launchSound != null && tickCount > 0) {
             level().playSound(null, getX(), getY(), getZ(), launchSound, SoundSource.PLAYERS, 0.8f, 1.05f + random.nextFloat() * 0.1f);
@@ -192,6 +197,7 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
         }
         setPos(hitPos.x, hitPos.y, hitPos.z);
         setDeltaMovement(Vec3.ZERO);
+        this.noPhysics = true;
         entityData.set(DATA_STATE, STATE_IMPACT);
         impactTicks = 0;
         if (!level().isClientSide) {
@@ -217,7 +223,7 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
             double sx = -Math.sin(angle) * 0.02;
             double sy = 0.015 + random.nextDouble() * 0.01;
             double sz = Math.cos(angle) * 0.02;
-            level().addParticle(ParticleRegistry.EMBER.get(), px, py, pz, sx, sy, sz);
+            level().addParticle(ModParticles.EMBER.get(), px, py, pz, sx, sy, sz);
         }
     }
 
@@ -234,7 +240,7 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
             double sx = (random.nextDouble() - 0.5) * 0.015;
             double sy = (random.nextDouble() - 0.15) * 0.03;
             double sz = (random.nextDouble() - 0.5) * 0.015;
-            level().addParticle(ParticleRegistry.EMBER.get(), px, py, pz, sx, sy, sz);
+            level().addParticle(ModParticles.EMBER.get(), px, py, pz, sx, sy, sz);
         }
     }
 
@@ -270,7 +276,7 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
     }
 
     private void spawnImpactBurst() {
-        burst(ParticleRegistry.EMBER.get(), 28, 0.32);
+        burst(ModParticles.EMBER.get(), 28, 0.32);
         burst(ParticleTypes.SMALL_FLAME, 18, 0.24);
     }
 
@@ -340,7 +346,7 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
 
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     public void pulseGlow(int ticks) {
@@ -372,3 +378,4 @@ public class FlameSlingEntity extends Entity implements GeoEntity {
         return geckoCache;
     }
 }
+

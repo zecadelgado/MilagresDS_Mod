@@ -8,8 +8,7 @@ import com.stefani.MilagresDSMod.client.magic.visual.lightning.LightningSpearVan
 import com.stefani.MilagresDSMod.client.particles.EmberParticle;
 import com.stefani.MilagresDSMod.client.particles.HealGlowParticle;
 import com.stefani.MilagresDSMod.client.particles.LightningSparkParticle;
-import com.stefani.MilagresDSMod.client.registry.RendererRegistry;
-import com.stefani.MilagresDSMod.registry.ParticleRegistry;
+import com.stefani.MilagresDSMod.registry.ModParticles;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -20,25 +19,19 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = MilagresDSMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class MilagresDSModClientEvents {
-    private MilagresDSModClientEvents() {}
-
-    @SubscribeEvent
-    public static void onClientSetup(final FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            DynamicLightClient.init();
-        });
+    private MilagresDSModClientEvents() {
     }
 
     @SubscribeEvent
-    public static void onRegisterRenderers(final EntityRenderersEvent.RegisterRenderers event) {
-        RendererRegistry.registerEntityRenderers(event);
+    public static void onClientSetup(final FMLClientSetupEvent event) {
+        event.enqueueWork(DynamicLightClient::init);
     }
 
     @SubscribeEvent
     public static void onRegisterParticles(final RegisterParticleProvidersEvent event) {
-        event.registerSpriteSet(ParticleRegistry.LIGHTNING_SPARK.get(), LightningSparkParticle.Provider::new);
-        event.registerSpriteSet(ParticleRegistry.EMBER.get(), EmberParticle.Provider::new);
-        event.registerSpriteSet(ParticleRegistry.HEAL_GLOW.get(), HealGlowParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.LIGHTNING_SPARK.get(), LightningSparkParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.EMBER.get(), EmberParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.HEAL_GLOW.get(), HealGlowParticle.Provider::new);
     }
 
     @SubscribeEvent

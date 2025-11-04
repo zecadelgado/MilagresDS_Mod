@@ -7,8 +7,8 @@ import com.stefani.MilagresDSMod.config.ModCommonConfig;
 import com.stefani.MilagresDSMod.item.ModItems;
 import com.stefani.MilagresDSMod.network.modpackets;
 import com.stefani.MilagresDSMod.registry.BlockRegistry;
-import com.stefani.MilagresDSMod.registry.EntityRegistry;
-import com.stefani.MilagresDSMod.registry.ParticleRegistry;
+import com.stefani.MilagresDSMod.registry.ModEntities;
+import com.stefani.MilagresDSMod.registry.ModParticles;
 import com.stefani.MilagresDSMod.registry.spellregistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -33,8 +33,8 @@ public class MilagresDSMod {
         BlockRegistry.register(modBus);
         ModBlocks.register(modBus);
         ModItems.ITEMS.register(modBus);
-        EntityRegistry.REGISTRY.register(modBus);
-        ParticleRegistry.REGISTRY.register(modBus);
+        ModEntities.register(modBus);
+        ModParticles.register(modBus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ModCommonConfig.SPEC);
 
@@ -55,3 +55,4 @@ public class MilagresDSMod {
         VisualTestCommands.register(evt.getDispatcher());
     }
 }
+

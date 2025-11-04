@@ -7,6 +7,7 @@ import com.stefani.MilagresDSMod.magic.SpellProperties;
 import com.stefani.MilagresDSMod.magic.SpellScalingAttribute;
 import com.stefani.MilagresDSMod.magic.SpellScalingGrade;
 import com.stefani.MilagresDSMod.magic.spell;
+import com.stefani.MilagresDSMod.util.SpellVisuals;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -32,6 +33,8 @@ public class healingburstspell extends spell {
                         .description(Component.translatable("spell.milagresdsmod.healingburst.desc"))
                         .effectSummary(Component.translatable("spell.milagresdsmod.healingburst.effect"))
                         .build(),
+                SpellActions.runOnServer(context ->
+                        SpellVisuals.showHeal(context.level(), context.player())),
                 SpellActions.healPlayer(8.0F),
                 SpellActions.applyEffect(() -> new MobEffectInstance(MobEffects.REGENERATION, 120, 0))
         );

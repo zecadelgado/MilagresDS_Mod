@@ -5,9 +5,9 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class LightningSpearGeoModel extends GeoModel<LightningSpearEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "geo/lightning_spear_model.geo.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/lightning_spear.png");
-    private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "animations/lightning_spear.anim.json");
+    private static final ResourceLocation MODEL = rl("geo/lightning_spear.geo.json");
+    private static final ResourceLocation TEXTURE = rl("textures/entity/lightning_spear.png");
+    private static final ResourceLocation ANIMATION = rl("animations/lightning_spear.animation.json");
 
     @Override
     public ResourceLocation getModelResource(LightningSpearEntity animatable) {
@@ -22,5 +22,9 @@ public class LightningSpearGeoModel extends GeoModel<LightningSpearEntity> {
     @Override
     public ResourceLocation getAnimationResource(LightningSpearEntity animatable) {
         return ANIMATION;
+    }
+
+    private static ResourceLocation rl(String path) {
+        return new ResourceLocation(MilagresDSMod.MODID, path);
     }
 }

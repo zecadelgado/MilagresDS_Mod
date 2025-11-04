@@ -2,31 +2,25 @@ package com.stefani.MilagresDSMod.magic.visual.lightning;
 
 import com.stefani.MilagresDSMod.client.LightningSpearClientAccess;
 import com.stefani.MilagresDSMod.magic.visual.backend.playeranim.PlayerAnimatorCompat;
-import com.stefani.MilagresDSMod.registry.ParticleRegistry;
+import com.stefani.MilagresDSMod.registry.ModParticles;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AreaEffectCloud;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.entity.Entity;\r\nimport net.minecraft.world.entity.EntityType;\r\nimport net.minecraft.world.entity.projectile.AbstractHurtingProjectile;\r\nimport net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.EntityHitResult;\r\nimport net.minecraft.world.phys.HitResult;\r\nimport net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import net.minecraftforge.fml.loading.FMLEnvironment;\r\nimport net.minecraftforge.network.NetworkHooks;\r\nimport software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationController;
@@ -37,7 +31,7 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LightningSpearEntity extends Entity implements GeoAnimatable {
+public class LightningSpearEntity extends AbstractHurtingProjectile implements GeoAnimatable {
     public static final int MAX_FLIGHT_TICKS = 40;
     public static final int IMPACT_LINGER_TICKS = 35;
     private static final double FLIGHT_SPEED = 1.85;
@@ -116,10 +110,7 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
     private void tickFlightServer() {
         serverStateTicks++;
         entityData.set(DATA_STATE_TIME, serverStateTicks);
-        Vec3 movement = getDeltaMovement();
-        setPos(getX() + movement.x, getY() + movement.y, getZ() + movement.z);
-        HitResult hit = level().clip(new ClipContext(position(), position().add(movement.scale(1.2)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
-        if (hit.getType() != HitResult.Type.MISS || serverStateTicks >= MAX_FLIGHT_TICKS) {
+        if (serverStateTicks >= MAX_FLIGHT_TICKS) {
             triggerImpact();
         }
     }
@@ -135,6 +126,21 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
         if (caster != null) {
             PlayerAnimatorCompat.playClip(caster, "LightningSpearImpact");
         }
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult result) {
+        triggerImpact();
+    }
+
+    @Override
+    protected void onHitBlock(BlockHitResult result) {
+        triggerImpact();
+    }
+
+    @Override
+    protected float getInertia() {
+        return 1.0F;
     }
 
     private void tickImpactServer() {
@@ -159,7 +165,7 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
             double speed = 0.6 + random.nextDouble() * 0.3;
             double sx = Math.cos(angle) * speed;
             double sz = Math.sin(angle) * speed;
-            serverLevel.sendParticles(ParticleRegistry.LIGHTNING_SPARK.get(), pos.x, pos.y, pos.z, 2, sx * 0.15, 0.05, sz * 0.15, 0.0);
+            serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(), pos.x, pos.y, pos.z, 2, sx * 0.15, 0.05, sz * 0.15, 0.0);
         }
         serverLevel.sendParticles(ParticleTypes.SONIC_BOOM, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
         spawnGroundDecal(serverLevel);
@@ -204,7 +210,7 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
                 double x = getX() + Math.cos(time) * radius;
                 double z = getZ() + Math.sin(time) * radius;
                 double y = getY() + 0.15 * ring - 0.1;
-                level().addParticle(ParticleRegistry.LIGHTNING_SPARK.get(), x, y, z, 0.0, 0.02, 0.0);
+                level().addParticle(ModParticles.LIGHTNING_SPARK.get(), x, y, z, 0.0, 0.02, 0.0);
                 level().addParticle(ParticleTypes.GLOW, x, y, z, 0.0, 0.01, 0.0);
             }
         }
@@ -212,7 +218,7 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
 
     @OnlyIn(Dist.CLIENT)
     private void spawnFlightTrail() {
-        spawnTrail(ParticleRegistry.LIGHTNING_SPARK.get(), 4);
+        spawnTrail(ModParticles.LIGHTNING_SPARK.get(), 4);
         spawnTrail(ParticleTypes.GLOW, 2);
     }
 
@@ -253,8 +259,7 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
     }
 
     @Override
-    protected void defineSynchedData() {
-        entityData.define(DATA_STATE, SpearState.CHARGING.ordinal());
+    protected void defineSynchedData() {\r\n        super.defineSynchedData();\r\n        entityData.define(DATA_STATE, SpearState.CHARGING.ordinal());
         entityData.define(DATA_CHARGE_DURATION, 20);
         entityData.define(DATA_STATE_TIME, 0);
         entityData.define(DATA_DIR_X, 0f);
@@ -296,7 +301,7 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
 
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     public void setChargeDuration(int ticks) {
@@ -397,3 +402,4 @@ public class LightningSpearEntity extends Entity implements GeoAnimatable {
         IMPACT
     }
 }
+

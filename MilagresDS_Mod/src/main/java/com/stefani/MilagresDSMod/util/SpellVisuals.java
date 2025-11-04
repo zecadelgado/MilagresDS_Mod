@@ -3,9 +3,9 @@ package com.stefani.MilagresDSMod.util;
 import com.stefani.MilagresDSMod.magic.visual.backend.lighting.DynamicLightDispatcher;
 import com.stefani.MilagresDSMod.magic.visual.backend.playeranim.PlayerAnimatorCompat;
 import com.stefani.MilagresDSMod.magic.visual.flame.FlameSlingEntity;
-import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaEntity;
+import com.stefani.MilagresDSMod.magic.visual.heal.HealRingEntity;
 import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearEntity;
-import com.stefani.MilagresDSMod.registry.EntityRegistry;
+import com.stefani.MilagresDSMod.registry.ModEntities;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
@@ -53,7 +53,7 @@ public final class SpellVisuals {
         if (level.isClientSide) {
             return;
         }
-        LightningSpearEntity entity = EntityRegistry.LIGHTNING_SPEAR.get().create(level);
+        LightningSpearEntity entity = ModEntities.LIGHTNING_SPEAR.get().create(level);
         if (entity == null) {
             return;
         }
@@ -74,7 +74,7 @@ public final class SpellVisuals {
         if (level.isClientSide) {
             return;
         }
-        FlameSlingEntity entity = EntityRegistry.FLAME_SLING.get().create(level);
+        FlameSlingEntity entity = ModEntities.FLAME_SLING.get().create(level);
         if (entity == null) {
             return;
         }
@@ -93,7 +93,7 @@ public final class SpellVisuals {
         if (level.isClientSide) {
             return;
         }
-        HealAreaEntity entity = EntityRegistry.HEAL_AREA.get().create(level);
+        HealRingEntity entity = ModEntities.HEAL_RING.get().create(level);
         if (entity == null) {
             return;
         }
@@ -111,3 +111,4 @@ public final class SpellVisuals {
         DynamicLightDispatcher.emit(serverLevel, entity, caster, rgb, radius, durationTicks);
     }
 }
+

@@ -4,23 +4,27 @@ import com.stefani.MilagresDSMod.MilagresDSMod;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
-public class HealRingModel extends GeoModel<HealAreaEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "geo/heal_ring_model.geo.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_ring.png");
-    private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "animations/heal_ring.anim.json");
+public class HealRingModel extends GeoModel<HealRingEntity> {
+    private static final ResourceLocation MODEL = rl("geo/heal_ring.geo.json");
+    private static final ResourceLocation TEXTURE = rl("textures/entity/heal_ring.png");
+    private static final ResourceLocation ANIMATION = rl("animations/heal_ring.animation.json");
 
     @Override
-    public ResourceLocation getModelResource(HealAreaEntity animatable) {
+    public ResourceLocation getModelResource(HealRingEntity animatable) {
         return MODEL;
     }
 
     @Override
-    public ResourceLocation getTextureResource(HealAreaEntity animatable) {
+    public ResourceLocation getTextureResource(HealRingEntity animatable) {
         return TEXTURE;
     }
 
     @Override
-    public ResourceLocation getAnimationResource(HealAreaEntity animatable) {
+    public ResourceLocation getAnimationResource(HealRingEntity animatable) {
         return ANIMATION;
+    }
+
+    private static ResourceLocation rl(String path) {
+        return new ResourceLocation(MilagresDSMod.MODID, path);
     }
 }

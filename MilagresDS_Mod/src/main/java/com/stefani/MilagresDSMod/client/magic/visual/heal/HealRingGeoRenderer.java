@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.stefani.MilagresDSMod.MilagresDSMod;
-import com.stefani.MilagresDSMod.magic.visual.heal.HealAreaEntity;
+import com.stefani.MilagresDSMod.magic.visual.heal.HealRingEntity;
 import com.stefani.MilagresDSMod.magic.visual.heal.HealRingModel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -16,9 +16,9 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 @Deprecated // no internal references (kept for safety)
-public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
-    private static final ResourceLocation RUNE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_cross_soft.png");
-    private static final ResourceLocation PULSE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/heal_ring.png");
+public class HealRingGeoRenderer extends GeoEntityRenderer<HealRingEntity> {
+    private static final ResourceLocation RUNE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/heal_cross_soft.png");
+    private static final ResourceLocation PULSE_TEXTURE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/heal_ring.png");
     private static final ResourceLocation BEAM_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/beacon_beam.png");
 
     public HealRingGeoRenderer(net.minecraft.client.renderer.entity.EntityRendererProvider.Context context) {
@@ -30,12 +30,12 @@ public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
     }
 
     @Override
-    public RenderType getRenderType(HealAreaEntity animatable, ResourceLocation texture, MultiBufferSource bufferSource, float partialTick) {
+    public RenderType getRenderType(HealRingEntity animatable, ResourceLocation texture, MultiBufferSource bufferSource, float partialTick) {
         return RenderType.entityTranslucent(texture);
     }
 
     @Override
-    public void actuallyRender(PoseStack poseStack, HealAreaEntity animatable, BakedGeoModel model, RenderType renderType,
+    public void actuallyRender(PoseStack poseStack, HealRingEntity animatable, BakedGeoModel model, RenderType renderType,
                                MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick,
                                int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         int fullBright = LightTexture.pack(15, 15);
@@ -43,12 +43,12 @@ public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
                 fullBright, packedOverlay, red, green, blue, alpha);
     }
 
-    private static class RunePlaneLayer extends GeoRenderLayer<HealAreaEntity> {
-        private RunePlaneLayer(GeoEntityRenderer<HealAreaEntity> renderer) {
+    private static class RunePlaneLayer extends GeoRenderLayer<HealRingEntity> {
+        private RunePlaneLayer(GeoEntityRenderer<HealRingEntity> renderer) {
             super(renderer);
         }
 
-        public void render(PoseStack poseStack, HealAreaEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
+        public void render(PoseStack poseStack, HealRingEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
                            MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight,
                            int packedOverlay, float red, float green, float blue, float alpha) {
             VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(RUNE_TEXTURE));
@@ -75,12 +75,12 @@ public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
         }
     }
 
-    private static class PulseLayer extends GeoRenderLayer<HealAreaEntity> {
-        private PulseLayer(GeoEntityRenderer<HealAreaEntity> renderer) {
+    private static class PulseLayer extends GeoRenderLayer<HealRingEntity> {
+        private PulseLayer(GeoEntityRenderer<HealRingEntity> renderer) {
             super(renderer);
         }
 
-        public void render(PoseStack poseStack, HealAreaEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
+        public void render(PoseStack poseStack, HealRingEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
                            MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight,
                            int packedOverlay, float red, float green, float blue, float alpha) {
             if (animatable.getActivePulses().isEmpty()) {
@@ -88,7 +88,7 @@ public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
             }
             VertexConsumer ringConsumer = bufferSource.getBuffer(RenderType.entityTranslucent(PULSE_TEXTURE));
             int light = LightTexture.pack(15, 15);
-            for (HealAreaEntity.PulseInstance pulse : animatable.getActivePulses()) {
+            for (HealRingEntity.PulseInstance pulse : animatable.getActivePulses()) {
                 float radius = pulse.getRadius(partialTick);
                 float intensity = pulse.getFade(partialTick);
                 if (intensity <= 0.01f) {
@@ -126,12 +126,12 @@ public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
         }
     }
 
-    private static class PillarLayer extends GeoRenderLayer<HealAreaEntity> {
-        private PillarLayer(GeoEntityRenderer<HealAreaEntity> renderer) {
+    private static class PillarLayer extends GeoRenderLayer<HealRingEntity> {
+        private PillarLayer(GeoEntityRenderer<HealRingEntity> renderer) {
             super(renderer);
         }
 
-        public void render(PoseStack poseStack, HealAreaEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
+        public void render(PoseStack poseStack, HealRingEntity animatable, BakedGeoModel bakedModel, RenderType renderType,
                            MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight,
                            int packedOverlay, float red, float green, float blue, float alpha) {
             if (animatable.getActivePulses().isEmpty()) {
@@ -140,7 +140,7 @@ public class HealRingGeoRenderer extends GeoEntityRenderer<HealAreaEntity> {
             VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(BEAM_TEXTURE));
             int light = LightTexture.pack(15, 15);
             float orbit = animatable.getClockRotation(partialTick) * 0.5f;
-            for (HealAreaEntity.PulseInstance pulse : animatable.getActivePulses()) {
+            for (HealRingEntity.PulseInstance pulse : animatable.getActivePulses()) {
                 float radius = pulse.getRadius(partialTick);
                 float alphaFade = pulse.getColumnAlpha(partialTick);
                 if (alphaFade <= 0.01f) {

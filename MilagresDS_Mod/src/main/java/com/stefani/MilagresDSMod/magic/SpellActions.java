@@ -78,3 +78,4 @@ public final class SpellActions {
         return bonus;
     }
 }
+

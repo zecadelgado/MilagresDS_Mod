@@ -109,7 +109,7 @@ tasks.register('failOnClientImports') {
 }
 compileJava.dependsOn tasks.named('failOnClientImports')
 
-// Valida nomes de recursos em assets/milagresdsmod para evitar ResourceLocationException
+// Validates resource names / GeckoLib bindings
 tasks.register('validateResourcePaths') {
     doLast {
         def assetsDir = file('src/main/resources/assets/milagresdsmod')
@@ -118,22 +118,58 @@ tasks.register('validateResourcePaths') {
         def bad = fileTree(assetsDir) {
             include '**/*.*'
         }.files.findAll { f ->
-            // Caminho relativo e normalização de separador (funciona em Windows/Linux/macOS)
-            def rel = project.relativePath(f).replace(File.separator, "/")
-            // Valida contra o conjunto permitido por ResourceLocation: [a-z0-9/._-]
-            // (qualquer caractere fora desse conjunto reprova — maiúsculas e espaços inclusos)
+            def rel = project.relativePath(f).replace(File.separator, '/')
             rel =~ /[^a-z0-9\/._-]/
         }
 
         if (!bad.isEmpty()) {
-            println '✖ Recursos com caracteres inválidos (apenas [a-z0-9/._-] são permitidos):'
-            bad.each { println " - ${project.relativePath(it).replace(File.separator, "/")}" }
+            println '? Resources with invalid characters (only [a-z0-9/._-] are allowed):'
+            bad.each { println " - ${project.relativePath(it).replace(File.separator, '/')}" }
             throw new GradleException('Invalid resource paths found (uppercase/space/special char)')
+        }
+
+        def resourceRoot = file('src/main/resources/assets/milagresdsmod')
+        def geoSources = fileTree('src/main/java/com/stefani/MilagresDSMod') {
+            include '**/*GeoModel.java'
+            include '**/HealRingModel.java'
+        }
+
+        def missingResources = []
+        geoSources.files.each { f ->
+            def text = f.getText('UTF-8')
+            def paths = [] as Set
+            (text =~ /rl\("([^"]+)"\)/).each { paths << it[1] }
+            (text =~ /new ResourceLocation\(MilagresDSMod\.MODID,\s*"([^"]+)"\)/).each { paths << it[1] }
+            paths.each { relPath ->
+                def target = new File(resourceRoot, relPath)
+                if (!target.exists()) {
+                    missingResources << "${project.relativePath(f)} -> missing ${relPath}"
+                }
+            }
+        }
+
+        if (!missingResources.isEmpty()) {
+            println '? GeckoLib models referencing missing resources:'
+            missingResources.each { println " - $it" }
+            throw new GradleException('Missing GeckoLib resource files detected')
+        }
+
+        def modEntitiesFile = file('src/main/java/com/stefani/MilagresDSMod/registry/ModEntities.java')
+        def rendererFile = file('src/main/java/com/stefani/MilagresDSMod/client/render/ModEntityRenderers.java')
+        if (modEntitiesFile.exists() && rendererFile.exists()) {
+            def entityDefs = []
+            def matcher = modEntitiesFile.getText('UTF-8') =~ /public static final RegistryObject<EntityType<[^>]+>>\s+([A-Z_]+)\s*=\s*ENTITIES\.register\("([^"]+)"/
+            matcher.each { entityDefs << [constName: it[1], id: it[2]] }
+            def rendererText = rendererFile.getText('UTF-8')
+            def missingBindings = entityDefs.findAll { !rendererText.contains("ModEntities.${it.constName}.get(") }
+            if (!missingBindings.isEmpty()) {
+                println '? Entity types without client renderer registration:'
+                missingBindings.each { println " - ${it.constName} (${it.id})" }
+                throw new GradleException('Missing client renderer registration for entity type')
+            }
         }
     }
 }
-
-// Garante que a validação rode antes de processar recursos
 processResources.dependsOn tasks.named('validateResourcePaths')
 
 tasks.register('validateGeckoAnimations') {
@@ -260,3 +296,6 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs += ['-Xlint:deprecation', '-Xlint:unchecked']
 }
+
+
+

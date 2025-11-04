@@ -21,11 +21,11 @@ import net.minecraft.resources.ResourceLocation;
 public class FlameSlingFallbackRenderer extends EntityRenderer<FlameSlingEntity> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(
             ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "flame_sling"), "main");
-    private static final ResourceLocation BASE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_base.png");
-    private static final ResourceLocation OVER0 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_0.png");
-    private static final ResourceLocation OVER1 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_1.png");
-    private static final ResourceLocation OVER2 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_2.png");
-    private static final ResourceLocation OVER3 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/spells/flame_sling_fire_3.png");
+    private static final ResourceLocation BASE = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/flame_sling.png");
+    private static final ResourceLocation OVER0 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/flame_sling_fire_0.png");
+    private static final ResourceLocation OVER1 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/flame_sling_fire_1.png");
+    private static final ResourceLocation OVER2 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/flame_sling_fire_2.png");
+    private static final ResourceLocation OVER3 = ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/entity/flame_sling_fire_3.png");
 
     private final ModelPart body;
 
