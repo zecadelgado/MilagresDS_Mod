@@ -5,6 +5,7 @@ import com.stefani.MilagresDSMod.block.ModBlocks;
 import com.stefani.MilagresDSMod.commands.VisualTestCommands;
 import com.stefani.MilagresDSMod.config.ModCommonConfig;
 import com.stefani.MilagresDSMod.item.ModItems;
+import com.stefani.MilagresDSMod.network.ModNetworking;
 import com.stefani.MilagresDSMod.network.modpackets;
 import com.stefani.MilagresDSMod.registry.BlockRegistry;
 import com.stefani.MilagresDSMod.registry.ModEntities;
@@ -48,6 +49,7 @@ public class MilagresDSMod {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         // Nada de net.minecraft.client.* aqui
+        ModNetworking.register();
         modpackets.register();
     }
 
@@ -55,4 +57,3 @@ public class MilagresDSMod {
         VisualTestCommands.register(evt.getDispatcher());
     }
 }
-
