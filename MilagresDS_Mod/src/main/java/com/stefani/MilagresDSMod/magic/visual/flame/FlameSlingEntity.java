@@ -159,7 +159,9 @@ public class FlameSlingEntity extends ThrowableItemProjectile implements GeoEnti
     }
 
     @Override
-    protected void onHit(HitResult result) {\r\n        beginImpact(result.getLocation());\r\n    }
+    protected void onHit(HitResult result) {
+        beginImpact(result.getLocation());
+    }
 
     private void tickImpact() {
         if (impactTicks == 0 && !level().isClientSide) {

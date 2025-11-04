@@ -32,7 +32,7 @@ public class fireballspell extends spell {
                         .description(Component.translatable("spell.milagresdsmod.fireball.desc"))
                         .effectSummary(Component.translatable("spell.milagresdsmod.fireball.effect"))
                         .build(),
-                SpellActions.runOnServer(context ->
+                SpellActions.RunOnServer(context ->
                         SpellVisuals.showFlameSling(context.level(), context.player(), context.direction()))
         );
     }

@@ -14,13 +14,21 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AreaEffectCloud;
-import net.minecraft.world.entity.Entity;\r\nimport net.minecraft.world.entity.EntityType;\r\nimport net.minecraft.world.entity.projectile.AbstractHurtingProjectile;\r\nimport net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.EntityHitResult;\r\nimport net.minecraft.world.phys.HitResult;\r\nimport net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.loading.FMLEnvironment;\r\nimport net.minecraftforge.network.NetworkHooks;\r\nimport software.bernie.geckolib.core.animatable.GeoAnimatable;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.network.NetworkHooks;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationController;
@@ -243,7 +251,7 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
         }
     }
 
-    private void updateRotation() {
+    public void updateRotation() {
         Vec3 dir = getLaunchDirection();
         if (dir.lengthSqr() < 1.0E-4) {
             return;
@@ -259,7 +267,9 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
     }
 
     @Override
-    protected void defineSynchedData() {\r\n        super.defineSynchedData();\r\n        entityData.define(DATA_STATE, SpearState.CHARGING.ordinal());
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        entityData.define(DATA_STATE, SpearState.CHARGING.ordinal());
         entityData.define(DATA_CHARGE_DURATION, 20);
         entityData.define(DATA_STATE_TIME, 0);
         entityData.define(DATA_DIR_X, 0f);
