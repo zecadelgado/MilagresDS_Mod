@@ -1,39 +1,32 @@
 package com.stefani.MilagresDSMod.item;
 
-import com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearEntity;
-import com.stefani.MilagresDSMod.registry.ModEntities;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import org.jetbrains.annotations.Nullable;
+import java.util.List;
 
+/**
+ * Simple item used to represent the Lightning Spear spell on the client.  The
+ * server uses an {@link com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearEntity}
+ * to actually perform the spell logic, but an {@link Item} is still required so
+ * the renderer has something to display when the spear is in flight.  This
+ * implementation does not add any special behaviour beyond displaying a
+ * tooltip when hovered in an inventory.
+ */
 public class LightningSpearItem extends Item {
-    public LightningSpearItem(Properties props) {
-        super(props);
+    public LightningSpearItem(Properties properties) {
+        super(properties);
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-
-        if (!level.isClientSide) {
-            LightningSpearEntity spear = new LightningSpearEntity(ModEntities.LIGHTNING_SPEAR.get(), level);
-            Vec3 spawnPos = player.position().add(0, player.getEyeHeight() * 0.7, 0);
-            spear.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
-
-            Vec3 lookVec = player.getLookAngle();
-            spear.configure(player, lookVec, 10);
-
-            level.addFreshEntity(spear);
-        }
-
-        player.getCooldowns().addCooldown(this, 20);
-        if (!player.getAbilities().instabuild) stack.shrink(1);
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+    public void appendHoverText(ItemStack stack, @Nullable net.minecraft.world.level.Level level,
+                                List<Component> tooltip, TooltipFlag flag) {
+        // Provide a short description for the item.  Translatable text keys could be used here
+        // if localisation support is desired, but a hard‑coded string suffices for a placeholder.
+        tooltip.add(Component.translatable("item.milagresdsmod.lightning_spear.description")
+                .withStyle(ChatFormatting.GRAY));
     }
 }
-
-

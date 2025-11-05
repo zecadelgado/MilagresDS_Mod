@@ -8,7 +8,7 @@ import com.stefani.MilagresDSMod.magic.SpellScalingAttribute;
 import com.stefani.MilagresDSMod.magic.SpellScalingGrade;
 import com.stefani.MilagresDSMod.magic.spell;
 import com.stefani.MilagresDSMod.util.SpellVisuals;
-import net.minecraft.core.particles.ParticleTypes;
+import com.stefani.MilagresDSMod.registry.ModParticles;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -24,7 +24,8 @@ public class lightningspear extends spell {
                         .category(SpellCategory.OFFENSIVE)
                         .icon(ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/gui/spells/lightningspear.png"))
                         .castSound(SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.0F, 0.8F)
-                        .castParticles(() -> ParticleTypes.ELECTRIC_SPARK, 20, 0.2D, 0.2D, 0.2D, 0.01D)
+                        // Use our custom lightning spark particle instead of the vanilla electric spark
+                        .castParticles(() -> ModParticles.LIGHTNING_SPARK.get(), 20, 0.2D, 0.2D, 0.2D, 0.01D)
                         .baseDamage(12.0F)
                         .scaling(SpellScalingAttribute.FAITH, SpellScalingGrade.S)
                         .scaling(SpellScalingAttribute.ARCANE, SpellScalingGrade.E)

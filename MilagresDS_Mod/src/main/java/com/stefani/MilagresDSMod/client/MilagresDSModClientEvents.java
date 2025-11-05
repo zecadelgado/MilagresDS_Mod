@@ -24,7 +24,23 @@ public final class MilagresDSModClientEvents {
 
     @SubscribeEvent
     public static void onClientSetup(final FMLClientSetupEvent event) {
-        event.enqueueWork(DynamicLightClient::init);
+        // Register dynamic lighting and schedule our entity renderer registrations.
+        event.enqueueWork(() -> {
+            // Initialise dynamic lighting module
+            DynamicLightClient.init();
+            // Register entity renderers via the static EntityRenderers registry.  This ensures
+            // that our entities always have a renderer, even if the RegisterRenderers event
+            // fails to fire for some reason.
+            net.minecraft.client.renderer.entity.EntityRenderers.register(
+                    com.stefani.MilagresDSMod.registry.ModEntities.LIGHTNING_SPEAR.get(),
+                    com.stefani.MilagresDSMod.client.magic.visual.lightning.LightningSpearGeoRenderer::new);
+            net.minecraft.client.renderer.entity.EntityRenderers.register(
+                    com.stefani.MilagresDSMod.registry.ModEntities.FLAME_SLING.get(),
+                    com.stefani.MilagresDSMod.client.magic.visual.flame.FlameSlingRenderer::new);
+            net.minecraft.client.renderer.entity.EntityRenderers.register(
+                    com.stefani.MilagresDSMod.registry.ModEntities.HEAL_RING.get(),
+                    com.stefani.MilagresDSMod.client.magic.visual.heal.HealRingRenderer::new);
+        });
     }
 
     @SubscribeEvent
@@ -45,5 +61,19 @@ public final class MilagresDSModClientEvents {
         event.register(ModKeyBindings.OPEN_SPELL_MENU);
         event.register(ModKeyBindings.CAST_SPELL);
         event.register(ModKeyBindings.OPEN_ATTRIBUTES);
+    }
+
+    /**
+     * Registers entity renderers for all custom entities used by the mod.  This callback hooks
+     * the {@link EntityRenderersEvent.RegisterRenderers} fired on the mod bus and delegates
+     * to Gecko backend registration.  Without this, some entities would lack a renderer and
+     * cause a {@link java.lang.NullPointerException} inside {@code EntityRenderDispatcher.shouldRender}.
+     *
+     * @param event the renderers registration event
+     */
+    @SubscribeEvent
+    public static void onRegisterRenderers(final EntityRenderersEvent.RegisterRenderers event) {
+        // Delegate to Gecko backend to register renderers for all mod entities
+        com.stefani.MilagresDSMod.client.magic.visual.backend.gecko.GeckoBackend.registerRenderers(event);
     }
 }

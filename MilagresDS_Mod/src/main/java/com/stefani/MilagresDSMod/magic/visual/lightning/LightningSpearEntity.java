@@ -348,17 +348,19 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
             return null;
         }
         LivingEntity living = null;
+        // On the logical server, look up the entity directly by UUID in the server level.
         if (level() instanceof ServerLevel serverLevel) {
             Entity entity = serverLevel.getEntity(uuid.get());
             if (entity instanceof LivingEntity serverLiving) {
                 living = serverLiving;
             }
-        } else if (FMLEnvironment.dist.isClient()) {
+        }
+        // On the client, defer the lookup to a client‑only helper using an unsafe call.  The unsafe
+        // variant avoids the strict safe referent validation that would otherwise throw a
+        // BootstrapMethodError in development environments【905944921372634†L205-L234】.
+        else if (FMLEnvironment.dist.isClient()) {
             UUID casterId = uuid.get();
-            LivingEntity[] holder = new LivingEntity[1];
-            DistExecutor.safeRunWhenOn(Dist.CLIENT,
-                    () -> () -> holder[0] = LightningSpearClientAccess.resolveCaster(casterId));
-            living = holder[0];
+            living = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> LightningSpearClientAccess.resolveCaster(casterId));
         }
         if (living != null) {
             cachedCaster = living;

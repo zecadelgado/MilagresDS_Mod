@@ -12,6 +12,7 @@ import net.minecraft.world.phys.EntityHitResult;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 public final class SpellActions {
     private SpellActions() {
@@ -76,6 +77,35 @@ public final class SpellActions {
             bonus += scaling.computeBonus(value);
         }
         return bonus;
+    }
+
+    /**
+     * Wraps a consumer of {@link SpellContext} in a {@link SpellAction} that only
+     * executes its action on the logical server.  When a spell is cast on the client,
+     * the returned action will do nothing.  This is useful for spawning entities or
+     * performing other server‑side effects as part of a spell.
+     *
+     * @param consumer the logic to run on the server during spell execution
+     * @return a {@link SpellAction} that runs the given consumer when executed on the server
+     */
+    public static SpellAction runOnServer(Consumer<SpellContext> consumer) {
+        return context -> {
+            if (!context.level().isClientSide()) {
+                consumer.accept(context);
+            }
+        };
+    }
+
+    /**
+     * Alias for {@link #runOnServer(Consumer)}.  Some existing spells reference
+     * {@code RunOnServer} with a capital R; providing this method ensures those calls
+     * continue to work without modification.
+     *
+     * @param consumer the logic to run on the server during spell execution
+     * @return a {@link SpellAction} that runs the given consumer when executed on the server
+     */
+    public static SpellAction RunOnServer(Consumer<SpellContext> consumer) {
+        return runOnServer(consumer);
     }
 }
 
