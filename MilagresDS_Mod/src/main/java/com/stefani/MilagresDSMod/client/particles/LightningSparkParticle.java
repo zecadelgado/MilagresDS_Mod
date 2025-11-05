@@ -17,9 +17,13 @@ public class LightningSparkParticle extends TextureSheetParticle {
                                      double vx, double vy, double vz, SpriteSet sprites) {
         super(level, x, y, z, vx, vy, vz);
         this.sprites = sprites;
-        this.setSize(0.02f, 0.02f);
-        this.quadSize = 0.18f + level.random.nextFloat() * 0.08f;
-        this.lifetime = 8 + level.random.nextInt(7);
+        // Increase the size of each spark and extend its lifetime to create a more
+        // substantial lightning effect reminiscent of the heavy arcs seen in other
+        // lightning spear mods.  Larger particles and longer lifetimes give the
+        // bolt a fuller, more persistent trail.
+        this.setSize(0.03f, 0.03f);
+        this.quadSize = 0.25f + level.random.nextFloat() * 0.10f;
+        this.lifetime = 10 + level.random.nextInt(10);
         this.gravity = 0f;
         this.xd = vx;
         this.yd = vy;

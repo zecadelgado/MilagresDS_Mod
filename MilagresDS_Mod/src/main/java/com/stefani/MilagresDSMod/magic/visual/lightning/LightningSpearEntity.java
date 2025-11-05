@@ -168,15 +168,26 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
             return;
         }
         Vec3 pos = position();
-        for (int i = 0; i < 32; i++) {
-            double angle = (Math.PI * 2 * i) / 32.0;
-            double speed = 0.6 + random.nextDouble() * 0.3;
+        // Increased burst particles for more dramatic initial impact
+        for (int i = 0; i < 64; i++) {
+            double angle = (Math.PI * 2 * i) / 64.0;
+            double speed = 0.8 + random.nextDouble() * 0.5;
             double sx = Math.cos(angle) * speed;
             double sz = Math.sin(angle) * speed;
-            serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(), pos.x, pos.y, pos.z, 2, sx * 0.15, 0.05, sz * 0.15, 0.0);
+            // More particles per burst with upward motion
+            serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(), pos.x, pos.y, pos.z, 4, sx * 0.2, 0.15, sz * 0.2, 0.0);
         }
-        serverLevel.sendParticles(ParticleTypes.SONIC_BOOM, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+        // Multiple sonic booms for extra impact
+        serverLevel.sendParticles(ParticleTypes.SONIC_BOOM, pos.x, pos.y, pos.z, 2, 0, 0, 0, 0);
+        serverLevel.sendParticles(ParticleTypes.FLASH, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
         spawnGroundDecal(serverLevel);
+        // When the spear impacts, spawn additional lightning visuals similar to the
+        // dramatic Elden Ring effect seen in mod videos: towering lightning
+        // pillars that rise from the impact point and crackling arcs that
+        // spread along the ground.  These methods emit extra particles to all
+        // nearby players on the server.
+        spawnLightningPillars(serverLevel);
+        spawnGroundCracks(serverLevel);
     }
 
     private void spawnGroundDecal(ServerLevel serverLevel) {
@@ -193,6 +204,98 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
             cloud.setOwner(caster);
         }
         serverLevel.addFreshEntity(cloud);
+    }
+
+    /**
+     * Spawn vertical columns of golden lightning sparks at the impact point.
+     * Creates massive vertical lightning pillars similar to Elden Ring's Lightning Spear.
+     * Multiple pillars rise upward from the centre with branching arcs, creating
+     * a dramatic tree-like structure of golden electricity.
+     */
+    private void spawnLightningPillars(ServerLevel serverLevel) {
+        Vec3 pos = position();
+        // Increased number of pillars for more dramatic effect (8 main pillars)
+        int pillars = 8;
+        for (int p = 0; p < pillars; p++) {
+            double angle = (Math.PI * 2 * p) / pillars;
+            // Increased height significantly (30 blocks tall instead of 12)
+            for (int j = 0; j < 30; j++) {
+                double yOff = j * 0.3;
+                // Wider spread at the base, narrowing toward the top
+                double spreadFactor = 1.0 - (j / 30.0) * 0.5;
+                double xOff = Math.cos(angle) * 0.5 * spreadFactor;
+                double zOff = Math.sin(angle) * 0.5 * spreadFactor;
+                // More particles per burst for denser effect
+                serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(),
+                        pos.x + xOff, pos.y + yOff, pos.z + zOff,
+                        4, 0.1, 0.05, 0.1, 0.0);
+                
+                // Add branching side arcs every few blocks
+                if (j % 3 == 0 && j > 5) {
+                    for (int branch = 0; branch < 3; branch++) {
+                        double branchAngle = angle + (random.nextDouble() - 0.5) * Math.PI / 2;
+                        double branchDist = 0.3 + random.nextDouble() * 0.4;
+                        double branchX = pos.x + xOff + Math.cos(branchAngle) * branchDist;
+                        double branchZ = pos.z + zOff + Math.sin(branchAngle) * branchDist;
+                        serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(),
+                                branchX, pos.y + yOff, branchZ,
+                                3, 0.05, 0.02, 0.05, 0.0);
+                    }
+                }
+            }
+        }
+        
+        // Add central pillar for extra density
+        for (int j = 0; j < 35; j++) {
+            double yOff = j * 0.3;
+            serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(),
+                    pos.x, pos.y + yOff, pos.z,
+                    5, 0.15, 0.05, 0.15, 0.0);
+        }
+    }
+
+    /**
+     * Spawn radial ground‑crack lightning lines emanating from the impact point.
+     * Creates a web of golden lightning spreading across the ground similar to
+     * Elden Ring's dramatic impact effect. Multiple rays with branching patterns
+     * extend outward from the centre.
+     */
+    private void spawnGroundCracks(ServerLevel serverLevel) {
+        Vec3 pos = position();
+        // Increased number of rays for denser ground effect
+        int rays = 12;
+        for (int i = 0; i < rays; i++) {
+            double angle = (Math.PI * 2 * i) / rays;
+            // Extended distance for wider spread
+            for (int step = 1; step <= 15; step++) {
+                double dist = step * 0.4;
+                double x = pos.x + Math.cos(angle) * dist;
+                double z = pos.z + Math.sin(angle) * dist;
+                // More particles for denser ground cracks
+                serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(),
+                        x, pos.y + 0.05, z,
+                        3, 0.05, 0.0, 0.05, 0.0);
+                
+                // Add branching cracks at intervals
+                if (step % 4 == 0 && step > 3) {
+                    double branchAngle1 = angle + Math.PI / 6;
+                    double branchAngle2 = angle - Math.PI / 6;
+                    for (int b = 1; b <= 3; b++) {
+                        double branchDist = b * 0.3;
+                        double bx1 = x + Math.cos(branchAngle1) * branchDist;
+                        double bz1 = z + Math.sin(branchAngle1) * branchDist;
+                        double bx2 = x + Math.cos(branchAngle2) * branchDist;
+                        double bz2 = z + Math.sin(branchAngle2) * branchDist;
+                        serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(),
+                                bx1, pos.y + 0.05, bz1,
+                                2, 0.02, 0.0, 0.02, 0.0);
+                        serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(),
+                                bx2, pos.y + 0.05, bz2,
+                                2, 0.02, 0.0, 0.02, 0.0);
+                    }
+                }
+            }
+        }
     }
 
     private void spawnClientEffects(SpearState state) {
@@ -226,8 +329,13 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
 
     @OnlyIn(Dist.CLIENT)
     private void spawnFlightTrail() {
-        spawnTrail(ModParticles.LIGHTNING_SPARK.get(), 4);
-        spawnTrail(ParticleTypes.GLOW, 2);
+        // Spawn a dense trail of sparks behind the spear.  The number of
+        // particles has been increased slightly to give a more energetic look,
+        // and a swirling trail is added to mimic the helical lightning arcs
+        // seen in higher‑fidelity lightning spear mods.
+        spawnTrail(ModParticles.LIGHTNING_SPARK.get(), 6);
+        spawnTrail(ParticleTypes.GLOW, 3);
+        spawnSwirlingTrail();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -248,6 +356,24 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
             double sy = (random.nextDouble() - 0.5) * 0.1;
             double sz = (random.nextDouble() - 0.5) * 0.1;
             level().addParticle(type, getX(), getY(), getZ(), sx, sy, sz);
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private void spawnSwirlingTrail() {
+        // Spawn three rings of particles rotating around the spear while in flight.
+        // Each ring has a slightly different radius and vertical offset.  The
+        // rotation angle advances with tickCount, creating a smooth helix effect.
+        int rings = 3;
+        for (int ring = 0; ring < rings; ring++) {
+            double radius = 0.25 + ring * 0.08;
+            double angle = (tickCount * 0.25) + ring * 2.0;
+            double xOff = Math.cos(angle) * radius;
+            double zOff = Math.sin(angle) * radius;
+            double yOff = -0.1 + ring * 0.05;
+            // Lightning spark for color and glow for subtle light bloom
+            level().addParticle(ModParticles.LIGHTNING_SPARK.get(), getX() + xOff, getY() + yOff, getZ() + zOff, 0.0, 0.0, 0.0);
+            level().addParticle(ParticleTypes.GLOW, getX() + xOff, getY() + yOff, getZ() + zOff, 0.0, 0.0, 0.0);
         }
     }
 
