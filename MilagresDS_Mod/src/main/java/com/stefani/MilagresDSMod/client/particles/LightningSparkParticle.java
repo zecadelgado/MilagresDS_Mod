@@ -1,57 +1,49 @@
 package com.stefani.MilagresDSMod.client.particles;
 
+import com.stefani.MilagresDSMod.registry.ModParticles;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
-import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.util.Mth;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
-public class LightningSparkParticle extends TextureSheetParticle {
-    private final SpriteSet sprites;
+/**
+ * Helper central (padrão ISS) para padrões de partículas:
+ * - burst radial de impacto
+ * - trilha helicoidal em voo
+ * - fallback para partículas vanilla se a textura custom estiver ausente
+ */
+public final class LightningSparkParticle {
+    public LightningSparkParticle(ClientLevel level, double x, double y, double z, double dx, double dy, double dz, SpriteSet sprites) {}
 
-    protected LightningSparkParticle(ClientLevel level, double x, double y, double z,
-                                     double vx, double vy, double vz, SpriteSet sprites) {
-        super(level, x, y, z, vx, vy, vz);
-        this.sprites = sprites;
-        // Increase the size of each spark and extend its lifetime to create a more
-        // substantial lightning effect reminiscent of the heavy arcs seen in other
-        // lightning spear mods.  Larger particles and longer lifetimes give the
-        // bolt a fuller, more persistent trail.
-        this.setSize(0.03f, 0.03f);
-        this.quadSize = 0.25f + level.random.nextFloat() * 0.10f;
-        this.lifetime = 10 + level.random.nextInt(10);
-        this.gravity = 0f;
-        this.xd = vx;
-        this.yd = vy;
-        this.zd = vz;
-        this.setSpriteFromAge(sprites);
-        this.setColor(0.97f, 0.89f, 0.48f);
+    private static ParticleOptions spark() {
+        return ModParticles.LIGHTNING_SPARK != null && ModParticles.LIGHTNING_SPARK.isPresent()
+                ? ModParticles.LIGHTNING_SPARK.get()
+                : ParticleTypes.ELECTRIC_SPARK;
     }
 
-    @Override
-    public void tick() {
-        super.tick();
-        this.setSpriteFromAge(sprites);
-        float t = (float) this.age / this.lifetime;
-        float flicker = 0.85f + 0.15f * Mth.sin((this.age + this.random.nextFloat()) * 0.9f);
-        this.alpha = (1.0f - t) * flicker;
-    }
-
-    @Override
-    public @NotNull ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
-    }
-
-    public record Provider(SpriteSet sprites) implements ParticleProvider<SimpleParticleType> {
-
-        @Override
-            public Particle createParticle(@NotNull SimpleParticleType type, @NotNull ClientLevel level,
-                                           double x, double y, double z, double vx, double vy, double vz) {
-                return new LightningSparkParticle(level, x, y, z, vx, vy, vz, sprites);
-            }
+    public static void impactBurst(ServerLevel level, Vec3 pos, int count) {
+        for (int i = 0; i < count; i++) {
+            double a = (Math.PI * 2 * i) / count;
+            double s = 0.7 + level.random.nextDouble() * 0.6;
+            level.sendParticles(spark(), pos.x, pos.y, pos.z, 1,
+                    Math.cos(a)*s, 0.15, Math.sin(a)*s, 0.0);
         }
+        // pico de luz e flash curto
+        level.sendParticles(ParticleTypes.FLASH, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+    }
+
+    public static void helixTrail(Level level, double x, double y, double z, int tick, int rings, double baseRadius) {
+        for (int ring = 0; ring < rings; ring++) {
+            double r = baseRadius + ring * 0.08;
+            double ang = (tick * 0.25) + ring * 2.0;
+            double xo = Math.cos(ang) * r;
+            double zo = Math.sin(ang) * r;
+            double yo = -0.1 + ring * 0.05;
+            level.addParticle(spark(), x+xo, y+yo, z+zo, 0, 0, 0);
+            level.addParticle(ParticleTypes.GLOW, x+xo, y+yo, z+zo, 0, 0, 0);
+        }
+    }
 }

@@ -1,1 +1,7 @@
-{ "textures": ["milagresdsmod:particle/lightning_spark"], "animate": true, "frametime": 1 }
+{
+  "textures": [
+    "milagresdsmod:particle/lightning_spark"
+  ],
+  "animate": true,
+  "frametime": 1
+}

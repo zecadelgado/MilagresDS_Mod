@@ -25,7 +25,7 @@ public class lightningspear extends spell {
                         .icon(ResourceLocation.fromNamespaceAndPath(MilagresDSMod.MODID, "textures/gui/spells/lightningspear.png"))
                         .castSound(SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.0F, 0.8F)
                         // Use our custom lightning spark particle instead of the vanilla electric spark
-                        .castParticles(() -> ModParticles.LIGHTNING_SPARK.get(), 20, 0.2D, 0.2D, 0.2D, 0.01D)
+                        .castParticles(ModParticles.LIGHTNING_SPARK, 20, 0.2D, 0.2D, 0.2D, 0.01D)
                         .baseDamage(12.0F)
                         .scaling(SpellScalingAttribute.FAITH, SpellScalingGrade.S)
                         .scaling(SpellScalingAttribute.ARCANE, SpellScalingGrade.E)
@@ -33,8 +33,19 @@ public class lightningspear extends spell {
                         .description(Component.translatable("spell.milagresdsmod.lightningspear.desc"))
                         .effectSummary(Component.translatable("spell.milagresdsmod.lightningspear.effect"))
                         .build(),
-                SpellActions.runOnServer(context ->
-                        SpellVisuals.showLightningSpear(context.level(), context.player(), context.direction()))
-        );
+                {
+            net.minecraft.world.level.Level level = context.level();
+            net.minecraft.world.entity.player.Player player = context.player();
+            net.minecraft.world.phys.Vec3 direction = context.direction();
+            if (!level.isClientSide) {
+                com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearEntity spear =
+                    new com.stefani.MilagresDSMod.magic.visual.lightning.LightningSpearEntity(
+                        com.stefani.MilagresDSMod.registry.ModEntities.LIGHTNING_SPEAR.get(), level);
+                if (player != null) spear.setOwner(player);
+                try { spear.setDamage(this.getDamage(config, player)); } catch (Throwable __) {}
+                spear.shoot(direction != null ? direction : (player != null ? player.getLookAngle() : new net.minecraft.world.phys.Vec3(0,0,1)));
+                level.addFreshEntity(spear);
+            }
+        }
     }
 }

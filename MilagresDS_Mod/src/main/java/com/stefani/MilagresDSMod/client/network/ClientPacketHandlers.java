@@ -5,7 +5,6 @@ import com.stefani.MilagresDSMod.capability.playerspellsprovider;
 import com.stefani.MilagresDSMod.client.MagicStats;
 import com.stefani.MilagresDSMod.client.gui.SpellMemorizeScreen;
 import com.stefani.MilagresDSMod.client.lighting.DynamicLightClient;
-import com.stefani.MilagresDSMod.client.renderer.LightningSpearRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 

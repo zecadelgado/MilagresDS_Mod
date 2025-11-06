@@ -4,11 +4,14 @@ import com.stefani.MilagresDSMod.MilagresDSMod;
 import com.stefani.MilagresDSMod.client.keybindings.ModKeyBindings;
 import com.stefani.MilagresDSMod.client.lighting.DynamicLightClient;
 import com.stefani.MilagresDSMod.client.magic.visual.flame.FlameSlingFallbackRenderer;
-import com.stefani.MilagresDSMod.client.magic.visual.lightning.LightningSpearVanillaRenderer;
 import com.stefani.MilagresDSMod.client.particles.EmberParticle;
 import com.stefani.MilagresDSMod.client.particles.HealGlowParticle;
 import com.stefani.MilagresDSMod.client.particles.LightningSparkParticle;
 import com.stefani.MilagresDSMod.registry.ModParticles;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -16,6 +19,7 @@ import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import org.jetbrains.annotations.Nullable;
 
 @Mod.EventBusSubscriber(modid = MilagresDSMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class MilagresDSModClientEvents {
@@ -52,7 +56,6 @@ public final class MilagresDSModClientEvents {
 
     @SubscribeEvent
     public static void onRegisterLayers(final EntityRenderersEvent.RegisterLayerDefinitions event) {
-        event.registerLayerDefinition(LightningSpearVanillaRenderer.LAYER, LightningSpearVanillaRenderer::createLayer);
         event.registerLayerDefinition(FlameSlingFallbackRenderer.LAYER, FlameSlingFallbackRenderer::createLayer);
     }
 
@@ -75,5 +78,19 @@ public final class MilagresDSModClientEvents {
     public static void onRegisterRenderers(final EntityRenderersEvent.RegisterRenderers event) {
         // Delegate to Gecko backend to register renderers for all mod entities
         com.stefani.MilagresDSMod.client.magic.visual.backend.gecko.GeckoBackend.registerRenderers(event);
+    }
+
+    @SubscribeEvent
+    public static void registerParticleProviders(final RegisterParticleProvidersEvent event) {
+        // garante providers das partículas custom
+        if (ModParticles.LIGHTNING_SPARK != null && ModParticles.LIGHTNING_SPARK.isPresent()) {
+            event.registerSpriteSet(ModParticles.LIGHTNING_SPARK.get(), (sprites) ->
+                    new ParticleProvider<SimpleParticleType>() {
+                        @Override
+                        public @Nullable Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double dx, double dy, double dz) {
+                            return new Particle(level, x, y, z, dx, dy, dz, sprites);
+                        }
+                    });
+        }
     }
 }

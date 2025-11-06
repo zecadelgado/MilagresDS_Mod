@@ -486,7 +486,7 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
         // BootstrapMethodError in development environments【905944921372634†L205-L234】.
         else if (FMLEnvironment.dist.isClient()) {
             UUID casterId = uuid.get();
-            living = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> LightningSpearClientAccess.resolveCaster(casterId));
+            living = // REMOVED DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> LightningSpearClientAccess.resolveCaster(casterId));
         }
         if (living != null) {
             cachedCaster = living;
