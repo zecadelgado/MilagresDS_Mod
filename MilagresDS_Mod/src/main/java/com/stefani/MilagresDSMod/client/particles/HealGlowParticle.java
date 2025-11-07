@@ -9,13 +9,11 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 import org.jetbrains.annotations.NotNull;
 
-public class HealGlowParticle extends TextureSheetParticle {
-    private final SpriteSet sprites;
+public class HealGlowParticle extends BaseTranslucentParticle {
 
     protected HealGlowParticle(ClientLevel level, double x, double y, double z,
                                double vx, double vy, double vz, SpriteSet sprites) {
-        super(level, x, y, z, vx, vy, vz);
-        this.sprites = sprites;
+        super(level, x, y, z, vx, vy, vz, sprites);
         this.setSize(0.02f, 0.02f);
         this.quadSize = 0.18f + level.random.nextFloat() * 0.06f;
         this.lifetime = 18 + level.random.nextInt(13);

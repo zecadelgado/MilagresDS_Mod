@@ -25,7 +25,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkHooks;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -33,6 +32,7 @@ import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
@@ -94,9 +94,11 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
         serverStateTicks++;
         entityData.set(DATA_STATE_TIME, serverStateTicks);
         if (caster != null) {
-            Vec3 origin = caster.position().add(0, caster.getEyeHeight() * 0.7, 0);
-            Vec3 offset = getLaunchDirection().normalize().scale(0.6);
-            setPos(origin.x + offset.x, origin.y + offset.y, origin.z + offset.z);
+            Vec3 eye = caster.getEyePosition(1.0F);
+// posiciona ~no ombro: um pouco abaixo do olho e levemente à frente
+double yDrop = 0.25; // desce 0.25 blocos
+Vec3 forward = getLaunchDirection().normalize().scale(0.55);
+setPos(eye.x + forward.x, eye.y - yDrop + forward.y, eye.z + forward.z);
         }
         if (serverStateTicks >= getChargeDuration()) {
             beginFlight();
@@ -168,24 +170,16 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
             return;
         }
         Vec3 pos = position();
-        // Increased burst particles for more dramatic initial impact
         for (int i = 0; i < 64; i++) {
             double angle = (Math.PI * 2 * i) / 64.0;
             double speed = 0.8 + random.nextDouble() * 0.5;
             double sx = Math.cos(angle) * speed;
             double sz = Math.sin(angle) * speed;
-            // More particles per burst with upward motion
             serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(), pos.x, pos.y, pos.z, 4, sx * 0.2, 0.15, sz * 0.2, 0.0);
         }
-        // Multiple sonic booms for extra impact
         serverLevel.sendParticles(ParticleTypes.SONIC_BOOM, pos.x, pos.y, pos.z, 2, 0, 0, 0, 0);
         serverLevel.sendParticles(ParticleTypes.FLASH, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
         spawnGroundDecal(serverLevel);
-        // When the spear impacts, spawn additional lightning visuals similar to the
-        // dramatic Elden Ring effect seen in mod videos: towering lightning
-        // pillars that rise from the impact point and crackling arcs that
-        // spread along the ground.  These methods emit extra particles to all
-        // nearby players on the server.
         spawnLightningPillars(serverLevel);
         spawnGroundCracks(serverLevel);
     }
@@ -197,7 +191,7 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
         cloud.setRadius(3.0F);
         cloud.setRadiusPerTick(-0.08F);
         cloud.setFixedColor(0xF7E27A);
-        cloud.setParticle(ParticleTypes.GLOW);
+        cloud.setParticle(com.stefani.MilagresDSMod.registry.ModParticles.LIGHTNING_SPARK.get());
         cloud.setNoGravity(true);
         LivingEntity caster = getCaster();
         if (caster != null) {
@@ -206,31 +200,20 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
         serverLevel.addFreshEntity(cloud);
     }
 
-    /**
-     * Spawn vertical columns of golden lightning sparks at the impact point.
-     * Creates massive vertical lightning pillars similar to Elden Ring's Lightning Spear.
-     * Multiple pillars rise upward from the centre with branching arcs, creating
-     * a dramatic tree-like structure of golden electricity.
-     */
     private void spawnLightningPillars(ServerLevel serverLevel) {
         Vec3 pos = position();
-        // Increased number of pillars for more dramatic effect (8 main pillars)
         int pillars = 8;
         for (int p = 0; p < pillars; p++) {
             double angle = (Math.PI * 2 * p) / pillars;
-            // Increased height significantly (30 blocks tall instead of 12)
             for (int j = 0; j < 30; j++) {
                 double yOff = j * 0.3;
-                // Wider spread at the base, narrowing toward the top
                 double spreadFactor = 1.0 - (j / 30.0) * 0.5;
                 double xOff = Math.cos(angle) * 0.5 * spreadFactor;
                 double zOff = Math.sin(angle) * 0.5 * spreadFactor;
-                // More particles per burst for denser effect
                 serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(),
                         pos.x + xOff, pos.y + yOff, pos.z + zOff,
                         4, 0.1, 0.05, 0.1, 0.0);
-                
-                // Add branching side arcs every few blocks
+
                 if (j % 3 == 0 && j > 5) {
                     for (int branch = 0; branch < 3; branch++) {
                         double branchAngle = angle + (random.nextDouble() - 0.5) * Math.PI / 2;
@@ -244,8 +227,7 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
                 }
             }
         }
-        
-        // Add central pillar for extra density
+
         for (int j = 0; j < 35; j++) {
             double yOff = j * 0.3;
             serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(),
@@ -254,29 +236,19 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
         }
     }
 
-    /**
-     * Spawn radial ground‑crack lightning lines emanating from the impact point.
-     * Creates a web of golden lightning spreading across the ground similar to
-     * Elden Ring's dramatic impact effect. Multiple rays with branching patterns
-     * extend outward from the centre.
-     */
     private void spawnGroundCracks(ServerLevel serverLevel) {
         Vec3 pos = position();
-        // Increased number of rays for denser ground effect
         int rays = 12;
         for (int i = 0; i < rays; i++) {
             double angle = (Math.PI * 2 * i) / rays;
-            // Extended distance for wider spread
             for (int step = 1; step <= 15; step++) {
                 double dist = step * 0.4;
                 double x = pos.x + Math.cos(angle) * dist;
                 double z = pos.z + Math.sin(angle) * dist;
-                // More particles for denser ground cracks
                 serverLevel.sendParticles(ModParticles.LIGHTNING_SPARK.get(),
                         x, pos.y + 0.05, z,
                         3, 0.05, 0.0, 0.05, 0.0);
-                
-                // Add branching cracks at intervals
+
                 if (step % 4 == 0 && step > 3) {
                     double branchAngle1 = angle + Math.PI / 6;
                     double branchAngle2 = angle - Math.PI / 6;
@@ -322,19 +294,15 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
                 double z = getZ() + Math.sin(time) * radius;
                 double y = getY() + 0.15 * ring - 0.1;
                 level().addParticle(ModParticles.LIGHTNING_SPARK.get(), x, y, z, 0.0, 0.02, 0.0);
-                level().addParticle(ParticleTypes.GLOW, x, y, z, 0.0, 0.01, 0.0);
+                level().addParticle(com.stefani.MilagresDSMod.registry.ModParticles.LIGHTNING_SPARK.get(), x, y, z, 0.0, 0.01, 0.0);
             }
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     private void spawnFlightTrail() {
-        // Spawn a dense trail of sparks behind the spear.  The number of
-        // particles has been increased slightly to give a more energetic look,
-        // and a swirling trail is added to mimic the helical lightning arcs
-        // seen in higher‑fidelity lightning spear mods.
         spawnTrail(ModParticles.LIGHTNING_SPARK.get(), 6);
-        spawnTrail(ParticleTypes.GLOW, 3);
+        spawnTrail(com.stefani.MilagresDSMod.registry.ModParticles.LIGHTNING_SPARK.get(), 3);
         spawnSwirlingTrail();
     }
 
@@ -346,7 +314,7 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
             double x = getX() + Math.cos(angle) * radius;
             double z = getZ() + Math.sin(angle) * radius;
             double y = getY() + 0.05;
-            level().addParticle(ParticleTypes.GLOW, x, y, z, 0.0, 0.005, 0.0);
+            level().addParticle(com.stefani.MilagresDSMod.registry.ModParticles.LIGHTNING_SPARK.get(), x, y, z, 0.0, 0.005, 0.0);
         }
     }
 
@@ -361,9 +329,6 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
 
     @OnlyIn(Dist.CLIENT)
     private void spawnSwirlingTrail() {
-        // Spawn three rings of particles rotating around the spear while in flight.
-        // Each ring has a slightly different radius and vertical offset.  The
-        // rotation angle advances with tickCount, creating a smooth helix effect.
         int rings = 3;
         for (int ring = 0; ring < rings; ring++) {
             double radius = 0.25 + ring * 0.08;
@@ -371,9 +336,8 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
             double xOff = Math.cos(angle) * radius;
             double zOff = Math.sin(angle) * radius;
             double yOff = -0.1 + ring * 0.05;
-            // Lightning spark for color and glow for subtle light bloom
             level().addParticle(ModParticles.LIGHTNING_SPARK.get(), getX() + xOff, getY() + yOff, getZ() + zOff, 0.0, 0.0, 0.0);
-            level().addParticle(ParticleTypes.GLOW, getX() + xOff, getY() + yOff, getZ() + zOff, 0.0, 0.0, 0.0);
+            level().addParticle(com.stefani.MilagresDSMod.registry.ModParticles.LIGHTNING_SPARK.get(), getX() + xOff, getY() + yOff, getZ() + zOff, 0.0, 0.0, 0.0);
         }
     }
 
@@ -474,20 +438,18 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
             return null;
         }
         LivingEntity living = null;
-        // On the logical server, look up the entity directly by UUID in the server level.
+
         if (level() instanceof ServerLevel serverLevel) {
             Entity entity = serverLevel.getEntity(uuid.get());
             if (entity instanceof LivingEntity serverLiving) {
                 living = serverLiving;
             }
-        }
-        // On the client, defer the lookup to a client‑only helper using an unsafe call.  The unsafe
-        // variant avoids the strict safe referent validation that would otherwise throw a
-        // BootstrapMethodError in development environments【905944921372634†L205-L234】.
-        else if (FMLEnvironment.dist.isClient()) {
+        } else if (FMLEnvironment.dist.isClient()) {
             UUID casterId = uuid.get();
-            living = // REMOVED DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> LightningSpearClientAccess.resolveCaster(casterId));
+            // chamada segura no cliente (sem DistExecutor)
+            living = LightningSpearClientAccess.resolveCaster(casterId);
         }
+
         if (living != null) {
             cachedCaster = living;
             return living;
@@ -521,7 +483,10 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "lightning_spear", 0, state -> software.bernie.geckolib.core.object.PlayState.CONTINUE.CONTINUE));
+        controllers.add(new AnimationController<>(
+                this, "lightning_spear", 0,
+                (AnimationState<LightningSpearEntity> state) -> PlayState.CONTINUE
+        ));
     }
 
     @Override
@@ -534,10 +499,18 @@ public class LightningSpearEntity extends AbstractHurtingProjectile implements G
         return tickCount;
     }
 
+    /** Alinha com a spell: permite “lançar” diretamente */
+    public void shoot(Vec3 dir) {
+        if (dir == null || dir.lengthSqr() < 1.0E-4) dir = new Vec3(0, 0, 1);
+        setLaunchDirection(dir);
+        setDeltaMovement(dir.normalize().scale(FLIGHT_SPEED));
+        setState(SpearState.FLIGHT);
+        this.noPhysics = false;
+    }
+
     private enum SpearState {
         CHARGING,
         FLIGHT,
         IMPACT
     }
 }
-

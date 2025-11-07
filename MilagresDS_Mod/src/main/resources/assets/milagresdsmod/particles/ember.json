@@ -1,1 +1,5 @@
-{ "textures": ["milagresdsmod:particle/ember"], "animate": true, "frametime": 2 }
+{
+  "textures": [
+    "milagresdsmod:particle/ember"
+  ]
+}

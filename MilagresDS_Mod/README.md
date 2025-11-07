@@ -10,7 +10,7 @@ GeckoLib 4.7.x é resolvido automaticamente via Maven (Cloudsmith/Modrinth).
 
 ## Limpeza antes de rodar
 ```
-gradlew --stop
+gradlew --stopR
 gradlew clean
 # Apagar manualmente:
 # %USERPROFILE%\.gradle\caches\forge_gradle
